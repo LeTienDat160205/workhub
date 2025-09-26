@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>WorkHub Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --main-bg: #f4f6fb;
+            --main-color: #222;
+            --panel-bg: #fff;
+            --accent: #2563eb;
+            --border: #e5e7eb;
+        }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--main-bg);
+            color: var(--main-color);
+            min-height: 100vh;
+        }
+        .dashboard-frame {
+            margin: 18px auto;
+            max-width: 1200px;
+            min-height: 90vh;
+            border: 2px solid var(--border);
+            border-radius: 18px;
+            background: var(--panel-bg);
+            box-shadow: 0 6px 32px #2563eb11;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            height: 58px;
+            border-bottom: 1.5px solid var(--border);
+            background: var(--panel-bg);
+        }
+        .logo-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 120px;
+        }
+        .logo-bar .logo {
+            width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #2563eb 60%, #60a5fa 100%);
+            border-radius: 50%;
+        }
+        .logo-bar .logo svg { width: 26px; height: 26px; }
+        .logo-bar .site-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent);
+            letter-spacing: 1px;
+        }
+        .header-search {
+            flex: 1;
+            margin: 0 18px;
+            display: flex;
+            align-items: center;
+        }
+        .header-search input {
+            width: 100%;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            font-size: 1rem;
+            background: #f4f6fb;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .icon-btn {
+            background: none;
+            border: 1.5px solid var(--border);
+            border-radius: 7px;
+            cursor: pointer;
+            padding: 7px;
+            font-size: 1.2rem;
+            color: var(--main-color);
+            transition: background 0.2s;
+        }
+        .icon-btn:hover {
+            background: #e0e7ff55;
+        }
+        .user-account {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        .user-avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: #c7d2fe;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            color: #2563eb;
+        }
+        .dashboard-body {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+        }
+        .sidebar {
+            width: 210px;
+            border-right: 1.5px solid var(--border);
+            background: var(--panel-bg);
+            display: flex;
+            flex-direction: column;
+            padding: 14px 0 0 0;
+        }
+        .sidebar-section {
+            margin-bottom: 18px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-section label {
+            font-size: 1rem;
+            color: #2563eb;
+            font-weight: 600;
+            margin-left: 18px;
+            margin-bottom: 6px;
+        }
+        .sidebar-list {
+            flex: 1;
+            overflow-y: auto;
+            margin: 0 10px 0 18px;
+            border-radius: 7px;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+        .sidebar-list::-webkit-scrollbar { width: 6px; background: #e5e7eb; }
+        .sidebar-list::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 6px; }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 14px 0 0 0;
+            min-width: 0;
+        }
+        .main-section {
+            margin-bottom: 18px;
+        }
+        .main-section label {
+            font-size: 1rem;
+            color: #2563eb;
+            font-weight: 600;
+            margin-left: 18px;
+            margin-bottom: 6px;
+        }
+        .main-search {
+            margin: 0 18px 10px 18px;
+            display: flex;
+            align-items: center;
+        }
+        .main-search input {
+            width: 100%;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            font-size: 1rem;
+            background: #f4f6fb;
+        }
+        .main-scroll {
+            flex: 1;
+            overflow-y: auto;
+            margin: 0 18px 0 18px;
+            border-radius: 7px;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+        .main-scroll::-webkit-scrollbar { width: 7px; background: #e5e7eb; }
+        .main-scroll::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 6px; }
+        .right-panel {
+            width: 240px;
+            border-left: 1.5px solid var(--border);
+            background: var(--panel-bg);
+            display: flex;
+            flex-direction: column;
+            padding: 14px 0 0 0;
+        }
+        .right-section {
+            margin: 0 14px 18px 14px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            flex: 1;
+            min-height: 120px;
+            overflow-y: auto;
+        }
+        .right-section + .right-section {
+            margin-top: 0;
+        }
+        .right-section::-webkit-scrollbar { width: 6px; background: #e5e7eb; }
+        .right-section::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 6px; }
+        @media (max-width: 1100px) {
+            .dashboard-frame { max-width: 100vw; }
+            .sidebar, .right-panel { width: 120px; }
+            .right-section { min-width: 80px; }
+        }
+        @media (max-width: 800px) {
+            .dashboard-frame { max-width: 100vw; }
+            .sidebar, .right-panel { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-frame">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="logo-bar">
+                <div class="logo">
+                    <!-- Logo chữ W cách điệu -->
+                    <svg width="32" height="32" viewBox="0 0 44 44" fill="none">
+                        <defs>
+                            <linearGradient id="wgrad" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#2563eb"/>
+                                <stop offset="1" stop-color="#60a5fa"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M7 10L15 34L22 20L29 34L37 10" stroke="url(#wgrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="22" cy="22" r="20" stroke="#fbbf24" stroke-width="2" fill="none" opacity="0.25"/>
+                    </svg>
+                </div>
+                <span class="site-name">WorkHub</span>
+            </div>
+            <div class="header-search">
+                <input type="text" placeholder="Tìm kiếm...">
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" title="Tùy chọn"><span>☰</span></button>
+                <div class="user-account">
+                    <div class="user-avatar">A</div>
+                    <span>ACCOUNT</span>
+                </div>
+            </div>
+        </div>
+        <!-- Body -->
+        <div class="dashboard-body">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <label>Section</label>
+                    <div class="sidebar-list">
+                        <!-- Nội dung danh sách bên trái -->
+                    </div>
+                </div>
+            </div>
+            <!-- Main content -->
+            <div class="main-content">
+                <div class="main-section">
+                    <label>Section</label>
+                    <div class="main-search">
+                        <input type="text" placeholder="Tìm kiếm...">
+                    </div>
+                </div>
+                <div class="main-scroll">
+                    <!-- Nội dung chính ở giữa -->
+                </div>
+            </div>
+            <!-- Right panel -->
+            <div class="right-panel">
+                <div class="right-section">
+                    <!-- Nội dung bảng trên bên phải -->
+                </div>
+                <div class="right-section">
+                    <!-- Nội dung bảng dưới bên phải -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

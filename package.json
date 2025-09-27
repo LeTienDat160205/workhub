@@ -16,12 +16,17 @@
   "author": "Tên Nhóm",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
     "cjs": "^0.0.11",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
-    "mysql2": "^3.15.0"
+    "express-session": "^1.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.15.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

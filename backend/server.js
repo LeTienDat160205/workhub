@@ -1,13 +1,30 @@
-const express = require('express');
+const express = require("express");
+const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
+const session = require("express-session");
+const db = require("./db");
+
 const app = express();
+
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({
+  secret: "secret-key",
+  resave: false,
+  saveUninitialized: true
+}));
 
+// Trang mặc định: nếu chưa login thì hiện form đăng nhập
 app.get('/', (req, res) => {
-    res.redirect('/login'); // hoặc res.render('login') nếu muốn hiển thị luôn trang đăng nhập
+    if (!req.session.user) {
+    return res.redirect("/login");
+  }
+  res.render("index", { user: req.session.user }); // hoặc res.render('login') nếu muốn hiển thị luôn trang đăng nhập
 });
 
 
@@ -29,7 +46,7 @@ app.post('/register', (req, res) => {
 // Xử lý đăng nhập
 app.post('/login', (req, res) => {
     // ...xử lý đăng nhập...
-    res.redirect('/dashboard');
+    res.redirect('/index');
 });
 
 // Xử lý quên mật khẩu

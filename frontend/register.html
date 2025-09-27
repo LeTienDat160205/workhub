@@ -344,6 +344,10 @@
         z-index: 0;
         filter: blur(2px);
     }
+
+    .form-group input {
+        width: 390px;
+    }
 </style>
 
 <body>
@@ -368,8 +372,19 @@
                     pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$">
             </div>
             <div class="form-group">
-                <label for="register-password">Mật khẩu</label>
-                <input type="password" id="register-password" name="password" placeholder="Nhập mật khẩu" required>
+                 <label for="register-password">Mật khẩu</label>
+                <div style="position: relative;">
+                    <input type="password" id="register-password" name="password"
+                        placeholder="Nhập mật khẩu" required>
+                    <span id="toggle-password"
+                        style="position:absolute;top:50%;right:12px;transform:translateY(-50%);cursor:pointer;user-select:none;">
+                        <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none"
+                            viewBox="0 0 24 24">
+                            <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" />
+                            <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2" />
+                        </svg>
+                    </span>
+                </div>
             </div>
             <button type="submit" class="auth-btn">Đăng ký</button>
             <div class="auth-footer">
@@ -378,5 +393,34 @@
         </form>
     </div>
 </body>
+
+<script>
+    const passwordInput = document.getElementById('register-password');
+    const togglePassword = document.getElementById('toggle-password');
+    const eyeIcon = document.getElementById('eye-icon');
+    let isShown = false;
+
+    togglePassword.addEventListener('click', function () {
+        isShown = !isShown;
+        passwordInput.type = isShown ? 'text' : 'password';
+        // Đổi icon mắt/mắt gạch
+        if (isShown) {
+            eyeIcon.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
+                    <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
+                    <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2"/>
+                    <line x1="4" y1="20" x2="20" y2="4" stroke="#ef4444" stroke-width="2"/>
+                </svg>
+            `;
+        } else {
+            eyeIcon.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
+                    <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
+                    <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2"/>
+                </svg>
+            `;
+        }
+    });
+</script>
 
 </html>

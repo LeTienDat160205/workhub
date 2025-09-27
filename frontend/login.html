@@ -19,73 +19,6 @@
         overflow: hidden;
     }
 
-    /* Background decorations */
-    .bg-decor {
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
-        top: 0;
-        left: 0;
-        z-index: 0;
-        pointer-events: none;
-    }
-
-    .bg-decor .dot {
-        position: absolute;
-        border-radius: 50%;
-        opacity: 0.18;
-    }
-
-    .bg-decor .dot1 {
-        width: 220px;
-        height: 220px;
-        background: radial-gradient(circle at 60% 40%, #60a5fa 60%, #818cf8 100%);
-        top: 30px;
-        left: 40px;
-        filter: blur(2px);
-    }
-
-    .bg-decor .dot2 {
-        width: 140px;
-        height: 140px;
-        background: radial-gradient(circle at 40% 60%, #818cf8 60%, #60a5fa 100%);
-        bottom: 60px;
-        right: 80px;
-        filter: blur(1.5px);
-    }
-
-    .bg-decor .dot3 {
-        width: 90px;
-        height: 90px;
-        background: radial-gradient(circle at 70% 30%, #fbbf24 60%, #fef08a 100%);
-        top: 120px;
-        right: 120px;
-        opacity: 0.13;
-        filter: blur(1.5px);
-    }
-
-    .bg-decor .dot4 {
-        width: 60px;
-        height: 60px;
-        background: #34d399;
-        bottom: 120px;
-        left: 120px;
-        opacity: 0.10;
-        filter: blur(1.5px);
-    }
-
-    .bg-decor .line {
-        position: absolute;
-        width: 180px;
-        height: 4px;
-        background: linear-gradient(90deg, #818cf8 0%, #60a5fa 100%);
-        top: 60px;
-        left: 180px;
-        border-radius: 2px;
-        opacity: 0.13;
-        transform: rotate(-18deg);
-    }
-
     .auth-container {
         background: rgba(255, 255, 255, 0.98);
         padding: 48px 38px 38px 38px;
@@ -352,7 +285,7 @@
 <body>
     <div class="auth-container">
         <div class="logo-bar">
-            <!-- ...logo SVG như trên... -->
+            <!--logo SVG -->
             <span class="site-name">WorkHub</span>
         </div>
         <form method="POST" action="/login" autocomplete="off">

@@ -269,11 +269,17 @@
             <div class="form-group">
                 <label for="register-username">Tên tài khoản</label>
                 <input type="username" id="register-username" name="username" placeholder="Nhập tên tài khoản" required>
+                <% if (error && error.includes("Username")) { %>
+                    <p style="color: red;"><%= error %></p>
+                <% } %>
             </div>
             <div class="form-group">
                 <label for="register-email">Email</label>
                 <input type="email" id="register-email" name="email" placeholder="Nhập email" required
-                    pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$">
+                    pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$">
+                <% if (error && error.includes("Email")) { %>
+                    <p style="color: red;"><%= error %></p>
+                <% } %>
             </div>
             <div class="form-group">
                  <label for="register-password">Mật khẩu</label>

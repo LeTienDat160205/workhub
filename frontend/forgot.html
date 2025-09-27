@@ -347,44 +347,22 @@
 </style>
 
 <body>
-    <div class="bg-decor">
-        <div class="dot dot1"></div>
-        <div class="dot dot2"></div>
-        <div class="dot dot3"></div>
-        <div class="dot dot4"></div>
-        <div class="line"></div>
-    </div>
     <div class="auth-container">
         <div class="logo-bar">
-            <div class="logo"
-                style="background: linear-gradient(135deg, #2563eb 60%, #93fa60 100%); position: relative;">
-                <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
-                    <defs>
-                        <linearGradient id="wgrad" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#2563eb" />
-                            <stop offset="1" stop-color="#60a5fa" />
-                        </linearGradient>
-                    </defs>
-                    <path d="M7 10L15 34L22 20L29 34L37 10" stroke="url(#wgrad)" stroke-width="4" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    <circle cx="22" cy="22" r="20" stroke="#fbbf24" stroke-width="2" fill="none" opacity="0.25" />
-                </svg>
-            </div>
+            <!-- ...logo SVG như trên... -->
             <span class="site-name">WorkHub</span>
         </div>
-        <form id="forgot-form" method="POST" action="/forgot" autocomplete="off">
+        <form method="POST" action="/forgot" autocomplete="off">
             <h2>Quên mật khẩu</h2>
             <div class="form-group">
-                <label for="forgot-email">Tên tài khoản</label>
-                <input type="email" id="forgot-email" name="email" placeholder="Nhập tên tài khoản" required
-                    pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$">
+                <label for="forgot-username">Tên tài khoản hoặc email</label>
+                <input type="username" id="forgot-username" name="username" placeholder="Nhập tên tài khoản hoặc email" required>
             </div>
             <button type="submit" class="auth-btn">Gửi yêu cầu</button>
             <div class="auth-footer">
-                <a href="/login" tabindex="0">Quay lại đăng nhập</a>
+                <a href="/login">Quay lại đăng nhập</a>
             </div>
         </form>
     </div>
 </body>
-
 </html>

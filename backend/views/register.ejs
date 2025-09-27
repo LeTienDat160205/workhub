@@ -355,12 +355,17 @@
         <form method="POST" action="/register" autocomplete="off">
             <h2>Đăng ký</h2>
             <div class="form-group">
-                <label for="register-fullname">Tên người dùng</label>
-                <input type="text" id="register-fullname" name="fullname" placeholder="Nhập tên người dùng" required>
+                <label for="register-name">Tên người dùng</label>
+                <input type="text" id="register-name" name="name" placeholder="Nhập tên người dùng" required>
             </div>
             <div class="form-group">
                 <label for="register-username">Tên tài khoản</label>
-                <input type="email" id="register-username" name="username" placeholder="Nhập tên tài khoản" required pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$">
+                <input type="username" id="register-username" name="username" placeholder="Nhập tên tài khoản" required>
+            </div>
+            <div class="form-group">
+                <label for="register-email">Email</label>
+                <input type="email" id="register-email" name="email" placeholder="Nhập email" required
+                    pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$">
             </div>
             <div class="form-group">
                 <label for="register-password">Mật khẩu</label>
@@ -373,4 +378,5 @@
         </form>
     </div>
 </body>
+
 </html>

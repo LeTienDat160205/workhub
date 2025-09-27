@@ -1,6 +1,8 @@
 CREATE DATABASE team_task_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE team_task_management;
 
+select * from user
+
 -- Bảng user
 CREATE TABLE user (
     id BINARY(16) PRIMARY KEY,
@@ -158,3 +160,4 @@ CREATE TABLE chatbot_mess (
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (chatbotId) REFERENCES chatbot(id)
 );
+

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mời thành viên</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ff 0%, #f4f6fb 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .open-popup-btn {
+            padding: 13px 32px;
+            font-size: 17px;
+            border-radius: 9px;
+            border: none;
+            background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 12px #2563eb33;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        .open-popup-btn:hover {
+            background: linear-gradient(90deg, #60a5fa 60%, #2563eb 100%);
+            box-shadow: 0 4px 24px #2563eb55;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(49, 130, 206, 0.10);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            transition: opacity 0.35s;
+        }
+
+        .popup-overlay.active {
+            display: flex;
+            opacity: 1;
+            animation: overlayFadeIn 0.35s;
+        }
+
+        @keyframes overlayFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .popup-content {
+            width: 500px;
+            min-height: 420px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 18px;
+            box-shadow: 0 12px 48px 0 rgba(49, 130, 206, 0.16), 0 2px 12px rgba(49, 130, 206, 0.09);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            animation: fadeInUp 0.35s;
+            border: 1.5px solid #e0e7ff;
+            overflow: hidden;
+            transform: translateY(40px) scale(0.98);
+            opacity: 0;
+            transition: transform 0.35s, opacity 0.35s;
+        }
+
+        .popup-overlay.active .popup-content {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            transition: transform 0.35s, opacity 0.35s;
+        }
+
+        .popup-content::before {
+            content: "";
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle, #60a5fa33 60%, transparent 100%);
+            z-index: 0;
+        }
+
+        .popup-content::after {
+            content: "";
+            position: absolute;
+            bottom: -50px;
+            left: -50px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #2563eb22 60%, transparent 100%);
+            z-index: 0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 22px;
+            background: none;
+            border: none;
+            font-size: 26px;
+            color: #222;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2;
+            transition: color 0.2s, transform 0.2s;
+            text-shadow: 0 2px 8px #60a5fa33;
+        }
+
+        .close-btn:hover {
+            color: #ef4444;
+            transform: scale(1.2) rotate(90deg);
+        }
+
+        .popup-inner-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            z-index: 1;
+            position: relative;
+            padding: 32px 0 0 0;
+        }
+
+        .popup-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2563eb;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 12px #c7d2fe55, 0 1px 0 #fff;
+            margin-bottom: 18px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 15px;
+            color: #374151;
+            margin-bottom: 7px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .autocomplete-wrapper {
+            position: relative;
+            margin-bottom: 12px;
+            width: 340px;
+        }
+        .autocomplete-input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 15px;
+            background: #f8fafc;
+        }
+        .autocomplete-input:focus {border-color: #2563eb; outline: none;}
+        .autocomplete-list {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1.5px solid #e0e7ff;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px #2563eb22;
+            z-index: 10;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .autocomplete-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .autocomplete-item:hover {background: #e0e7ff;}
+        .autocomplete-avt {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #e0e7ff;
+        }
+        .autocomplete-info {display: flex; flex-direction: column;}
+        .autocomplete-username {font-weight: 500; color: #2563eb; font-size: 15px;}
+        .autocomplete-email {color: #888; font-size: 13px;}
+        .autocomplete-name {color: #888; font-size: 13px;}
+        .selected-list {margin: 10px 0 0 0; padding: 0; list-style: none; width: 340px;}
+        .selected-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f3f4f6;
+            border-radius: 7px;
+            padding: 7px 12px;
+            margin-bottom: 7px;
+            border: 1.5px solid #e0e7ff;
+        }
+        .selected-avt {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #e0e7ff;
+        }
+        .selected-info {display: flex; flex-direction: column; flex: 1;}
+        .selected-username {font-weight: 500; color: #374151; font-size: 15px;}
+        .selected-email {color: #888; font-size: 13px;}
+        .selected-name {color: #888; font-size: 13px;}
+        .remove-btn {background: none; border: none; font-size: 18px; color: #ef4444; cursor: pointer;}
+        .remove-btn:hover {color: #b91c1c;}
+        .confirm-btn {
+            width: 340px;
+            margin-top: 18px;
+            padding: 10px 0;
+            border-radius: 7px;
+            border: none;
+            background: linear-gradient(90deg, #3182ce 60%, #2563eb 100%);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .confirm-btn:hover {background: linear-gradient(90deg, #2563eb 60%, #3182ce 100%);}
+    </style>
+</head>
+
+<body>
+    <button class="open-popup-btn" id="openPopupBtn">Mời thành viên</button>
+
+    <div class="popup-overlay" id="popup">
+        <div class="popup-content">
+            <button class="close-btn" id="closeBtn">&times;</button>
+            <div class="popup-inner-content">
+                <div class="popup-title">Mời thành viên</div>
+                <label class="input-label" for="autocompleteInput">
+                    Nhập <b>tên tài khoản (username)</b> hoặc <b>email</b>
+                </label>
+                <div class="autocomplete-wrapper">
+                    <input type="text" class="autocomplete-input" id="autocompleteInput" placeholder="Tên tài khoản hoặc email" autocomplete="off">
+                    <div class="autocomplete-list" id="autocompleteList" style="display:none;"></div>
+                </div>
+                <ul class="selected-list" id="selectedList"></ul>
+                <button type="button" class="confirm-btn" id="confirmBtn">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dữ liệu mẫu
+        const users = [
+            { id: 1, username: "vana", name: "Nguyễn Văn A", email: "vana@example.com", avatar: "https://randomuser.me/api/portraits/men/32.jpg" },
+            { id: 2, username: "thib", name: "Trần Thị B", email: "thib@example.com", avatar: "https://randomuser.me/api/portraits/women/44.jpg" },
+            { id: 3, username: "vanc", name: "Lê Văn C", email: "vanc@example.com", avatar: "https://randomuser.me/api/portraits/men/45.jpg" },
+            { id: 4, username: "minhd", name: "Phạm Minh D", email: "minhd@example.com", avatar: "https://randomuser.me/api/portraits/men/46.jpg" },
+            { id: 5, username: "thie", name: "Ngô Thị E", email: "thie@example.com", avatar: "https://randomuser.me/api/portraits/women/47.jpg" }
+        ];
+        const openBtn = document.getElementById('openPopupBtn');
+        const popup = document.getElementById('popup');
+        const closeBtn = document.getElementById('closeBtn');
+        const autocompleteInput = document.getElementById('autocompleteInput');
+        const autocompleteList = document.getElementById('autocompleteList');
+        const selectedList = document.getElementById('selectedList');
+        const confirmBtn = document.getElementById('confirmBtn');
+        let selectedUsers = [];
+        openBtn.onclick = () => popup.classList.add('active');
+        closeBtn.onclick = () => close();
+        popup.onclick = (e) => { if (e.target === popup) close(); };
+        function close() {
+            popup.classList.remove('active');
+            autocompleteInput.value = '';
+            autocompleteList.style.display = 'none';
+            selectedList.innerHTML = '';
+            selectedUsers = [];
+        }
+        autocompleteInput.addEventListener('input', function() {
+            const val = this.value.trim().toLowerCase();
+            if (!val) return autocompleteList.style.display = 'none', autocompleteList.innerHTML = '';
+            const filtered = users.filter(u =>
+                !selectedUsers.some(su => su.id === u.id) &&
+                (u.username.toLowerCase().includes(val) || u.email.toLowerCase().includes(val))
+            );
+            if (!filtered.length) return autocompleteList.style.display = 'none', autocompleteList.innerHTML = '';
+            autocompleteList.innerHTML = filtered.map(u => `
+                <div class="autocomplete-item" data-id="${u.id}">
+                    <img src="${u.avatar}" class="autocomplete-avt">
+                    <div class="autocomplete-info">
+                        <span class="autocomplete-username">Tên tài khoản: <b>${u.username}</b></span>
+                        <span class="autocomplete-email">${u.email}</span>
+                        <span class="autocomplete-name">Tên người dùng: ${u.name}</span>
+                    </div>
+                </div>
+            `).join('');
+            autocompleteList.style.display = 'block';
+        });
+        autocompleteList.onclick = function(e) {
+            let item = e.target;
+            while (item && !item.classList.contains('autocomplete-item')) item = item.parentElement;
+            if (!item) return;
+            const id = Number(item.getAttribute('data-id'));
+            const user = users.find(u => u.id === id);
+            if (!user) return;
+            selectedUsers.push(user);
+            renderSelected();
+            autocompleteInput.value = '';
+            autocompleteList.style.display = 'none';
+        };
+        function renderSelected() {
+            selectedList.innerHTML = selectedUsers.map((u, idx) => `
+                <li class="selected-item">
+                    <img src="${u.avatar}" class="selected-avt">
+                    <div class="selected-info">
+                        <span class="selected-username">Tên tài khoản: <b>${u.username}</b></span>
+                        <span class="selected-email">${u.email}</span>
+                        <span class="selected-name">Tên người dùng: ${u.name}</span>
+                    </div>
+                    <button type="button" class="remove-btn" data-idx="${idx}">&times;</button>
+                </li>
+            `).join('');
+        }
+        selectedList.onclick = function(e) {
+            if (e.target.classList.contains('remove-btn')) {
+                selectedUsers.splice(Number(e.target.getAttribute('data-idx')), 1);
+                renderSelected();
+            }
+        };
+        autocompleteInput.addEventListener('blur', function() {
+            setTimeout(() => autocompleteList.style.display = 'none', 150);
+        });
+        confirmBtn.onclick = () => {
+            if (!selectedUsers.length) return alert('Vui lòng chọn ít nhất một thành viên!');
+            alert('Đã mời:\n' + selectedUsers.map(u => `${u.name} (username: ${u.username}, email: ${u.email})`).join('\n'));
+            close();
+        };
+    </script>
+</body>
+</html>

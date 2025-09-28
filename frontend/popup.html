@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Popup Đơn Giản Trang Trí</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ff 0%, #f4f6fb 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .open-popup-btn {
+            padding: 13px 32px;
+            font-size: 17px;
+            border-radius: 9px;
+            border: none;
+            background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 12px #2563eb33;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        .open-popup-btn:hover {
+            background: linear-gradient(90deg, #60a5fa 60%, #2563eb 100%);
+            box-shadow: 0 4px 24px #2563eb55;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(49, 130, 206, 0.10);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+
+        .popup-overlay.active {
+            display: flex;
+        }
+
+        .popup-content {
+            width: 500px;
+            height: 420px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 18px;
+            box-shadow: 0 12px 48px 0 rgba(49, 130, 206, 0.16), 0 2px 12px rgba(49, 130, 206, 0.09);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            animation: fadeInUp 0.35s;
+            border: 1.5px solid #e0e7ff;
+            overflow: hidden;
+        }
+
+        .popup-content::before {
+            content: "";
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle, #60a5fa33 60%, transparent 100%);
+            z-index: 0;
+        }
+
+        .popup-content::after {
+            content: "";
+            position: absolute;
+            bottom: -50px;
+            left: -50px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #2563eb22 60%, transparent 100%);
+            z-index: 0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 22px;
+            background: none;
+            border: none;
+            font-size: 26px;
+            color: #222;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2;
+            transition: color 0.2s, transform 0.2s;
+            text-shadow: 0 2px 8px #60a5fa33;
+        }
+
+        .close-btn:hover {
+            color: #ef4444;
+            transform: scale(1.2) rotate(90deg);
+        }
+
+        .popup-inner-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            position: relative;
+        }
+
+        .popup-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2563eb;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 12px #c7d2fe55, 0 1px 0 #fff;
+            margin-bottom: 10px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="open-popup-btn" id="openPopupBtn">Mở popup</button>
+
+    <div class="popup-overlay" id="popup">
+        <div class="popup-content">
+            <button class="close-btn" id="closeBtn">&times;</button>
+            <div class="popup-inner-content">
+                <div>
+                    <div class="popup-title">Content </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const openBtn = document.getElementById('openPopupBtn');
+        const popup = document.getElementById('popup');
+        const closeBtn = document.getElementById('closeBtn');
+
+        openBtn.onclick = () => popup.classList.add('active');
+        closeBtn.onclick = () => popup.classList.remove('active');
+        popup.onclick = (e) => {
+            if (e.target === popup) popup.classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông tin tài khoản</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ff 0%, #f4f6fb 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin: 48px;
+            border: 3px solid #2563eb;
+            box-shadow: 0 2px 12px #2563eb33;
+            transition: box-shadow 0.2s, border 0.2s;
+        }
+        .avatar:hover {
+            box-shadow: 0 4px 24px #2563eb55;
+            border: 3px solid #60a5fa;
+        }
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(49, 130, 206, 0.10);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+        .popup-overlay.active {
+            display: flex;
+        }
+        .popup-content {
+            width: 420px;
+            background: rgba(255,255,255,0.98);
+            border-radius: 22px;
+            box-shadow: 0 12px 48px 0 rgba(49, 130, 206, 0.16), 0 2px 12px rgba(49, 130, 206, 0.09);
+            padding: 36px 32px 28px 32px;
+            position: relative;
+            animation: fadeInUp 0.35s;
+            border: 1.5px solid #e0e7ff;
+            overflow: hidden;
+        }
+        .popup-content::before {
+            content: "";
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 140px; height: 140px;
+            background: radial-gradient(circle, #60a5fa33 60%, transparent 100%);
+            z-index: 0;
+        }
+        .popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            z-index: 1;
+            position: relative;
+        }
+        .popup-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2563eb;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 12px #c7d2fe55, 0 1px 0 #fff;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+        }
+        .close-btn:hover {
+            color: #ef4444;
+            transform: rotate(90deg) scale(1.15);
+        }
+        .profile-img {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            z-index: 1;
+            position: relative;
+        }
+        .profile-img-box {
+            width: 96px;
+            height: 96px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #2563eb 60%, #60a5fa 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 18px 0 #60a5fa33, 0 1.5px 8px #2563eb22;
+            position: relative;
+        }
+        .profile-img-box img {
+            width: 76px;
+            height: 76px;
+            border-radius: 14px;
+            object-fit: cover;
+            border: 2px solid #e0e7ff;
+            box-shadow: 0 2px 8px #2563eb22;
+        }
+        .profile-img-box::after {
+            content: "";
+            position: absolute;
+            width: 112px;
+            height: 112px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2.5px dashed #60a5fa55;
+            z-index: 0;
+            animation: spin 7s linear infinite;
+        }
+        @keyframes spin {
+            100% { transform: translate(-50%, -50%) rotate(360deg);}
+        }
+        .profile-name {
+            font-size: 1.13rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 4px #c7d2fe33;
+        }
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            margin-bottom: 22px;
+            z-index: 1;
+            position: relative;
+        }
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-label {
+            width: 110px;
+            font-size: 15px;
+            color: #374151;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .form-input {
+            flex: 1;
+            padding: 10px 13px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #f8fafc;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 4px #c7d2fe11;
+        }
+        .form-input:focus {
+            border-color: #2563eb;
+            outline: none;
+            box-shadow: 0 0 0 2px #c3dafe55;
+        }
+        .form-input[readonly] {
+            background: #f3f4f6;
+            color: #888;
+            cursor: default;
+            border-style: dashed;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: space-around;
+            gap: 12px;
+            z-index: 1;
+            position: relative;
+        }
+        .btn {
+            padding: 10px 22px;
+            border-radius: 8px;
+            border: none;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 4px #c7d2fe22;
+        }
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+        .btn-save {
+            background: linear-gradient(90deg, #3182ce 60%, #2563eb 100%);
+            color: #fff;
+            box-shadow: 0 2px 8px #2563eb22;
+        }
+        .btn-save:hover {
+            background: linear-gradient(90deg, #2563eb 60%, #3182ce 100%);
+        }
+        .btn-edit {
+            background: #fff;
+            color: #2563eb;
+            border: 1.5px solid #2563eb;
+        }
+        .btn-edit:hover {
+            background: #2563eb;
+            color: #fff;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        /* Scrollbar đẹp cho popup */
+        .popup-content::-webkit-scrollbar {
+            width: 7px;
+            background: #e0e7ff;
+            border-radius: 8px;
+        }
+        .popup-content::-webkit-scrollbar-thumb {
+            background: #a5b4fc;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <img src="" alt="Avatar" class="avatar" id="avatar">
+
+    <div class="popup-overlay" id="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <div class="popup-title">Thông tin tài khoản</div>
+                <button class="close-btn" id="closeBtn">&times;</button>
+            </div>
+            <div class="profile-img">
+                <div class="profile-img-box">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                </div>
+                <div class="profile-name">Nguyễn Văn A</div>
+            </div>
+            <form class="profile-form" id="profileForm">
+                <div class="form-row">
+                    <label class="form-label">Tên tài khoản</label>
+                    <input class="form-input" type="text" value="Nguyễn Văn A" readonly id="username">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Email</label>
+                    <input class="form-input" type="email" value="nguyenvana@email.com" readonly id="email">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Nghề nghiệp</label>
+                    <input class="form-input" type="text" value="Nhân viên văn phòng" readonly id="job">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Số điện thoại</label>
+                    <input class="form-input" type="text" value="0987654321" readonly id="phone">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Quê quán</label>
+                    <input class="form-input" type="text" value="Hà Nội" readonly id="address">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Giới tính</label>
+                    <input class="form-input" type="text" value="Nam" readonly id="gender">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Ngày sinh</label>
+                    <input class="form-input" type="date" value="1995-01-01" readonly id="dob">
+                </div>
+            </form>
+            <div class="form-actions">
+                <button class="btn btn-edit" type="button" id="editBtn">Sửa</button>
+                <button class="btn btn-save" type="button" id="saveBtn" disabled>Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const avatar = document.getElementById('avatar');
+        const popup = document.getElementById('popup');
+        const closeBtn = document.getElementById('closeBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const editBtn = document.getElementById('editBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const formInputs = [
+            document.getElementById('email'),
+            document.getElementById('job'),
+            document.getElementById('phone'),
+            document.getElementById('address'),
+            document.getElementById('gender'),
+            document.getElementById('dob')
+        ];
+        const usernameInput = document.getElementById('username');
+
+        let isEditing = false;
+
+        avatar.onclick = () => popup.classList.add('active');
+        closeBtn.onclick = () => closePopup();
+        cancelBtn.onclick = () => closePopup();
+        popup.onclick = (e) => {
+            if (e.target === popup) closePopup();
+        };
+
+        function closePopup() {
+            popup.classList.remove('active');
+            setReadOnly(true);
+            isEditing = false;
+            saveBtn.disabled = true;
+        }
+
+        editBtn.onclick = () => {
+            isEditing = true;
+            setReadOnly(false);
+            saveBtn.disabled = false;
+        };
+
+        saveBtn.onclick = () => {
+            setReadOnly(true);
+            isEditing = false;
+            saveBtn.disabled = true;
+            // Xử lý lưu thông tin ở đây nếu cần
+            alert('Thông tin đã được lưu!');
+        };
+
+        function setReadOnly(readonly) {
+            formInputs.forEach(input => input.readOnly = readonly);
+            usernameInput.readOnly = true;
+        }
+    </script>
+</body>
+</html>

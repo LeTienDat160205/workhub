@@ -2,360 +2,1416 @@
 <html lang="vi">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập & Đăng ký - WorkHub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8" />
+    <title>WorkHub Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        :root {
+            --main-bg: linear-gradient(120deg, #e0e7ff 0%, #f4f6fb 100%);
+            --main-color: #222;
+            --panel-bg: #fff;
+            --accent: #2563eb;
+            --border: #e5e7eb;
+            --glass: rgba(255, 255, 255, 0.85);
+            --glass-blur: blur(8px);
+            --notif-width: 370px;
+            --notif-bg: #fff;
+            --notif-shadow: 0 8px 32px rgba(49, 130, 206, 0.18);
+            --notif-z: 20;
+            --header-height: 80px;
+        }
+
+        [data-theme="dark"] {
+            --main-bg: linear-gradient(120deg, #232946 0%, #16161a 100%);
+            --main-color: #f3f4f6;
+            --panel-bg: #232946;
+            --accent: #60a5fa;
+            --border: #334155;
+            --glass: rgba(35, 41, 70, 0.92);
+            --notif-bg: #232946;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            height: 100vh;
+            width: 100vw;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--main-bg);
+            color: var(--main-color);
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: var(--main-bg);
+            filter: blur(0px);
+            opacity: 1;
+            pointer-events: none;
+        }
+
+        .dashboard-frame {
+            position: absolute;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            border-radius: 16px;
+            border: none;
+            background: var(--glass);
+            box-shadow: 0 4px 32px #2563eb11;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: var(--glass-blur);
+            z-index: 1;
+            animation: fadeInDash 0.7s;
+        }
+
+        @keyframes fadeInDash {
+            from {
+                opacity: 0;
+                transform: scale(1.03);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* HEADER */
+        .dashboard-header {
+            display: grid;
+            grid-template-columns: 180px auto;
+            gap: 12px;
+            align-items: center;
+            padding: 16px 32px 12px 32px;
+            height: var(--header-height);
+            border-bottom: 1.5px solid var(--border);
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 2px 16px #2563eb11;
+            position: relative;
+            z-index: 10;
+            transition: background 0.3s;
+            border-radius: 16px;
+            margin: 10px;
+        }
+
+        [data-theme="dark"] .dashboard-header {
+            background: rgba(35, 41, 70, 0.98);
+        }
+
+        .logo-bar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 140px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e0e7ff;
+            box-shadow: 0 2px 12px #2563eb22;
+            border: 2.5px solid #2563eb33;
+        }
+
+        [data-theme="dark"] .logo {
+            background: #232946;
+            border-color: #334155;
+        }
+
+        .logo svg {
+            width: 38px;
+            height: 38px;
+            display: block;
+        }
+
+        .site-name {
+            font-size: 1.45rem;
+            font-weight: 900;
+            color: var(--accent);
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 12px #c7d2fe55, 0 1px 0 #fff;
+        }
+
+        .header-actions {
+            justify-self: end;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 11px;
+            cursor: pointer;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 0;
+            box-shadow: 0 2px 8px #2563eb11;
+            transition: box-shadow 0.18s, border-color 0.18s, background 0.18s;
+            position: relative;
+        }
+
+        .icon-btn[aria-pressed="true"] {
+            background: #2563eb;
+            color: #fff;
+            border-color: #2563eb;
+        }
+
+        .icon-btn[aria-pressed="true"] svg {
+            filter: brightness(10);
+        }
+
+        .icon-btn:hover {
+            box-shadow: 0 0 0 4px #2563eb22;
+            border-color: #2563eb;
+            background: #f1f5ff;
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .user-account {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-left: 10px;
+            font-size: 1.05rem;
+            color: #222;
+            padding: 4px 10px 4px 4px;
+            border-radius: 8px;
+            transition: background 0.18s;
+            background: #e0e7ff;
+            border: 1.5px solid #c7d2fe;
+            box-shadow: 0 2px 8px #2563eb11;
+        }
+
+        .user-account:hover {
+            background: #c7d2fe;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #c7d2fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #2563eb;
+            font-weight: 700;
+            border: 2px solid #2563eb33;
+            box-shadow: 0 2px 8px #2563eb22;
+        }
+
+        .actions-cluster {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* BODY */
+        .dashboard-body {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+            height: 0;
+            background: transparent;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px;
+            border-right: 1.5px solid var(--border);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.92);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 0 56px;
+            position: relative;
+            box-shadow: 0 2px 12px #2563eb11;
+            z-index: 1;
+            transition: background 0.3s;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            margin-left: 10px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            height: 97%;
+            min-height: 0;
+        }
+
+        [data-theme="dark"] .sidebar {
+            background: rgba(35, 41, 70, 0.98);
+        }
+
+        .sidebar-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .sidebar-section label {
+            display: none;
+        }
+
+        .sidebar-search {
+            margin: -15px 16px 14px 24px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .mini-pill {
+            height: 36px;
+            border-radius: 18px;
+            border: 1.5px solid var(--border);
+            background: #f1f5ff;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 8px;
+            box-shadow: 0 1px 0 #ffffff, 0 1px 0 #eef2ff;
+        }
+
+        .mini-pill svg {
+            width: 18px;
+            height: 18px;
+            opacity: 0.8;
+        }
+
+        .mini-pill input {
+            border: 0;
+            outline: 0;
+            background: transparent;
+            width: 100%;
+            color: inherit;
+            font-size: 1rem;
+        }
+
+        .sidebar-list {
+            flex: 1;
+            min-height: 0;
+            margin: 0 16px 0 20px;
+            max-height: 450px;
+            overflow-y: auto;
+            background: #f8fafc;
+            border-radius: 9px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 8px #2563eb11;
+            padding: 0;
+            padding-left: -10px;
+        }
+
+        .sidebar-list::-webkit-scrollbar {
+            width: 8px;
+            background: #e0e7ff;
+            border-radius: 8px;
+        }
+
+        .sidebar-list::-webkit-scrollbar-thumb {
+            background: #c7d2fe;
+            border-radius: 8px;
+        }
+
+        .sidebar-plus {
+            position: absolute;
+            left: 18px;
+            right: 18px;
+            bottom: 18px;
+            height: 48px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #2563eb;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #00000010;
+            transition: background 0.18s, color 0.18s;
+        }
+
+        .sidebar-plus:hover {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        /* MAIN */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: transparent;
+        }
+
+        .main-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px 10px 0 10px;
+            padding-top: 18px;
+            padding-bottom: 18px;
+            border-bottom: 1.5px solid var(--border);
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 18px;
+            box-shadow: 0 2px 12px #2563eb11;
+            position: relative;
+            z-index: 2;
+        }
+
+        [data-theme="dark"] .main-toolbar {
+            background: rgba(35, 41, 70, 0.98);
+        }
+
+        .task-tabs {
+            background: #e0e7ff;
+            border-radius: 22px;
+            box-shadow: none;
+            border: none;
+            overflow: hidden;
+            display: flex;
+            gap: 0;
+            padding: 2px;
+        }
+
+        .tab-btn {
+            padding: 8px 22px;
+            border: none;
+            background: none;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #2563eb;
+            background: transparent;
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+            border-right: none;
+            outline: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 18px;
+            min-width: 90px;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+            color: #fff;
+            box-shadow: 0 2px 8px #2563eb22;
+            border-radius: 18px;
+        }
+
+        .tab-btn:not(.active):hover {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .tab-btn svg {
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .search-pill {
+            flex: 1;
+            height: 44px;
+            border-radius: 22px;
+            border: none;
+            background: #f1f5ff;
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            gap: 12px;
+            box-shadow: none;
+            margin-left: 18px;
+        }
+
+        .search-pill svg {
+            width: 20px;
+            height: 20px;
+            opacity: 0.9;
+        }
+
+        .search-pill input {
+            width: 100%;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            font-size: 1.05rem;
+            color: inherit;
+        }
+
+
+        .filter-select {
+            margin-left: 18px;
+            height: 44px;
+            min-width: 140px;
+            font-size: 1rem;
+            border-radius: 22px;
+            border: 1.5px solid #2563eb;
+            background: #fff;
+            color: #2563eb;
+            font-weight: 600;
+            transition: border-color 0.18s, background 0.18s;
+            box-shadow: none;
+            padding: 0 22px;
+        }
+
+        .filter-select:focus {
+            border-color: #2563eb;
+            outline: none;
+            background: #e0e7ff;
+        }
+
+        .main-scroll {
+            flex: 1;
+            overflow-y: auto;
+            margin: 0 10px 12px 10px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            min-height: 300px;
+            box-shadow: 0 1px 8px #2563eb11;
+        }
+
+        /* RIGHT PANEL STACK */
+        .right-panel-stack {
+            position: fixed;
+            top: var(--header-height);
+            right: 0;
+            height: calc(100vh - var(--header-height));
+            width: var(--notif-width);
+            max-width: 100vw;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+
+        .right-panel.half {
+            width: 100%;
+            height: 0;
+            background: var(--notif-bg);
+            box-shadow: var(--notif-shadow);
+            border-left: 2px solid var(--border);
+            border-radius: 0 0 0 18px;
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition:
+                height 0.4s cubic-bezier(.7, 0, .3, 1),
+                opacity 0.3s,
+                transform 0.45s cubic-bezier(.7, 0, .3, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transform: translateX(100%);
+        }
+
+        .right-panel.half.show {
+            height: 50%;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+
+        .right-panel.half.top {
+            z-index: 2;
+            box-shadow: 0 8px 32px rgba(49, 130, 206, 0.18), 0 2px 12px rgba(49, 130, 206, 0.09);
+            border-bottom: 1.5px solid #e5e7eb;
+        }
+
+        .right-panel.half.bottom {
+            z-index: 1;
+            border-top: 1.5px solid #e5e7eb;
+        }
+
+        .panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f1f5ff;
+            border-bottom: 1.5px solid #e5e7eb;
+            padding: 13px 18px 11px 18px;
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: #2563eb;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px #2563eb11;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: #2563eb;
+            letter-spacing: 0.5px;
+            gap: 4px;
+        }
+
+        .close-panel {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #2563eb;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.18s, color 0.18s;
+        }
+
+        .close-panel:hover {
+            background: #e0e7ff;
+            color: #ef4444;
+        }
+
+        .notif-list {
+            padding: 18px 10px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .notif-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 18px;
+            background: #fff;
+            border-radius: 12px;
+            margin: 0 6px;
+            box-shadow: 0 2px 8px #2563eb11;
+            min-height: 48px;
+            transition: background 0.18s, box-shadow 0.18s;
+            position: relative;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #222;
+            border: 1.5px solid #e5e7eb;
+        }
+
+        .notif-item:last-child {
+            border-bottom: none;
+        }
+
+        .notif-item:hover {
+            background: #e0e7ff;
+            box-shadow: 0 4px 16px #2563eb22;
+        }
+
+        .notif-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            background: #fff;
+            flex-shrink: 0;
+            margin-right: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notif-text {
+            flex: 1;
+            font-weight: 600;
+            color: #2563eb;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .notif-dot::after {
+            content: "";
+            display: block;
+            width: 8px;
+            height: 8px;
+            background: #60a5fa;
+            border-radius: 50%;
+            margin: auto;
+        }
+
+        .notif-time {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-left: 8px;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        /* Responsive: nếu màn hình nhỏ thì panel chiếm 100% chiều cao */
+        @media (max-height: 700px) {
+            .right-panel.half.show {
+                height: 48%;
+            }
+        }
+
+        /* Notification & Calendar content */
+        .right-section {
+            flex: 1;
+            overflow-y: auto;
+            background: #f8fafc;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notif-list {
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .calendar-card {
+            background: #fff;
+            border-radius: 0;
+            box-shadow: none;
+            margin: 0;
+            padding: 0;
+            border: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .calendar-head {
+            padding: 10px 16px 6px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+        }
+
+        .calendar-title {
+            font-weight: 800;
+            color: #2563eb;
+            font-size: 1.02rem;
+            letter-spacing: 0.5px;
+        }
+
+        .calendar-sub {
+            font-size: 12px;
+            color: #6b7280;
+            letter-spacing: 1px;
+        }
+
+        .calendar-head .btn {
+            min-width: 32px;
+            height: 32px;
+            padding: 0;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            margin-left: 2px;
+            margin-right: 2px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            padding: 8px 8px 10px 8px;
+            background: #fff;
+        }
+
+        .calendar-grid .dow {
+            height: 22px;
+            border: 0;
+            background: transparent;
+            font-weight: 700;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.93rem;
+        }
+
+        .calendar-grid .cell {
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #eef2f7;
+            background: #f9fafb;
+            color: #0f172a;
+            font-size: 0.93rem;
+            font-weight: 500;
+            transition: background 0.18s, color 0.18s;
+            cursor: pointer;
+        }
+
+        .calendar-grid .cell.faded {
+            opacity: 0.45;
+            background: #e0e7ff;
+            color: #64748b;
+        }
+
+        .calendar-grid .cell.today {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+            font-weight: 700;
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .calendar-grid .cell:hover:not(.faded) {
+            background: #e0e7ff;
+            color: #2563eb;
+        }
+
+        /* Popup tạo nhóm giữ nguyên */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(49, 130, 206, 0.10);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+
+        .popup-overlay.active {
+            display: flex;
+        }
+
+        .popup-content {
+            width: 420px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 22px;
+            box-shadow: 0 12px 48px 0 rgba(49, 130, 206, 0.16), 0 2px 12px rgba(49, 130, 206, 0.09);
+            padding: 36px 32px 28px 32px;
+            position: relative;
+            animation: fadeInUp 0.35s;
+            border: 1.5px solid #e0e7ff;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .popup-content::before {
+            content: "";
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle, #60a5fa33 60%, transparent 100%);
+            z-index: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+            position: absolute;
+            top: 16px;
+            right: 22px;
+            z-index: 2;
+        }
+
+        .close-btn:hover {
+            color: #ef4444;
+            transform: rotate(90deg) scale(1.15);
+        }
+
+        .popup-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2563eb;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 12px #c7d2fe55, 0 1px 0 #fff;
+            margin-bottom: 18px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-save {
+            background: linear-gradient(90deg, #3182ce 60%, #2563eb 100%);
+            color: #fff;
+            box-shadow: 0 2px 8px #2563eb22;
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(90deg, #2563eb 60%, #3182ce 100%);
+        }
+    </style>
 </head>
 
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        background: linear-gradient(120deg, #e0e7ff 0%, #f4f6fb 100%);
-        font-family: 'Segoe UI', Arial, sans-serif;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    .auth-container {
-        background: rgba(255, 255, 255, 0.98);
-        padding: 48px 38px 38px 38px;
-        border-radius: 28px;
-        box-shadow: 0 12px 48px 0 rgba(49, 130, 206, 0.16), 0 2px 12px rgba(49, 130, 206, 0.09);
-        width: 496px;
-        position: relative;
-        z-index: 1;
-        overflow: visible;
-    }
-
-    /* Logo bar with extra decoration */
-    .logo-bar {
-        display: flex;
-        align-items: center;
-        margin-bottom: 36px;
-        gap: 18px;
-        position: relative;
-    }
-
-    .logo-bar .logo {
-        background: linear-gradient(135deg, #2563eb 60%, #60a5fa 100%);
-        border-radius: 50%;
-        box-shadow: 0 4px 18px 0 #60a5fa33, 0 1.5px 8px #2563eb22;
-        width: 68px;
-        height: 68px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-    }
-
-    .logo-bar .logo img {
-        width: 40px;
-        height: 40px;
-        filter: drop-shadow(0 2px 6px #fff8);
-    }
-
-    .logo-bar .logo::after {
-        content: "";
-        position: absolute;
-        width: 84px;
-        height: 84px;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        border-radius: 50%;
-        border: 2.5px dashed #60a5fa55;
-        z-index: 0;
-        animation: spin 7s linear infinite;
-    }
-
-    @keyframes spin {
-        100% {
-            transform: translate(-50%, -50%) rotate(360deg);
-        }
-    }
-
-    .logo-bar .site-name {
-        font-size: 2.2rem;
-        font-weight: bold;
-        /*color: #2563eb;*/
-        letter-spacing: 1.5px;
-        font-family: 'Segoe UI', Arial, sans-serif;
-        /*text-shadow: 0 2px 12px #c7d2fe55, 0 1px 0 #fff;*/
-        position: relative;
-    }
-
-    .logo-bar .site-name::after {
-        content: "Quản lý nhóm hiệu quả";
-        display: block;
-        font-size: 1rem;
-        color: #818cf8;
-        font-weight: 500;
-        margin-top: 2px;
-        letter-spacing: 0.5px;
-        text-shadow: 0 1px 4px #c7d2fe33;
-    }
-
-    .auth-container h2 {
-        text-align: center;
-        margin-bottom: 26px;
-        color: #2d3a4b;
-        letter-spacing: 1px;
-        font-size: 1.5rem;
-        font-weight: 600;
-    }
-
-    .form-group {
-        margin-bottom: 18px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 7px;
-        color: #4a5568;
-        font-size: 15px;
-    }
-
-    .form-group input {
-        width: 100%;
-        padding: 12px 14px;
-        border: 1.5px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 15px;
-        outline: none;
-        background: #f8fafc;
-        transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .form-group input:focus {
-        border-color: #3182ce;
-        box-shadow: 0 0 0 2px #c3dafe;
-    }
-
-    .form-group input.invalid {
-        border-color: #ef4444;
-        background: #fef2f2;
-    }
-
-    .form-group .error-msg {
-        color: #ef4444;
-        font-size: 13px;
-        margin-top: 3px;
-    }
-
-    .auth-btn {
-        width: 100%;
-        padding: 13px;
-        background: linear-gradient(90deg, #3182ce 60%, #2563eb 100%);
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 2px 8px rgba(49, 130, 206, 0.08);
-        transition: background 0.2s, transform 0.1s;
-    }
-
-    .auth-btn:hover {
-        background: linear-gradient(90deg, #2563eb 60%, #3182ce 100%);
-        transform: translateY(-2px) scale(1.01);
-    }
-
-    .google-btn {
-        width: 100%;
-        padding: 12px;
-        background: #fff;
-        color: #444;
-        border: 1.5px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: 500;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        margin: 16px 0 0 0;
-        box-shadow: 0 1.5px 8px #c7d2fe22;
-        transition: background 0.2s, border 0.2s;
-    }
-
-    .google-btn:hover {
-        background: #f3f4f6;
-        border: 1.5px solid #2563eb;
-    }
-
-    .google-btn img {
-        width: 22px;
-        height: 22px;
-    }
-
-    .auth-footer {
-        text-align: center;
-        margin-top: 22px;
-        font-size: 14px;
-        color: #6b7280;
-    }
-
-    .auth-footer a {
-        color: #3182ce;
-        text-decoration: none;
-        font-weight: 500;
-        cursor: pointer;
-    }
-
-    .auth-footer a:hover {
-        text-decoration: underline;
-    }
-
-    .forgot-link {
-        display: block;
-        text-align: right;
-        margin-top: -14px;
-        margin-bottom: 14px;
-        font-size: 13px;
-    }
-
-    .forgot-link a {
-        color: #2563eb;
-        text-decoration: none;
-    }
-
-    .forgot-link a:hover {
-        text-decoration: underline;
-    }
-
-    .hidden {
-        display: none;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .auth-container,
-    .logo-bar {
-        animation: fadeInUp 0.7s cubic-bezier(.4, 0, .2, 1);
-    }
-
-    /* Extra decoration for container */
-    .auth-container::before {
-        content: "";
-        position: absolute;
-        left: -18px;
-        top: -18px;
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #818cf8 60%, #fbbf24 100%);
-        border-radius: 50%;
-        opacity: 0.13;
-        z-index: 0;
-        filter: blur(1.5px);
-    }
-
-    .auth-container::after {
-        content: "";
-        position: absolute;
-        right: -22px;
-        bottom: -22px;
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, #60a5fa 60%, #34d399 100%);
-        border-radius: 50%;
-        opacity: 0.10;
-        z-index: 0;
-        filter: blur(2px);
-    }
-
-</style>
-
 <body>
-    <div class="auth-container">
-        <div class="logo-bar">
-            <!--logo SVG -->
-            <span
-                class="site-name bg-gradient-to-r from-teal-500 via-orange-500 to-yellow-500 text-transparent bg-clip-text">WorkHub</span>
-        </div>
-        <form method="POST" action="/login" autocomplete="off">
-            <h2>Đăng nhập</h2>
-            <div class="form-group">
-                <label for="login-username">Tên tài khoản hoặc email</label>
-                <input type="username" id="login-username" name="username" placeholder="Nhập tên tài khoản hoặc email"
-                    required>
+    <div class="dashboard-frame">
+        <!-- HEADER -->
+        <div class="dashboard-header">
+            <div class="logo-bar">
+                <div class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="gCircle" cx="30%" cy="20%" r="80%">
+                                <stop offset="0%" stop-color="#3b82f6" />
+                                <stop offset="100%" stop-color="#1d4ed8" />
+                            </radialGradient>
+                            <linearGradient id="gW" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#93c5fd" />
+                                <stop offset="100%" stop-color="#60a5fa" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="24" cy="24" r="22" fill="url(#gCircle)" />
+                        <circle cx="24" cy="24" r="22" fill="none" stroke="#94a3b8" stroke-width="2" opacity=".55" />
+                        <path d="M10 15 L16 33 L24 20 L32 33 L38 15" fill="none" stroke="url(#gW)" stroke-width="4"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="site-name">WorkHub</span>
             </div>
-            <div class="form-group">
-                <label for="login-password">Mật khẩu</label>
-                <div style="position: relative;">
-                    <input type="password" id="login-password" name="password" placeholder="Nhập mật khẩu" required>
-                    <span id="toggle-password"
-                        style="position:absolute;top:50%;right:12px;transform:translateY(-50%);cursor:pointer;user-select:none;">
-                        <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none"
-                            viewBox="0 0 24 24">
-                            <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" />
-                            <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2" />
-                        </svg>
-                    </span>
+            <div class="header-actions actions-cluster">
+                <button class="icon-btn" title="Menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="3" y1="6" x2="21" y2="6" stroke-width="2" />
+                        <line x1="3" y1="12" x2="21" y2="12" stroke-width="2" />
+                        <line x1="3" y1="18" x2="21" y2="18" stroke-width="2" />
+                    </svg>
+                </button>
+                <button class="icon-btn" id="btnTheme" title="Chuyển chế độ sáng/tối" aria-pressed="false">
+                    <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="5" stroke-width="2" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                            stroke-width="2" />
+                    </svg>
+                </button>
+                <button class="icon-btn" id="btnCalendar" title="Lịch">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"></line>
+                        <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"></line>
+                        <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"></line>
+                    </svg>
+                </button>
+                <button class="icon-btn" id="btnNotif" title="Thông báo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path>
+                        <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
+                    </svg>
+                </button>
+                <div class="user-account" id="openProfile" title="Account">
+                    <div class="user-avatar">A</div>
+                    <span>ACCOUNT</span>
                 </div>
             </div>
-            <div class="forgot-link">
-                <a href="/forgot">Quên mật khẩu?</a>
+        </div>
+        <!-- BODY -->
+        <div class="dashboard-body" id="dashboardBody">
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-search">
+                        <div class="mini-pill">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"></line>
+                            </svg>
+                            <input type="text" placeholder="Search" />
+                        </div>
+                    </div>
+                    <div class="sidebar-list" id="groupList"></div>
+                </div>
+                <button class="sidebar-plus" title="Thêm nhóm" id="btnAddGroup">+</button>
             </div>
-            <button type="submit" class="auth-btn">Đăng nhập</button>
-            <button type="button" class="google-btn"
-                onclick="alert('Chức năng đăng nhập bằng Google sẽ được tích hợp sau!')">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google">
-                Đăng nhập với Google
-            </button>
-            <div class="auth-footer">
-                Chưa có tài khoản? <a href="/register">Đăng ký</a>
+            <!-- MAIN -->
+            <div class="main-content" id="mainContent">
+                <div class="main-toolbar">
+                    <div class="task-tabs">
+                        <button class="tab-btn active" tabindex="0">
+                            <svg viewBox="0 0 20 20">
+                                <path d="M4 10l4 4 8-8" />
+                            </svg>
+                            Đã giao
+                        </button>
+                        <button class="tab-btn" tabindex="0">
+                            <svg viewBox="0 0 20 20">
+                                <circle cx="9" cy="9" r="7" />
+                                <path d="M13 13l4 4" />
+                            </svg>
+                            Được giao
+                        </button>
+                    </div>
+                    <div class="search-pill">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"></line>
+                        </svg>
+                        <input type="text" placeholder="Search" />
+                    </div>
+                    <select class="filter-select">
+                        <option value="">Lọc công việc</option>
+                        <option value="done">Hoàn thành</option>
+                        <option value="doing">Đang làm</option>
+                        <option value="pending">Chưa làm</option>
+                    </select>
+                </div>
+                <div class="main-scroll">
+                </div>
             </div>
-        </form>
-    </div>
+            <!-- RIGHT PANEL STACK -->
+            <div class="right-panel-stack" id="rightPanelStack">
+                <div class="right-panel half" id="calendarPanel">
+                    <div class="panel-head">
+                        <span class="panel-title">
+                            <svg width="20" height="20" style="vertical-align:middle;margin-right:6px;" fill="none"
+                                stroke="currentColor">
+                                <rect x="3" y="4" width="14" height="14" rx="2" stroke-width="2" />
+                                <line x1="7" y1="2" x2="7" y2="6" stroke-width="2" />
+                                <line x1="13" y1="2" x2="13" y2="6" stroke-width="2" />
+                            </svg>
+                            Lịch
+                        </span>
+                        <button class="close-panel" id="closeCalendarPanel" title="Đóng">&times;</button>
+                    </div>
+                    <div class="right-section" id="calendarPanelContent"></div>
+                </div>
+                <div class="right-panel half" id="notifPanel">
+                    <div class="panel-head">
+                        <span class="panel-title">
+                            <svg width="20" height="20" style="vertical-align:middle;margin-right:6px;" fill="none"
+                                stroke="currentColor">
+                                <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path>
+                                <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
+                            </svg>
+                            Thông báo
+                        </span>
+                        <button class="close-panel" id="closeNotifPanel" title="Đóng">&times;</button>
+                    </div>
+                    <div class="right-section" id="notifPanelContent"></div>
+                </div>
+            </div>
+            <!-- POPUP TẠO NHÓM -->
+            <div class="popup-overlay" id="popupGroup">
+                <div class="popup-content">
+                    <button class="close-btn" id="closeGroupPopup">&times;</button>
+                    <div class="popup-inner-content" style="flex-direction:column; width:100%;">
+                        <div>
+                            <div class="popup-title">Tạo nhóm mới</div>
+                            <form id="groupForm" style="display:flex;flex-direction:column;gap:18px;min-width:260px;">
+                                <div style="display:flex;flex-direction:column;gap:6px;">
+                                    <label for="groupName" style="font-weight:500;color:#2563eb;">Tên nhóm</label>
+                                    <input id="groupName" name="groupName" type="text" required
+                                        placeholder="Nhập tên nhóm"
+                                        style="padding:10px 13px;border-radius:8px;border:1.5px solid #d1d5db;font-size:15px;background:#f8fafc;transition:border-color 0.2s, box-shadow 0.2s;box-shadow:0 1px 4px #c7d2fe11;">
+                                </div>
+                                <div style="display:flex;flex-direction:column;gap:6px;">
+                                    <label for="groupDesc" style="font-weight:500;color:#2563eb;">Mô tả</label>
+                                    <textarea id="groupDesc" name="groupDesc" rows="2" placeholder="Mô tả ngắn về nhóm"
+                                        style="padding:10px 13px;border-radius:8px;border:1.5px solid #d1d5db;font-size:15px;background:#f8fafc;resize:none;transition:border-color 0.2s, box-shadow 0.2s;box-shadow:0 1px 4px #c7d2fe11;"></textarea>
+                                </div>
+                                <div style="display:flex;justify-content:flex-end;gap:12px;">
+                                    <button type="button" class="btn btn-cancel" id="cancelGroupBtn">Huỷ</button>
+                                    <button type="submit" class="btn btn-save">Tạo nhóm</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+                // --- TẠO NHÓM POPUP ---
+                const btnAddGroup = document.getElementById('btnAddGroup');
+                const popupGroup = document.getElementById('popupGroup');
+                const closeGroupPopup = document.getElementById('closeGroupPopup');
+                const cancelGroupBtn = document.getElementById('cancelGroupBtn');
+                const groupForm = document.getElementById('groupForm');
+                const groupList = document.getElementById('groupList');
+
+                const groupSearchInput = document.querySelector('.sidebar-search input');
+                //Mẫu danh sách
+                let groups = [
+                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
+                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
+                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
+                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
+                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
+                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
+                    { name: "Nhóm B", desc: "Nhóm backend" }
+                ];
+
+                // Hàm render nhóm với filter
+                function renderGroups(filter = "") {
+                    const filtered = groups.filter(g =>
+                        g.name.toLowerCase().includes(filter.trim().toLowerCase())
+                    );
+                    groupList.innerHTML = filtered.map(g => `
+        <div style="padding:10px 14px;border-bottom:1px solid #e5e7eb;cursor:pointer;">
+            <div style="font-weight:600;color:#2563eb;">${g.name}</div>
+            <div style="font-size:13px;color:#64748b;opacity:0.85;">${g.desc || ''}</div>
+        </div>
+    `).join('');
+                }
+                renderGroups();
+
+                // Sự kiện tìm kiếm
+                groupSearchInput.addEventListener('input', (e) => {
+                    renderGroups(e.target.value);
+                });
+
+                btnAddGroup.onclick = () => {
+                    popupGroup.classList.add('active');
+                    groupForm.reset();
+                };
+                closeGroupPopup.onclick = () => popupGroup.classList.remove('active');
+                cancelGroupBtn.onclick = () => popupGroup.classList.remove('active');
+                popupGroup.onclick = (e) => {
+                    if (e.target === popupGroup) popupGroup.classList.remove('active');
+                };
+                groupForm.onsubmit = function (e) {
+                    e.preventDefault();
+                    const name = groupForm.groupName.value.trim();
+                    const desc = groupForm.groupDesc.value.trim();
+                    if (!name) {
+                        groupForm.groupName.focus();
+                        return;
+                    }
+                    groups.push({ name, desc });
+                    renderGroups();
+                    popupGroup.classList.remove('active');
+                };
+
+                // DARK/LIGHT THEME BUTTON
+                const THEME_KEY = "workhub-theme";
+                const themeBtn = document.getElementById("btnTheme");
+                const themeIcon = document.getElementById("themeIcon");
+                function getPreferredTheme() {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved === "light" || saved === "dark") return saved;
+                    return window.matchMedia &&
+                        window.matchMedia("(prefers-color-scheme: dark)").matches
+                        ? "dark"
+                        : "light";
+                }
+                function applyTheme(t) {
+                    document.documentElement.setAttribute("data-theme", t);
+                    themeBtn.title = t === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối";
+                    themeBtn.setAttribute("aria-pressed", t === "dark");
+                    // Đổi icon mặt trời/trăng
+                    if (t === "dark") {
+                        themeIcon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2"/>`;
+                    } else {
+                        themeIcon.innerHTML = `<circle cx="12" cy="12" r="5" stroke-width="2"/>
+                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/>`;
+                    }
+                }
+                function toggleTheme() {
+                    const current =
+                        document.documentElement.getAttribute("data-theme") || "light";
+                    const next = current === "dark" ? "light" : "dark";
+                    localStorage.setItem(THEME_KEY, next);
+                    applyTheme(next);
+                }
+                applyTheme(getPreferredTheme());
+                themeBtn.addEventListener("click", toggleTheme);
+
+                // TABS
+                document.querySelectorAll(".tab-btn").forEach((btn) => {
+                    btn.addEventListener("click", () => {
+                        document
+                            .querySelectorAll(".tab-btn")
+                            .forEach((b) => b.classList.remove("active"));
+                        btn.classList.add("active");
+                    });
+                });
+
+                // RIGHT PANEL STACK LOGIC (chỉ cho phép 1 panel xuất hiện tại 1 thời điểm)
+                const notifPanel = document.getElementById("notifPanel");
+                const notifPanelContent = document.getElementById("notifPanelContent");
+                const calendarPanel = document.getElementById("calendarPanel");
+                const calendarPanelContent = document.getElementById("calendarPanelContent");
+                const closeNotifPanel = document.getElementById("closeNotifPanel");
+                const closeCalendarPanel = document.getElementById("closeCalendarPanel");
+                const btnNotif = document.getElementById("btnNotif");
+                const btnCalendar = document.getElementById("btnCalendar");
+
+                // Trạng thái panel: panel nào mở trước thì nằm trên, panel nào mở sau thì nằm dưới
+                let panelOrder = [];
+
+                function showPanel(panel) {
+                    // Nếu panel đã mở rồi (ở bất kỳ vị trí nào), thì ẩn panel đó
+                    if (panelOrder.includes(panel)) {
+                        closePanel(panel);
+                        return;
+                    }
+                    // Nếu panel chưa có trong order, thêm vào đầu
+                    panelOrder = [panel, ...panelOrder];
+                    if (panelOrder.length > 2) panelOrder = panelOrder.slice(0, 2);
+
+                    notifPanel.classList.remove("top", "bottom", "show");
+                    calendarPanel.classList.remove("top", "bottom", "show");
+
+                    // Hiển thị panel theo thứ tự
+                    if (panelOrder.length === 1) {
+                        if (panelOrder[0] === "notif") {
+                            notifPanel.classList.add("show", "top");
+                            notifPanelContent.innerHTML = `
+                <div class="notif-list">
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                </div>
+            `;
+                        } else if (panelOrder[0] === "calendar") {
+                            calendarPanel.classList.add("show", "top");
+                            calendarPanelContent.innerHTML = `
+                <div class="calendar-card" id="calendarCard">
+                    <div class="calendar-head">
+                        <div>
+                            <div class="calendar-title" id="titleDay">Mon, Sep 29</div>
+                            <div class="calendar-sub" id="subMonth">SEPTEMBER 2025</div>
+                        </div>
+                        <div>
+                            <button class="btn" id="prevMth">◀</button>
+                            <button class="btn" id="nextMth">▶</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calGrid"></div>
+                </div>
+            `;
+                            setTimeout(initCalendar, 0);
+                        }
+                    } else if (panelOrder.length === 2) {
+                        // panelOrder[0] là top, panelOrder[1] là bottom
+                        if (panelOrder[0] === "notif" && panelOrder[1] === "calendar") {
+                            notifPanel.classList.add("show", "top");
+                            calendarPanel.classList.add("show", "bottom");
+                            notifPanelContent.innerHTML = `
+                <div class="notif-list">
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                </div>
+            `;
+                        } else if (panelOrder[0] === "calendar" && panelOrder[1] === "notif") {
+                            calendarPanel.classList.add("show", "top");
+                            notifPanel.classList.add("show", "bottom");
+                            calendarPanelContent.innerHTML = `
+                <div class="calendar-card" id="calendarCard">
+                    <div class="calendar-head">
+                        <div>
+                            <div class="calendar-title" id="titleDay">Mon, Sep 29</div>
+                            <div class="calendar-sub" id="subMonth">SEPTEMBER 2025</div>
+                        </div>
+                        <div>
+                            <button class="btn" id="prevMth">◀</button>
+                            <button class="btn" id="nextMth">▶</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calGrid"></div>
+                </div>
+            `;
+                            setTimeout(initCalendar, 0);
+                        }
+                    }
+                }
+
+                function closePanel(panel) {
+                    // Xóa panel khỏi order
+                    panelOrder = panelOrder.filter(p => p !== panel);
+                    notifPanel.classList.remove("top", "bottom", "show");
+                    calendarPanel.classList.remove("top", "bottom", "show");
+                    // Nếu còn panel còn lại thì show lại
+                    if (panelOrder.length === 1) {
+                        if (panelOrder[0] === "notif") {
+                            notifPanel.classList.add("show", "top");
+                            notifPanelContent.innerHTML = `
+                <div class="notif-list">
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                    <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+                </div>
+            `;
+                        } else if (panelOrder[0] === "calendar") {
+                            calendarPanel.classList.add("show", "top");
+                            calendarPanelContent.innerHTML = `
+                <div class="calendar-card" id="calendarCard">
+                    <div class="calendar-head">
+                        <div>
+                            <div class="calendar-title" id="titleDay">Mon, Sep 29</div>
+                            <div class="calendar-sub" id="subMonth">SEPTEMBER 2025</div>
+                        </div>
+                        <div>
+                            <button class="btn" id="prevMth">◀</button>
+                            <button class="btn" id="nextMth">▶</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calGrid"></div>
+                </div>
+            `;
+                            setTimeout(initCalendar, 0);
+                        }
+                    }
+                }
+
+                btnNotif.onclick = () => showPanel("notif");
+                btnCalendar.onclick = () => showPanel("calendar");
+                closeNotifPanel.onclick = () => closePanel("notif");
+                closeCalendarPanel.onclick = () => closePanel("calendar");
+
+                // Đóng khi click ngoài
+                document.addEventListener("mousedown", (e) => {
+                    if (
+                        notifPanel.classList.contains("show") &&
+                        !notifPanel.contains(e.target) &&
+                        !btnNotif.contains(e.target)
+                    ) {
+                        closePanel("notif");
+                    }
+                    if (
+                        calendarPanel.classList.contains("show") &&
+                        !calendarPanel.contains(e.target) &&
+                        !btnCalendar.contains(e.target)
+                    ) {
+                        closePanel("calendar");
+                    }
+                });
+
+                // Calendar logic cho right panel (giữ nguyên)
+                function initCalendar() {
+                    const calGrid = document.getElementById("calGrid");
+                    const titleDay = document.getElementById("titleDay");
+                    const subMonth = document.getElementById("subMonth");
+                    const prevMth = document.getElementById("prevMth");
+                    const nextMth = document.getElementById("nextMth");
+                    let view = new Date();
+                    function headText(d) {
+                        const w = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getDay()];
+                        const m = [
+                            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                        ][d.getMonth()];
+                        return `${w}, ${m} ${String(d.getDate()).padStart(2, "0")}`;
+                    }
+                    function buildCalendar(date) {
+                        const y = date.getFullYear(),
+                            m = date.getMonth();
+                        titleDay.textContent = headText(new Date());
+                        subMonth.textContent = new Intl.DateTimeFormat("en-US", {
+                            month: "long",
+                            year: "numeric",
+                        })
+                            .format(new Date(y, m, 1))
+                            .toUpperCase();
+                        const first = new Date(y, m, 1);
+                        const start = (first.getDay() + 6) % 7; // Monday first
+                        const days = new Date(y, m + 1, 0).getDate();
+                        const prevDays = new Date(y, m, 0).getDate();
+                        const parts = [];
+                        ["M", "T", "W", "T", "F", "S", "S"].forEach((d) =>
+                            parts.push(`<div class="dow">${d}</div>`)
+                        );
+                        for (let i = 0; i < 42; i++) {
+                            let label, cls = "cell";
+                            if (i < start) {
+                                label = prevDays - start + i + 1;
+                                cls += " faded";
+                            } else if (i < start + days) {
+                                label = i - start + 1;
+                            } else {
+                                label = i - (start + days) + 1;
+                                cls += " faded";
+                            }
+                            const today = new Date();
+                            if (
+                                y === today.getFullYear() &&
+                                m === today.getMonth() &&
+                                label === today.getDate() &&
+                                !cls.includes("faded")
+                            ) {
+                                cls += " today";
+                            }
+                            parts.push(`<div class="${cls}">${label}</div>`);
+                        }
+                        calGrid.innerHTML = parts.join("");
+                    }
+                    prevMth.addEventListener("click", () => {
+                        view.setMonth(view.getMonth() - 1);
+                        buildCalendar(view);
+                    });
+                    nextMth.addEventListener("click", () => {
+                        view.setMonth(view.getMonth() + 1);
+                        buildCalendar(view);
+                    });
+                    buildCalendar(view);
+                }
+            </script>
 </body>
-
-<script>
-    const passwordInput = document.getElementById('login-password');
-    const togglePassword = document.getElementById('toggle-password');
-    const eyeIcon = document.getElementById('eye-icon');
-    let isShown = false;
-
-    togglePassword.addEventListener('click', function () {
-        isShown = !isShown;
-        passwordInput.type = isShown ? 'text' : 'password';
-        // Đổi icon mắt/mắt gạch
-        if (isShown) {
-            eyeIcon.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
-                    <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
-                    <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2"/>
-                    <line x1="4" y1="20" x2="20" y2="4" stroke="#ef4444" stroke-width="2"/>
-                </svg>
-            `;
-        } else {
-            eyeIcon.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
-                    <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
-                    <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2"/>
-                </svg>
-            `;
-        }
-    });
-</script>
 
 </html>

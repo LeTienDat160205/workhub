@@ -37,7 +37,9 @@ app.get('/', (req, res) => {
 
 
 // Trang đăng nhập
-app.get('/login', (req, res) => res.render('login'));
+app.get('/login', (req, res) => {
+  res.render('login', {error: null});
+});
 
 // Trang đăng ký
 app.get('/register', (req, res) => {
@@ -47,7 +49,7 @@ app.get('/register', (req, res) => {
 // Trang quên mật khẩu
 app.get('/forgot', (req, res) => res.render('forgot'));
 
-// Xử lý đăng ký
+// ------------------------------------------------------------ Xử lý đăng ký ------------------------------------------------------------
 app.post('/register', async (req, res) => {
   const {name, username, email, password, confirmPassword } = req.body;
   const formData = { name, username, email };
@@ -55,6 +57,12 @@ app.post('/register', async (req, res) => {
   // Kiem tra nhap du thong tin khong
   if (!username || !email || !password || !confirmPassword) {
     return res.render("register", { error: "Vui lòng nhập đủ thông tin!", formData });
+  }
+
+  // Username chỉ được chứa chữ cái, số và dấu gạch dưới, độ dài 3-50
+  const usernameRegex = /^[a-zA-Z0-9_]{3,50}$/;
+  if (!usernameRegex.test(username)) {
+    return res.render("register", { error: "Username chỉ được chứa chữ, số, dấu gạch dưới (_) và dài 3-50 ký tự!", formData });
   }
 
   // Regex kiem tra dinh dang email
@@ -112,18 +120,29 @@ app.post('/register', async (req, res) => {
   }
 });
 
-// Xử lý đăng nhập
+// ------------------------------------------------------------ Xử lý đăng nhập ------------------------------------------------------------
 app.post('/login', (req, res) => {
-  const { username, email, password } = req.body;
+  const { usernameOrEmail, password } = req.body;
+  const formData = {usernameOrEmail};
 
-  db.query("SELECT * FROM user WHERE username = ? OR email = ?", [username, email], async (err, results) => {
+  // Kiem tra nhap du thong tin khong
+  if (!usernameOrEmail || !password) {
+    return res.render("login", { error: "Vui lòng nhập đủ thông tin!", formData });
+  }
+
+  // Kiem tra la username hay email
+  const isEmail = usernameOrEmail.includes("@");
+
+  const sql = isEmail ? "SELECT * FROM user WHERE email = ?" : "SELECT * FROM user WHERE username = ?";
+
+  db.query(sql, [usernameOrEmail], async (err, results) => {  
     if (err) {
       console.error(err);
       return res.status(500).send("Lỗi hệ thống");
     }
 
     if (results.length === 0) {
-      return res.send("Sai email hoặc mật khẩu!");
+      return res.render("login", { error: "Tài khoản không tồn tại", formData});
     }
 
     const user = results[0];
@@ -131,7 +150,8 @@ app.post('/login', (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.send("Sai email hoặc mật khẩu!");
+      return res.render("login", {error: "Sai mật khẩu!" , formData});
+      console.log(password, user.password)
     }
 
     // Lưu session

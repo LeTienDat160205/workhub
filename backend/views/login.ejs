@@ -292,22 +292,20 @@
             <h2>Đăng nhập</h2>
             <div class="form-group">
                 <label for="login-username">Tên tài khoản hoặc email</label>
-                <input type="username" id="login-username" name="username" placeholder="Nhập tên tài khoản hoặc email"
-                    required>
+                <input type="username" id="login-username" name="usernameOrEmail" placeholder="Nhập tên tài khoản hoặc email" value="<%= typeof formData !== 'undefined' ? formData.usernameOrEmail || '' : '' %>" required>
+                <% if (error && error.includes("Tài khoản")) { %>
+                    <p style="color: red;"><%= error %></p>
+                <% } %>
             </div>
             <div class="form-group">
                 <label for="login-password">Mật khẩu</label>
                 <div style="position: relative;">
                     <input type="password" id="login-password" name="password" placeholder="Nhập mật khẩu" required>
-                    <span id="toggle-password"
-                        style="position:absolute;top:50%;right:12px;transform:translateY(-50%);cursor:pointer;user-select:none;">
-                        <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none"
-                            viewBox="0 0 24 24">
-                            <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" />
-                            <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2" />
-                        </svg>
-                    </span>
+                    <button type="button" onclick="togglePassword('login-password')" style="position:absolute; right:5px; top:5px;">👁</button>
                 </div>
+                <% if (error && error.includes("mật khẩu")) { %>
+                    <p style="color: red;"><%= error %></p>
+                <% } %>
             </div>
             <div class="forgot-link">
                 <a href="/forgot">Quên mật khẩu?</a>
@@ -326,32 +324,10 @@
 </body>
 
 <script>
-    const passwordInput = document.getElementById('login-password');
-    const togglePassword = document.getElementById('toggle-password');
-    const eyeIcon = document.getElementById('eye-icon');
-    let isShown = false;
-
-    togglePassword.addEventListener('click', function () {
-        isShown = !isShown;
-        passwordInput.type = isShown ? 'text' : 'password';
-        // Đổi icon mắt/mắt gạch
-        if (isShown) {
-            eyeIcon.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
-                    <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
-                    <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2"/>
-                    <line x1="4" y1="20" x2="20" y2="4" stroke="#ef4444" stroke-width="2"/>
-                </svg>
-            `;
-        } else {
-            eyeIcon.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
-                    <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
-                    <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2"/>
-                </svg>
-            `;
-        }
-    });
+  function togglePassword(id) {
+    const input = document.getElementById(id);
+    input.type = input.type === "password" ? "text" : "password";
+  }
 </script>
 
 </html>

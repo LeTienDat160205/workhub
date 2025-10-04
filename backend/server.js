@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
     if (!req.session.user) {
     return res.redirect("/login");
   }
-  res.render("index", { user: req.session.user }); 
+  res.render("info", { user: req.session.user }); 
 });
 
 
@@ -49,10 +49,23 @@ app.get('/forgot', (req, res) => res.render('forgot'));
 
 // Xử lý đăng ký
 app.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
+  const {name, username, email, password, confirmPassword } = req.body;
+  const formData = { name, username, email };
 
-  if (!username || !email || !password) {
-    return res.send("Vui lòng nhập đủ thông tin!");
+  // Kiem tra nhap du thong tin khong
+  if (!username || !email || !password || !confirmPassword) {
+    return res.render("register", { error: "Vui lòng nhập đủ thông tin!", formData });
+  }
+
+  // regex kiem tra mk manh hay khong
+  const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+  if (!strongRegex.test(password)) {
+    return res.render("register", { error: "Mật khẩu phải >=8 ký tự, có ít nhất 1 hoa, 1 thường, 1 số và 1 ký tự đặc biệt!", formData });
+  }
+
+  if (password !== confirmPassword) {
+    return res.render("register", { error: "Mật khẩu xác nhận không khớp!", formData });
   }
 
   try {
@@ -63,8 +76,14 @@ app.post('/register', async (req, res) => {
         return res.status(500).send("Lỗi hệ thống");
       }
 
+      // Kiểm tra username hoặc email đã tồn tại hay chưa
       if (results.length > 0) {
-        return res.render("register", { error: "Username hoặc Email đã tồn tại, vui lòng chọn cái khác!" });
+        const existsUsername = results.some(r => r.username === username);
+        const existsEmail = results.some(r => r.email === email);
+        let msg = "Username hoặc Email đã tồn tại, vui lòng chọn cái khác!";
+        if (existsUsername && !existsEmail) msg = "Username đã tồn tại!";
+        if (!existsUsername && existsEmail) msg = "Email đã tồn tại!";
+        return res.render("register", { error: msg, formData });
       }
 
       // chưa tồn tại thì băm mk ra và nhét vào

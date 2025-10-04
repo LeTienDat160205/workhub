@@ -264,18 +264,18 @@
             <h2>Đăng ký</h2>
             <div class="form-group">
                 <label for="register-name">Tên người dùng</label>
-                <input type="text" id="register-name" name="name" placeholder="Nhập tên người dùng" required>
+                <input type="text" id="register-name" name="name" placeholder="Nhập tên người dùng" value="<%= typeof formData !== 'undefined' ? formData.name || '' : '' %>" required>
             </div>
             <div class="form-group">
                 <label for="register-username">Tên tài khoản</label>
-                <input type="username" id="register-username" name="username" placeholder="Nhập tên tài khoản" required>
+                <input type="username" id="register-username" name="username" placeholder="Nhập tên tài khoản" value="<%= typeof formData !== 'undefined' ? formData.username || '' : '' %>" required>
                 <% if (error && error.includes("Username")) { %>
                     <p style="color: red;"><%= error %></p>
                 <% } %>
             </div>
             <div class="form-group">
                 <label for="register-email">Email</label>
-                <input type="email" id="register-email" name="email" placeholder="Nhập email" required
+                <input type="email" id="register-email" name="email" placeholder="Nhập email" value="<%= typeof formData !== 'undefined' ? formData.email || '' : '' %>" required
                     pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$">
                 <% if (error && error.includes("Email")) { %>
                     <p style="color: red;"><%= error %></p>
@@ -284,17 +284,22 @@
             <div class="form-group">
                  <label for="register-password">Mật khẩu</label>
                 <div style="position: relative;">
-                    <input type="password" id="register-password" name="password"
-                        placeholder="Nhập mật khẩu" required>
-                    <span id="toggle-password"
-                        style="position:absolute;top:50%;right:12px;transform:translateY(-50%);cursor:pointer;user-select:none;">
-                        <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none"
-                            viewBox="0 0 24 24">
-                            <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" />
-                            <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2" />
-                        </svg>
-                    </span>
+                    <input type="password" id="register-password" name="password" placeholder="Nhập mật khẩu" required>
+                    <button type="button" onclick="togglePassword('register-password')" style="position:absolute; right:5px; top:5px;">👁</button>
                 </div>
+                <% if (error && error.includes("Mật khẩu phải")) { %>
+                    <p style="color: red;"><%= error %></p>
+                <% } %>
+            </div>
+            <div class="form-group">
+                 <label for="register-confirmPassword">Xác nhận mật khẩu</label>
+                <div style="position: relative;">
+                    <input type="password" id="register-confirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu" required>
+                    <button type="button" onclick="togglePassword('register-confirmPassword')" style="position:absolute; right:5px; top:5px;">👁</button>
+                </div>
+                <% if (error && error.includes("Mật khẩu xác nhận")) { %>
+                    <p style="color: red;"><%= error %></p>
+                <% } %>
             </div>
             <button type="submit" class="auth-btn">Đăng ký</button>
             <div class="auth-footer">
@@ -305,32 +310,11 @@
 </body>
 
 <script>
-    const passwordInput = document.getElementById('register-password');
-    const togglePassword = document.getElementById('toggle-password');
-    const eyeIcon = document.getElementById('eye-icon');
-    let isShown = false;
-
-    togglePassword.addEventListener('click', function () {
-        isShown = !isShown;
-        passwordInput.type = isShown ? 'text' : 'password';
-        // Đổi icon mắt/mắt gạch
-        if (isShown) {
-            eyeIcon.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
-                    <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
-                    <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2"/>
-                    <line x1="4" y1="20" x2="20" y2="4" stroke="#ef4444" stroke-width="2"/>
-                </svg>
-            `;
-        } else {
-            eyeIcon.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
-                    <path stroke="#555" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
-                    <circle cx="12" cy="12" r="3" stroke="#555" stroke-width="2"/>
-                </svg>
-            `;
-        }
-    });
+  function togglePassword(id) {
+    const input = document.getElementById(id);
+    input.type = input.type === "password" ? "text" : "password";
+  }
 </script>
+
 
 </html>

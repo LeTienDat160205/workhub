@@ -57,11 +57,17 @@ app.post('/register', async (req, res) => {
     return res.render("register", { error: "Vui lòng nhập đủ thông tin!", formData });
   }
 
+  // Regex kiem tra dinh dang email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.render("register", { error: "Email không hợp lệ, vui lòng nhập đúng định dạng (vd: abc@example.com)!", formData });
+  }
+
+
   // regex kiem tra mk manh hay khong
   const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-
   if (!strongRegex.test(password)) {
-    return res.render("register", { error: "Mật khẩu phải >=8 ký tự, có ít nhất 1 hoa, 1 thường, 1 số và 1 ký tự đặc biệt!", formData });
+    return res.render("register", { error: "Mật khẩu phải >=8 ký tự, có ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt!", formData });
   }
 
   if (password !== confirmPassword) {

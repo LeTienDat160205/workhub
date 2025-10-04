@@ -7,28 +7,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
         :root {
-            --main-bg: linear-gradient(120deg, #e0e7ff 0%, #f4f6fb 100%);
+            --main-bg: linear-gradient(120deg, #ede9fe 0%, #f5f3ff 100%);
             --main-color: #222;
             --panel-bg: #fff;
-            --accent: #2563eb;
-            --border: #e5e7eb;
-            --glass: rgba(255, 255, 255, 0.85);
+            --accent: #a78bfa;
+            --border: #ddd6fe;
+            --glass: rgba(245, 243, 255, 0.85);
             --glass-blur: blur(8px);
             --notif-width: 370px;
             --notif-bg: #fff;
-            --notif-shadow: 0 8px 32px rgba(49, 130, 206, 0.18);
+            --notif-shadow: 0 8px 32px rgba(167, 139, 250, 0.18);
             --notif-z: 20;
-            --header-height: 80px;
+            --header-height: 75px;
         }
 
         [data-theme="dark"] {
-            --main-bg: linear-gradient(120deg, #232946 0%, #16161a 100%);
+            --main-bg: linear-gradient(120deg, #3b0764 0%, #4c1d95 100%);
             --main-color: #f3f4f6;
-            --panel-bg: #232946;
-            --accent: #60a5fa;
-            --border: #334155;
-            --glass: rgba(35, 41, 70, 0.92);
-            --notif-bg: #232946;
+            --panel-bg: #2a174d;
+            --accent: #c4b5fd;
+            --border: #6d28d9;
+            --glass: rgba(76, 29, 149, 0.92);
+            --notif-bg: #2a174d;
         }
 
         * {
@@ -70,7 +70,7 @@
             width: 100vw;
             height: 100vh;
             margin: 0;
-            border-radius: 16px;
+            border-radius: 5px;
             border: none;
             background: var(--glass);
             box-shadow: 0 4px 32px #2563eb11;
@@ -108,7 +108,7 @@
             position: relative;
             z-index: 10;
             transition: background 0.3s;
-            border-radius: 16px;
+            border-radius: 5px;
             margin: 10px;
         }
 
@@ -126,7 +126,7 @@
         .logo {
             width: 48px;
             height: 48px;
-            border-radius: 50%;
+            border-radius: 5px;
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -152,7 +152,7 @@
             font-weight: 900;
             color: var(--accent);
             letter-spacing: 1.5px;
-            text-shadow: 0 2px 12px #c7d2fe55, 0 1px 0 #fff;
+            text-shadow: 0 2px 12px #c4b5fd55, 0 1px 0 #fff;
         }
 
         .header-actions {
@@ -165,7 +165,7 @@
         .icon-btn {
             background: #fff;
             border: 1.5px solid var(--border);
-            border-radius: 11px;
+            border-radius: 5px;
             cursor: pointer;
             padding: 10px;
             display: flex;
@@ -208,7 +208,7 @@
             font-size: 1.05rem;
             color: #222;
             padding: 4px 10px 4px 4px;
-            border-radius: 8px;
+            border-radius: 5px;
             transition: background 0.18s;
             background: #e0e7ff;
             border: 1.5px solid #c7d2fe;
@@ -253,7 +253,7 @@
         .sidebar {
             width: 240px;
             border-right: 1.5px solid var(--border);
-            border-radius: 16px;
+            border-radius: 5px;
             background: rgba(255, 255, 255, 0.92);
             display: flex;
             flex-direction: column;
@@ -291,14 +291,14 @@
 
         .sidebar-search {
             margin: -15px 16px 14px 24px;
-            border-radius: 16px;
+            border-radius: 5px;
             overflow: hidden;
             background: #f8fafc;
         }
 
         .mini-pill {
             height: 36px;
-            border-radius: 18px;
+            border-radius: 5px;
             border: 1.5px solid var(--border);
             background: #f1f5ff;
             display: flex;
@@ -330,7 +330,7 @@
             max-height: 450px;
             overflow-y: auto;
             background: #f8fafc;
-            border-radius: 9px;
+            border-radius: 5px;
             border: 1px solid #e5e7eb;
             box-shadow: 0 1px 8px #2563eb11;
             padding: 0;
@@ -340,12 +340,12 @@
         .sidebar-list::-webkit-scrollbar {
             width: 8px;
             background: #e0e7ff;
-            border-radius: 8px;
+            border-radius: 5px;
         }
 
         .sidebar-list::-webkit-scrollbar-thumb {
             background: #c7d2fe;
-            border-radius: 8px;
+            border-radius: 5px;
         }
 
         .sidebar-plus {
@@ -354,7 +354,7 @@
             right: 18px;
             bottom: 18px;
             height: 48px;
-            border-radius: 12px;
+            border-radius: 5px;
             border: 1.5px solid var(--border);
             background: #fff;
             display: flex;
@@ -389,8 +389,9 @@
             padding-top: 18px;
             padding-bottom: 18px;
             border-bottom: 1.5px solid var(--border);
+            padding-left: 10px;
             background: rgba(255, 255, 255, 0.85);
-            border-radius: 18px;
+            border-radius: 5px;
             box-shadow: 0 2px 12px #2563eb11;
             position: relative;
             z-index: 2;
@@ -402,7 +403,7 @@
 
         .task-tabs {
             background: #e0e7ff;
-            border-radius: 22px;
+            border-radius: 5px;
             box-shadow: none;
             border: none;
             overflow: hidden;
@@ -418,7 +419,7 @@
             font-weight: 700;
             cursor: pointer;
             font-size: 1rem;
-            color: #2563eb;
+            color: var(--accent);
             background: transparent;
             transition: background 0.18s, color 0.18s, box-shadow 0.18s;
             border-right: none;
@@ -426,20 +427,20 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            border-radius: 18px;
+            border-radius: 5px;
             min-width: 90px;
         }
 
         .tab-btn.active {
-            background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+            background: linear-gradient(90deg, #a78bfa 60%, #c4b5fd 100%);
             color: #fff;
             box-shadow: 0 2px 8px #2563eb22;
-            border-radius: 18px;
+            border-radius: 5px;
         }
 
         .tab-btn:not(.active):hover {
-            background: #dbeafe;
-            color: #2563eb;
+            background: #f3f0ff;
+            color: var(--accent);
         }
 
         .tab-btn svg {
@@ -454,7 +455,7 @@
         .search-pill {
             flex: 1;
             height: 44px;
-            border-radius: 22px;
+            border-radius: 5px;
             border: none;
             background: #f1f5ff;
             display: flex;
@@ -484,33 +485,35 @@
         .filter-select {
             margin-left: 18px;
             height: 44px;
-            min-width: 140px;
-            font-size: 1rem;
-            border-radius: 22px;
+            min-width: 100px;
+            font-size: 16px;
+            border-radius: 5px;
             border: 1.5px solid #2563eb;
             background: #fff;
-            color: #2563eb;
+            color: #8525eb;
             font-weight: 600;
             transition: border-color 0.18s, background 0.18s;
             box-shadow: none;
-            padding: 0 22px;
+            padding: 0 5px;
         }
 
         .filter-select:focus {
-            border-color: #2563eb;
+            border-radius: 5px;
+            border-color: #4d25eb;
             outline: none;
             background: #e0e7ff;
         }
 
-        .main-scroll {
+        .content-task {
             flex: 1;
             overflow-y: auto;
             margin: 0 10px 12px 10px;
-            border-radius: 10px;
+            border-radius: 5px;
             border: 1px solid #e5e7eb;
             background: #fff;
             min-height: 300px;
             box-shadow: 0 1px 8px #2563eb11;
+            color: #6322c5;
         }
 
         /* RIGHT PANEL STACK */
@@ -533,7 +536,7 @@
             background: var(--notif-bg);
             box-shadow: var(--notif-shadow);
             border-left: 2px solid var(--border);
-            border-radius: 0 0 0 18px;
+            border-radius: 5px;
             overflow: hidden;
             opacity: 0;
             pointer-events: none;
@@ -574,7 +577,7 @@
             padding: 13px 18px 11px 18px;
             font-size: 1.08rem;
             font-weight: 700;
-            color: #2563eb;
+            color: #a925eb;
             letter-spacing: 0.5px;
             box-shadow: 0 2px 8px #2563eb11;
         }
@@ -584,7 +587,7 @@
             align-items: center;
             font-size: 1.08rem;
             font-weight: 700;
-            color: #2563eb;
+            color: var(--accent);
             letter-spacing: 0.5px;
             gap: 4px;
         }
@@ -593,9 +596,9 @@
             background: none;
             border: none;
             font-size: 24px;
-            color: #2563eb;
+            color: var(--accent);
             cursor: pointer;
-            border-radius: 50%;
+            border-radius: 5px;
             width: 32px;
             height: 32px;
             display: flex;
@@ -623,7 +626,7 @@
             gap: 12px;
             padding: 13px 18px;
             background: #fff;
-            border-radius: 12px;
+            border-radius: 5px;
             margin: 0 6px;
             box-shadow: 0 2px 8px #2563eb11;
             min-height: 48px;
@@ -631,7 +634,7 @@
             position: relative;
             font-size: 1.05rem;
             font-weight: 600;
-            color: #222;
+            color: var(--accent);
             border: 1.5px solid #e5e7eb;
         }
 
@@ -647,7 +650,7 @@
         .notif-dot {
             width: 18px;
             height: 18px;
-            border-radius: 50%;
+            border-radius: 5px;
             border: 2px solid #cbd5e1;
             background: #fff;
             flex-shrink: 0;
@@ -660,7 +663,7 @@
         .notif-text {
             flex: 1;
             font-weight: 600;
-            color: #2563eb;
+            color: var(--accent);
             font-size: 1rem;
             line-height: 1.5;
         }
@@ -671,7 +674,7 @@
             width: 8px;
             height: 8px;
             background: #60a5fa;
-            border-radius: 50%;
+            border-radius: 5px;
             margin: auto;
         }
 
@@ -729,7 +732,7 @@
 
         .calendar-title {
             font-weight: 800;
-            color: #2563eb;
+            color: var(--accent);
             font-size: 1.02rem;
             letter-spacing: 0.5px;
         }
@@ -745,7 +748,7 @@
             height: 32px;
             padding: 0;
             font-size: 1.1rem;
-            border-radius: 8px;
+            border-radius: 5px;
             margin-left: 2px;
             margin-right: 2px;
         }
@@ -772,7 +775,7 @@
 
         .calendar-grid .cell {
             height: 28px;
-            border-radius: 6px;
+            border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -826,7 +829,7 @@
         .popup-content {
             width: 420px;
             background: rgba(255, 255, 255, 0.98);
-            border-radius: 22px;
+            border-radius: 5px;
             box-shadow: 0 12px 48px 0 rgba(49, 130, 206, 0.16), 0 2px 12px rgba(49, 130, 206, 0.09);
             padding: 36px 32px 28px 32px;
             position: relative;
@@ -869,7 +872,7 @@
         .popup-title {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #2563eb;
+            color: var(--accent);
             letter-spacing: 1px;
             text-shadow: 0 2px 12px #c7d2fe55, 0 1px 0 #fff;
             margin-bottom: 18px;
@@ -905,33 +908,39 @@
         .btn-save:hover {
             background: linear-gradient(90deg, #2563eb 60%, #3182ce 100%);
         }
+
+        #editProfileBtn,
+        #saveProfileBtn {
+            background: #9f25eb;
+            color: #fff;
+            border-radius: 5px;
+            border: none;
+            min-width: 90px;
+            font-size: 15px;
+            padding: 5px;
+        }
+
+        #editProfileBtn:hover,
+        #saveProfileBtn:hover {
+            font-weight: bold;
+        }
+
+        #cancelGroupBtn,
+        #createGroupBtn {
+            padding: 3px;
+            font-size: 15px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
 <body>
     <div class="dashboard-frame">
         <!-- HEADER -->
-        <div class="dashboard-header">
+        <div class="dashboard-header" style="margin-top:0;">
             <div class="logo-bar">
-                <div class="logo" aria-hidden="true">
-                    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <radialGradient id="gCircle" cx="30%" cy="20%" r="80%">
-                                <stop offset="0%" stop-color="#3b82f6" />
-                                <stop offset="100%" stop-color="#1d4ed8" />
-                            </radialGradient>
-                            <linearGradient id="gW" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stop-color="#93c5fd" />
-                                <stop offset="100%" stop-color="#60a5fa" />
-                            </linearGradient>
-                        </defs>
-                        <circle cx="24" cy="24" r="22" fill="url(#gCircle)" />
-                        <circle cx="24" cy="24" r="22" fill="none" stroke="#94a3b8" stroke-width="2" opacity=".55" />
-                        <path d="M10 15 L16 33 L24 20 L32 33 L38 15" fill="none" stroke="url(#gW)" stroke-width="4"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <span class="site-name">WorkHub</span>
+                <span class="site-name"
+                    style="font-size:30px;font-weight:900;color:#7725eb;letter-spacing:1.5px;">WorkHub</span>
             </div>
             <div class="header-actions actions-cluster">
                 <button class="icon-btn" title="Menu">
@@ -963,9 +972,38 @@
                         <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
                     </svg>
                 </button>
-                <div class="user-account" id="openProfile" title="Account">
-                    <div class="user-avatar">A</div>
-                    <span>ACCOUNT</span>
+                <div class="user-account" id="openProfile" title="Account"
+                    style="background:#f3f4fa; border: none; box-shadow: none; padding: 4px 18px 4px 8px; border-radius: 16px; display: flex; align-items: center; gap: 10px; position: relative;">
+                    <div style="position:relative;">
+                        <div
+                            style="width:32px;height:32px;border-radius:50%;background:#cbd5e1;display:flex;align-items:center;justify-content:center;">
+                            <!-- Avatar tròn -->
+                        </div>
+                        <span
+                            style="position:absolute;bottom:0;right:-2px;width:10px;height:10px;background:#22c55e;border-radius:50%;border:2px solid #fff;display:block;"></span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-start;">
+                        <span style="font-weight:700;font-size:1.08rem;color:#222;line-height:1.1;">Tên người dùng
+                        </span>
+                        <span style="font-size:0.97rem;color:#64748b;line-height:1.1;">@example.com</span>
+                    </div>
+                    <svg style="margin-left:8px;" width="18" height="18" fill="none" stroke="#94a3b8" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                    <!-- Menu popup -->
+                    <div id="userMenu"
+                        style="display:none;position:absolute;top:48px;right:0;min-width:160px;background:#fff;border-radius:10px;box-shadow:0 4px 24px #2563eb22;padding:10px 0;z-index:100;border:1px solid #e5e7eb;">
+                        <button
+                            style="width:100%;background:none;border:none;text-align:left;padding:10px 18px;font-size:1rem;color:#2563eb;cursor:pointer;transition:background 0.15s;"
+                            id="Profile">Xem thông tin</button>
+                        <button
+                            style="width:100%;background:none;border:none;text-align:left;padding:10px 18px;font-size:1rem;color:#2563eb;cursor:pointer;transition:background 0.15s;"
+                            id="ChangePass">Đổi mật khẩu</button>
+                        <button
+                            style="width:100%;background:none;border:none;text-align:left;padding:10px 18px;font-size:1rem;color:#ef4444;cursor:pointer;transition:background 0.15s;"
+                            id="Logout">Đăng xuất</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1012,14 +1050,17 @@
                         </svg>
                         <input type="text" placeholder="Search" />
                     </div>
-                    <select class="filter-select">
-                        <option value="">Lọc công việc</option>
-                        <option value="done">Hoàn thành</option>
-                        <option value="doing">Đang làm</option>
-                        <option value="pending">Chưa làm</option>
-                    </select>
+                    <div style="padding-right: 10px;">
+                        <select class="filter-select">
+                            <option value="">Bộ lọc công việc</option>
+                            <option value="done">Đã hoàn thành</option>
+                            <option value="doing">Đang làm</option>
+                            <option value="pending">Chưa nhận</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="main-scroll">
+                <div class="content-task">
+
                 </div>
             </div>
             <!-- RIGHT PANEL STACK -->
@@ -1054,7 +1095,7 @@
                     <div class="right-section" id="notifPanelContent"></div>
                 </div>
             </div>
-            <!-- POPUP TẠO NHÓM -->
+            <!-- POPUP TẠO NHÓM GIỮ NGUYÊN -->
             <div class="popup-overlay" id="popupGroup">
                 <div class="popup-content">
                     <button class="close-btn" id="closeGroupPopup">&times;</button>
@@ -1066,19 +1107,85 @@
                                     <label for="groupName" style="font-weight:500;color:#2563eb;">Tên nhóm</label>
                                     <input id="groupName" name="groupName" type="text" required
                                         placeholder="Nhập tên nhóm"
-                                        style="padding:10px 13px;border-radius:8px;border:1.5px solid #d1d5db;font-size:15px;background:#f8fafc;transition:border-color 0.2s, box-shadow 0.2s;box-shadow:0 1px 4px #c7d2fe11;">
-                                </div>
-                                <div style="display:flex;flex-direction:column;gap:6px;">
-                                    <label for="groupDesc" style="font-weight:500;color:#2563eb;">Mô tả</label>
-                                    <textarea id="groupDesc" name="groupDesc" rows="2" placeholder="Mô tả ngắn về nhóm"
-                                        style="padding:10px 13px;border-radius:8px;border:1.5px solid #d1d5db;font-size:15px;background:#f8fafc;resize:none;transition:border-color 0.2s, box-shadow 0.2s;box-shadow:0 1px 4px #c7d2fe11;"></textarea>
+                                        style="padding:10px 13px;border-radius:5px;border:1.5px solid #d1d5db;font-size:15px;background:#f8fafc;transition:border-color 0.2s, box-shadow 0.2s;box-shadow:0 1px 4px #c7d2fe11;">
                                 </div>
                                 <div style="display:flex;justify-content:flex-end;gap:12px;">
                                     <button type="button" class="btn btn-cancel" id="cancelGroupBtn">Huỷ</button>
-                                    <button type="submit" class="btn btn-save">Tạo nhóm</button>
+                                    <button type="submit" class="btn btn-save" id="createGroupBtn">Tạo nhóm</button>
                                 </div>
                             </form>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <!-- POPUP THÔNG TIN TÀI KHOẢN -->
+            <div class="popup-overlay" id="popupProfile"
+                style="display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px);z-index:1000;">
+                <div class="popup-content" style="width:420px;max-width:95vw;">
+                    <div class="popup-header"
+                        style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                        <div class="popup-title"
+                            style="font-size:23px;font-weight:700;color:#8b25eb;letter-spacing:1px;">Thông tin tài
+                            khoản</div>
+                        <button class="close-btn" id="closeProfileBtn"
+                            style="font-size:28px;color:#888;transition:color 0.2s, transform 0.2s;">&times;</button>
+                    </div>
+                    <div class="profile-img"
+                        style="display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+                        <img src="" alt="User"
+                            style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:2px solid #e0e7ff;box-shadow:0 2px 8px #2563eb22;">
+                    </div>
+                    <form class="profile-form" id="profileForm"
+                        style="display:flex;flex-direction:column;gap:13px;margin-bottom:22px;">
+                        <div class="form-row" style="display:flex;align-items:center;gap:10px;">
+                            <label class="form-label"
+                                style="width:110px;font-size:15px;color:#374151;font-weight:500;letter-spacing:0.2px;">Tên
+                                tài khoản</label>
+                            <input class="form-input" type="text" value="Nguyễn Văn A" readonly id="username"
+                                style="flex:1;padding:10px 13px;border:1.5px solid #d1d5db;border-radius:8px;font-size:15px;background:#f8fafc;">
+                        </div>
+                        <div class="form-row" style="display:flex;align-items:center;gap:10px;">
+                            <label class="form-label"
+                                style="width:110px;font-size:15px;color:#374151;font-weight:500;letter-spacing:0.2px;">Email</label>
+                            <input class="form-input" type="email" value="@example.com" readonly id="email"
+                                style="flex:1;padding:10px 13px;border:1.5px solid #d1d5db;border-radius:8px;font-size:15px;background:#f8fafc;">
+                        </div>
+                        <div class="form-row" style="display:flex;align-items:center;gap:10px;">
+                            <label class="form-label"
+                                style="width:110px;font-size:15px;color:#374151;font-weight:500;letter-spacing:0.2px;">Số
+                                điện thoại</label>
+                            <input class="form-input" type="text" value="0123456789" readonly id="phone"
+                                style="flex:1;padding:10px 13px;border:1.5px solid #d1d5db;border-radius:8px;font-size:15px;background:#f8fafc;">
+                        </div>
+                        <div class="form-row" style="display:flex;align-items:center;gap:10px;">
+                            <label class="form-label"
+                                style="width:110px;font-size:15px;color:#374151;font-weight:500;letter-spacing:0.2px;">Quê
+                                quán</label>
+                            <input class="form-input" type="text" value="Hà Nội" readonly id="address"
+                                style="flex:1;padding:10px 13px;border:1.5px solid #d1d5db;border-radius:8px;font-size:15px;background:#f8fafc;">
+                        </div>
+                        <div class="form-row" style="display:flex;align-items:center;gap:10px;">
+                            <label class="form-label"
+                                style="width:110px;font-size:15px;color:#374151;font-weight:500;letter-spacing:0.2px;">Giới
+                                tính</label>
+                            <select class="form-input" id="gender" disabled
+                                style="flex:1;padding:10px 13px;border:1.5px solid #d1d5db;border-radius:8px;font-size:15px;background:#f8fafc;">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+                        <div class="form-row" style="display:flex;align-items:center;gap:10px;">
+                            <label class="form-label"
+                                style="width:110px;font-size:15px;color:#374151;font-weight:500;letter-spacing:0.2px;">Ngày
+                                sinh</label>
+                            <input class="form-input" type="date" value="1995-01-01" readonly id="dob"
+                                style="flex:1;padding:10px 13px;border:1.5px solid #d1d5db;border-radius:8px;font-size:15px;background:#f8fafc;">
+                        </div>
+                    </form>
+                    <div class="form-actions" style="display:flex;justify-content:center;gap:12px;">
+                        <button class="btn" type="button" id="editProfileBtn">Sửa</button>
+                        <button class="btn" type="button" id="saveProfileBtn">Xác nhận</button>
                     </div>
                 </div>
             </div>
@@ -1094,13 +1201,8 @@
                 const groupSearchInput = document.querySelector('.sidebar-search input');
                 //Mẫu danh sách
                 let groups = [
-                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
-                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
-                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
-                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
-                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
-                    { name: "Nhóm A", desc: "Nhóm phát triển frontend" },
-                    { name: "Nhóm B", desc: "Nhóm backend" }
+                    { name: "Nhóm A", leader: "Nguyễn Văn A" },
+                    { name: "Nhóm B", leader: "Trần Thị B" }
                 ];
 
                 // Hàm render nhóm với filter
@@ -1110,8 +1212,8 @@
                     );
                     groupList.innerHTML = filtered.map(g => `
         <div style="padding:10px 14px;border-bottom:1px solid #e5e7eb;cursor:pointer;">
-            <div style="font-weight:600;color:#2563eb;">${g.name}</div>
-            <div style="font-size:13px;color:#64748b;opacity:0.85;">${g.desc || ''}</div>
+            <div style="font-weight:600;color:var(--accent);">${g.name}</div>
+            <div style="font-size:13px;color:#64748b;opacity:0.85;">Nhóm trưởng: ${g.leader || ''}</div>
         </div>
     `).join('');
                 }
@@ -1134,12 +1236,12 @@
                 groupForm.onsubmit = function (e) {
                     e.preventDefault();
                     const name = groupForm.groupName.value.trim();
-                    const desc = groupForm.groupDesc.value.trim();
                     if (!name) {
                         groupForm.groupName.focus();
                         return;
                     }
-                    groups.push({ name, desc });
+                    // Khi tạo nhóm mới, mặc định nhóm trưởng là "Bạn"
+                    groups.push({ name, leader: "Bạn" });
                     renderGroups();
                     popupGroup.classList.remove('active');
                 };
@@ -1410,6 +1512,80 @@
                         buildCalendar(view);
                     });
                     buildCalendar(view);
+                }
+
+
+                // Hiển thị/ẩn menu khi click vào user-account
+                const openProfile = document.getElementById('openProfile');
+                const userMenu = document.getElementById('userMenu');
+                openProfile.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    userMenu.style.display = userMenu.style.display === 'block' ? 'none' : 'block';
+                });
+                // Ẩn menu khi click ra ngoài
+                document.addEventListener('mousedown', function (e) {
+                    if (!openProfile.contains(e.target)) {
+                        userMenu.style.display = 'none';
+                    }
+                });
+                // Xử lý các nút menu (thay bằng chức năng thật nếu cần)
+                document.getElementById('Profile').onclick = function () {
+                    document.getElementById('popupProfile').style.display = 'flex';
+                    userMenu.style.display = 'none';
+                };
+                document.getElementById('ChangePass').onclick = function () {
+                    alert('Đổi mật khẩu');
+                    userMenu.style.display = 'none';
+                };
+                document.getElementById('Logout').onclick = function () {
+                    alert('Đăng xuất');
+                    userMenu.style.display = 'none';
+                };
+                // Popup thông tin tài khoản
+                const popupProfile = document.getElementById('popupProfile');
+                const closeProfileBtn = document.getElementById('closeProfileBtn');
+                const editProfileBtn = document.getElementById('editProfileBtn');
+                const saveProfileBtn = document.getElementById('saveProfileBtn');
+                const genderSelect = document.getElementById('gender');
+                const profileFormInputs = [
+                    document.getElementById('email'),
+                    document.getElementById('phone'),
+                    document.getElementById('address'),
+                    genderSelect,
+                    document.getElementById('dob')
+                ];
+                const usernameInput = document.getElementById('username');
+                let isEditingProfile = false;
+                function closeProfilePopup() {
+                    popupProfile.style.display = 'none';
+                    setProfileReadOnly(true);
+                    isEditingProfile = false;
+                    saveProfileBtn.disabled = true;
+                }
+                closeProfileBtn.onclick = closeProfilePopup;
+                popupProfile.onclick = function (e) {
+                    if (e.target === popupProfile) closeProfilePopup();
+                };
+                editProfileBtn.onclick = function () {
+                    isEditingProfile = true;
+                    setProfileReadOnly(false);
+                    saveProfileBtn.disabled = false;
+                };
+                saveProfileBtn.onclick = function () {
+                    setProfileReadOnly(true);
+                    isEditingProfile = false;
+                    saveProfileBtn.disabled = true;
+                    alert('Thông tin đã được lưu!');
+                };
+                function setProfileReadOnly(readonly) {
+                    profileFormInputs.forEach(input => {
+                        if (input.tagName === 'SELECT') {
+                            input.disabled = readonly;
+                        } else {
+                            input.readOnly = readonly;
+                        }
+                    });
+                    usernameInput.readOnly = true;
                 }
             </script>
 </body>

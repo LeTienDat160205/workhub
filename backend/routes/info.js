@@ -6,6 +6,8 @@ import session from "express-session";
 import db from "../db.js";
 import { v7 as uuidv7 } from "uuid";
 import { body, validationResult } from "express-validator";
+import { uploadAvatar, uploadBackground } from "../middlewares/upload.js";
+import cloudinary from "../config/cloudinary.js";
 
 const router = express.Router();
 
@@ -97,5 +99,38 @@ router.post("/info",
     }
   }
 );
+
+// ============================== Upload avatar ==============================
+router.post("/upload/avatar", uploadAvatar.single("avatar"), async (req, res) => {
+  try {
+    const avatarUrl = req.file.path; // đường dẫn Cloudinary trả về
+    const userId = req.session.user.id;
+
+    await db.promise().query("UPDATE user SET avatarPath = ? WHERE id = UUID_TO_BIN(?)", [avatarUrl, userId]);
+
+    req.session.user.avatarPath = avatarUrl;
+    res.redirect("/info");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Lỗi khi upload avatar");
+  }
+});
+
+// ============================== Upload background ==============================
+router.post("/upload/background", uploadBackground.single("background"), async (req, res) => {
+  try {
+    const backgroundUrl = req.file.path;
+    const userId = req.session.user.id;
+
+    await db.promise().query("UPDATE user SET backgroundPath = ? WHERE id = UUID_TO_BIN(?)", [backgroundUrl, userId]);
+
+    req.session.user.backgroundPath = backgroundUrl;
+    res.redirect("/info");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Lỗi khi upload background");
+  }
+});
+
 
 export default router;

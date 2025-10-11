@@ -10,8 +10,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 // Import các files
-import authRoutes from "./features/auth.js";
-import infoRoutes from "./features/info.js";
+import authRoutes from "./routes/auth.js";
+import infoRoutes from "./routes/info.js";
 
 const app = express();
 

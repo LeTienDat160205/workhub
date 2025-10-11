@@ -144,7 +144,7 @@
 <body>
   <div class="card">
     <div class="head">
-      <form method="post" action="/info/info">
+      <form method="post" action="/info/info" enctype="multipart/form-data">
       <h3>Thông tin tài khoản</h3>
       <% if (error) { %>
         <p class="error"><%= error %></p>
@@ -154,11 +154,20 @@
       <% } %>
       <input type="button" value="X">
     </div>
+    <!-- Background -->
     <div class="background">
-        <img name="backgroundPath" alt="background" src="<%= user.backgroundPath || '/uploads/default-bg.png' %>">
+      <img id="bgPreview" name="backgroundPath" alt="background" src="<%= user.backgroundPath || '/uploads/default-bg.png' %>">
+      <label class="bg-upload">
+        Thay đổi
+        <input type="file" name="background" accept="image/*" style="display:none" onchange="previewImage(event, 'bgPreview')">
+      </label>
     </div>
     <div class="avatar">
-      <img name="avatarPath" alt="avatar" src="<%= user.avatarPath || '/uploads/default-avatar.png' %>">
+      <img id="avatarPreview" name="avatarPath" alt="avatar" src="<%= user.avatarPath || '/uploads/default-avatar.png' %>">
+      <label class="avatar-upload">
+        ✎
+        <input type="file" name="avatar" accept="image/*" style="display:none" onchange="previewImage(event, 'avatarPreview')">
+      </label>
     </div>
     <div>
         <input class="name" type="text" name="name" value="<%= user.name || '' %>" readonly>
@@ -217,6 +226,15 @@
         input.style.background = '#fff';
       });
     });
+
+    // Xem trước ảnh
+    function previewImage(event, previewId) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById(previewId).src = reader.result;
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
   </script>
 
 </body>

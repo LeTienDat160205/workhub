@@ -5,6 +5,8 @@ import bcrypt from "bcrypt";
 import session from "express-session";
 import db from "../db.js";
 import { v7 as uuidv7 } from "uuid";
+import { uploadAvatar, uploadBackground } from "../middlewares/upload.js";
+import cloudinary from "../config/cloudinary.js";
 
 const router = express.Router();
 

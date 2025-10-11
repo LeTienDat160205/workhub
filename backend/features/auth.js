@@ -26,7 +26,7 @@ router.post('/register', async (req, res) => {
   const formData = { name, username, email };
 
   // Kiem tra nhap du thong tin khong
-  if (!username || !email || !password || !confirmPassword) {
+  if (!name || !username || !email || !password || !confirmPassword) {
     return res.render("register", { error: "Vui lòng nhập đủ thông tin!", formData });
   }
 
@@ -75,14 +75,14 @@ router.post('/register', async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
       const id = uuidv7();  // tạo UUID v7
     
-      const sql = "INSERT INTO `user` (id, username, email, password, name) VALUES (UUID_TO_BIN(?), ?, ?, ?)";
+      const sql = "INSERT INTO `user` (id, username, email, password, name) VALUES (UUID_TO_BIN(?), ?, ?, ?, ?)";
 
       db.query(sql, [id, username, email, hashedPassword, name], (err, result) => {
         if (err) {
           console.error(err);
           return res.status(500).send("Lỗi khi đăng ký");
         }
-        res.redirect("/login");
+        res.redirect("/auth/login");
       });
     });
   } catch (error) {
@@ -147,7 +147,7 @@ router.post('/login', (req, res) => {
 // Xử lý quên mật khẩu
 router.post('/forgot', (req, res) => {
     // ...xử lý gửi mail...
-    res.redirect('/login');
+    res.redirect('/auth/login');
 });
 
 module.exports = router;

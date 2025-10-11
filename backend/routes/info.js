@@ -6,8 +6,9 @@ import session from "express-session";
 import db from "../db.js";
 import { v7 as uuidv7 } from "uuid";
 import { body, validationResult } from "express-validator";
-import { uploadAvatar, uploadBackground } from "../middlewares/upload.js";
+import upload from "../middlewares/upload.js";
 import cloudinary from "../config/cloudinary.js";
+import multer from "multer";
 
 const router = express.Router();
 
@@ -50,6 +51,10 @@ router.get("/info", ensureAuth, async (req, res) => {
 router.post("/info",
   ensureAuth,
   // validation middleware (express-validator)
+  upload.fields([
+    { name: "avatar", maxCount: 1 },
+    { name: "background", maxCount: 1 },
+  ]),
   body("name").trim().isLength({ max: 100 }).optional({ nullable: true }),
   body("dob").optional({ nullable: true }).isISO8601().toDate(),
   body("gender").optional({ nullable: true }).isIn(["male", "female", "other"]),
@@ -71,19 +76,31 @@ router.post("/info",
       return res.render("info", { user: { ...req.session.user, ...formData, dobString: formData.dob ? new Date(formData.dob).toISOString().slice(0,10) : "" }, error: errors.array()[0].msg, success: null });
     }
 
+    // Lấy file upload từ Cloudinary
+      const avatarUrl = req.files?.avatar
+      ? req.files.avatar[0].path || req.files.avatar[0].url
+      : req.session.user.avatarPath;
+
+      const backgroundUrl = req.files?.background
+      ? req.files.background[0].path || req.files.background[0].url
+      : req.session.user.backgroundPath;
+
+
     try {
       const userId = req.session.user.id;
-      const sql = `UPDATE user SET name = ?, dob = ?, gender = ?, phoneNumber = ?, address = ? WHERE id = UUID_TO_BIN(?)`;
-      await db.promise().query(sql, [formData.name, formData.dob || null, formData.gender, formData.phoneNumber, formData.address, userId]);
+      const sql = `UPDATE user SET name = ?, dob = ?, gender = ?, phoneNumber = ?, address = ?, avatarPath=?, backgroundPath=? WHERE id = UUID_TO_BIN(?)`;
+      await db.promise().query(sql, [formData.name, formData.dob || null, formData.gender, formData.phoneNumber, formData.address, avatarUrl, backgroundUrl, userId]);
 
-      // cập nhật session (quan trọng để khi render index/info dùng lại session)
+      // cập nhật session 
       req.session.user = {
         ...req.session.user,
         name: formData.name,
         dob: formData.dob ,
         gender: formData.gender,
         phoneNumber: formData.phoneNumber,
-        address: formData.address
+        address: formData.address,
+        avatarPath: avatarUrl,
+        backgroundPath: backgroundUrl,
       };
 
       // Lấy lại user để render đầy đủ thông tin
@@ -99,38 +116,5 @@ router.post("/info",
     }
   }
 );
-
-// ============================== Upload avatar ==============================
-router.post("/upload/avatar", uploadAvatar.single("avatar"), async (req, res) => {
-  try {
-    const avatarUrl = req.file.path; // đường dẫn Cloudinary trả về
-    const userId = req.session.user.id;
-
-    await db.promise().query("UPDATE user SET avatarPath = ? WHERE id = UUID_TO_BIN(?)", [avatarUrl, userId]);
-
-    req.session.user.avatarPath = avatarUrl;
-    res.redirect("/info");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Lỗi khi upload avatar");
-  }
-});
-
-// ============================== Upload background ==============================
-router.post("/upload/background", uploadBackground.single("background"), async (req, res) => {
-  try {
-    const backgroundUrl = req.file.path;
-    const userId = req.session.user.id;
-
-    await db.promise().query("UPDATE user SET backgroundPath = ? WHERE id = UUID_TO_BIN(?)", [backgroundUrl, userId]);
-
-    req.session.user.backgroundPath = backgroundUrl;
-    res.redirect("/info");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Lỗi khi upload background");
-  }
-});
-
 
 export default router;

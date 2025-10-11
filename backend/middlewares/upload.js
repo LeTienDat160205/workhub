@@ -2,25 +2,15 @@ import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../config/cloudinary.js";
 
-// Avatar upload
-const avatarStorage = new CloudinaryStorage({
+const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "avatars", // thư mục trên Cloudinary
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
-    transformation: [{ width: 400, height: 400, crop: "fill" }],
-  },
+  params: (req, file) => ({
+    folder: file.fieldname === "avatar" ? "workhub/avatars" : "workhub/backgrounds",
+    allowed_formats: ["jpg", "png", "jpeg", "webp"],
+    public_id: `${file.fieldname}_${Date.now()}`,
+  }),
 });
 
-// Background upload
-const backgroundStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "backgrounds",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
-    transformation: [{ width: 1200, height: 600, crop: "fill" }],
-  },
-});
+const upload = multer({ storage });
 
-export const uploadAvatar = multer({ storage: avatarStorage });
-export const uploadBackground = multer({ storage: backgroundStorage });
+export default upload;

@@ -4,9 +4,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 cloudinary.config({
-  cloud_name: process.env.dqoc6wrdw,
-  api_key: process.env.292454249529146,
-  api_secret: process.env.ZMPDQvL2QPzbZtwTn__N8nBtqUg,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 console.log("Cloudinary connected:", cloudinary.config().cloud_name);

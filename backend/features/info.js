@@ -1,20 +1,22 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const bcrypt = require("bcrypt");
-const session = require("express-session");
-const db = require("../db");
-const { v7: uuidv7 } = require("uuid");
+// ============================== IMPORTS ==============================
+import express from "express";
+import bodyParser from "body-parser";
+import bcrypt from "bcrypt";
+import session from "express-session";
+import db from "../db.js";
+import { v7 as uuidv7 } from "uuid";
+import { body, validationResult } from "express-validator";
 
-const { body, validationResult } = require("express-validator");
 const router = express.Router();
 
+// ============================== MIDDLEWARE ==============================
 // Kiểm tra đảm bảo đã đăng nhập
 function ensureAuth(req, res, next) {
   if (!req.session || !req.session.user) return res.redirect("/login");
   next();
 }
 
-// ---------------------------------------------------------- Lấy thông tin từ db ----------------------------------------------------------
+// ============================== Lấy thông tin từ db ==============================
 router.get("/info", ensureAuth, async (req, res) => {
   try {
     // mong req.session.user.id là UUID string 
@@ -42,7 +44,7 @@ router.get("/info", ensureAuth, async (req, res) => {
   }
 });
 
-//  ---------------------------------------------------------- Cập nhật thông tin ----------------------------------------------------------
+//  ============================== Cập nhật thông tin ==============================
 router.post("/info",
   ensureAuth,
   // validation middleware (express-validator)
@@ -51,6 +53,7 @@ router.post("/info",
   body("gender").optional({ nullable: true }).isIn(["male", "female", "other"]),
   body("phoneNumber").optional({ nullable: true }).isLength({ max: 20 }),
   body("address").optional({ nullable: true }).isLength({ max: 255 }),
+
   async (req, res) => {
     const errors = validationResult(req);
     const formData = {
@@ -95,4 +98,4 @@ router.post("/info",
   }
 );
 
-module.exports = router;
+export default router;

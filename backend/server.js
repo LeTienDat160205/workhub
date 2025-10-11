@@ -1,15 +1,22 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const bcrypt = require("bcrypt");
-const session = require("express-session");
-const db = require("./db");
-const { v7: uuidv7 } = require("uuid");
+// ============================== IMPORTS ==============================
+import express from "express";
+import bodyParser from "body-parser";
+import bcrypt from "bcrypt";
+import session from "express-session";
+import db from "./db.js";
+import { v7 as uuidv7 } from "uuid";
 
-// Import các file
-const authRoutes = require("./features/auth");
-const infoRoutes = require("./features/info");
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Import các files
+import authRoutes from "./features/auth.js";
+import infoRoutes from "./features/info.js";
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(express.json());
@@ -17,8 +24,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Cấu hình EJS
-app.set('view engine', 'ejs');
-app.set('views', __dirname + '/views');
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // Cấu hình session
 app.use(

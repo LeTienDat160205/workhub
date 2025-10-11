@@ -1,11 +1,14 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const bcrypt = require("bcrypt");
-const session = require("express-session");
-const db = require("../db");
-const { v7: uuidv7 } = require("uuid");
+// ============================== IMPORTS ==============================
+import express from "express";
+import bodyParser from "body-parser";
+import bcrypt from "bcrypt";
+import session from "express-session";
+import db from "../db.js";
+import { v7 as uuidv7 } from "uuid";
 
 const router = express.Router();
+
+// ============================== ROUTES ==============================
 
 // Trang đăng nhập
 router.get('/login', (req, res) => {
@@ -20,7 +23,7 @@ router.get('/register', (req, res) => {
 // Trang quên mật khẩu
 router.get('/forgot', (req, res) => res.render('forgot'));
 
-// ------------------------------------------------------------ Xử lý đăng ký ------------------------------------------------------------
+// ============================== ĐĂNG KÝ ==============================
 router.post('/register', async (req, res) => {
   const {name, username, email, password, confirmPassword } = req.body;
   const formData = { name, username, email };
@@ -91,7 +94,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// ------------------------------------------------------------ Xử lý đăng nhập ------------------------------------------------------------
+// ============================== ĐĂNG NHẬP ==============================
 router.post('/login', (req, res) => {
   const { usernameOrEmail, password } = req.body;
   const formData = {usernameOrEmail};
@@ -150,4 +153,4 @@ router.post('/forgot', (req, res) => {
     res.redirect('/auth/login');
 });
 
-module.exports = router;
+export default router;

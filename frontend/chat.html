@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>WorkHub - Merged V3</title>
+<style>
+:root{
+  --primary-bg:#F6F8FA;
+  --div-bg:#E8F9F1;
+  --accent:#FFD6A5;
+  --accent-hover:#FFB74D;
+  --primary-text:#1E293B;
+  --border:#DDEBE5;
+  --card:#fff;
+  --input:#fff;
+  --header-height:72px;
+  --notif-width:360px;
+  --glass-blur: blur(6px);
+}
+[data-theme="dark"]{
+  --primary-bg:#0f1724;
+  --div-bg:#12121a;
+  --accent:#B388FF;
+  --accent-hover:#9D4EDD;
+  --primary-text:#EDE9FE;
+  --border:#2E1F46;
+  --card:#11121a;
+  --input:#11121a;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Segoe UI',Arial,sans-serif;background:var(--primary-bg);color:var(--primary-text);overflow:hidden}
+.dashboard-frame{position:relative;height:100vh;display:flex;flex-direction:column;padding:8px}
+
+/* Header */
+.dashboard-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px;height:var(--header-height);
+  background:rgba(255,255,255,0.96);border-bottom:1.5px solid var(--border);
+  box-shadow:0 6px 30px #00000010;border-radius:8px;
+}
+[data-theme="dark"] .dashboard-header{background:rgba(35,41,70,0.96)}
+.logo-bar{display:flex;align-items:center;gap:16px}
+.site-name{font-size:32px;font-weight:900;color:#f3c06a;letter-spacing:2px;text-shadow:0 6px 18px rgba(243,192,106,0.18)}
+.header-actions{display:flex;align-items:center;gap:10px}
+.icon-btn{
+  width:48px;height:48px;border-radius:12px;border:none;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;
+  box-shadow:0 4px 12px #00000010;transition:transform .15s,background .15s;
+}
+.icon-btn:hover{transform:translateY(-2px);background:var(--accent-hover)}
+.icon-btn svg{width:20px;height:20px}
+.user-account{
+  display:flex;align-items:center;gap:12px;padding:6px 12px;border-radius:16px;background:#eef3fb;border:1px solid #e5e7eb;cursor:pointer;position:relative;
+}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:#cbd5e1;display:flex;align-items:center;justify-content:center;font-weight:700;color:#2563eb;border:2px solid #fff}
+.user-online{position:absolute;left:10px;bottom:6px;width:10px;height:10px;border-radius:50%;background:#22c55e;border:2px solid #fff}
+
+/* Body layout */
+.dashboard-body{flex:1;display:flex;min-height:0;padding:10px;gap:10px}
+.sidebar{
+  width:260px;background:var(--card);border-radius:8px;padding:16px;border:1px solid var(--border);
+  display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 22px #00000008;
+}
+.mini-pill{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;background:#f8fafc;border:1px solid var(--border)}
+.mini-pill svg{opacity:.9}
+.sidebar-list{flex:1;overflow:auto;background:#f8fafc;border-radius:8px;padding:8px;border:1px solid var(--border);margin-top:6px;box-shadow:0 1px 8px #00000004}
+.group-item{padding:10px;border-radius:8px;background:#fff;margin-bottom:8px;cursor:pointer;border:1px solid #e5e7eb}
+.sidebar-plus{height:48px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:26px;color:#2563eb;cursor:pointer;box-shadow:0 4px 12px #00000006}
+.sidebar-plus:hover{background:#2563eb;color:#fff}
+
+/* Main */
+.main-content{flex:1;display:flex;flex-direction:column;gap:12px}
+.main-toolbar{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:linear-gradient(90deg,#fff3db,#fff);box-shadow:0 2px 8px #00000008;border:1px solid var(--border)}
+.task-tabs{display:flex;gap:6px;background:#e0e7ff;border-radius:8px;padding:4px}
+.tab-btn{padding:8px 16px;border-radius:8px;border:none;background:transparent;font-weight:700;cursor:pointer}
+.tab-btn.active{background:linear-gradient(90deg,#22c589,#2fbf9a);color:#07111a}
+.search-pill{flex:1;display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:#f1f5ff}
+.content-task{flex:1;overflow:auto;border-radius:10px;padding:16px;background:#E8F9F1;border:1px solid var(--border);color:#6322c5}
+
+/* Chat */
+.chat-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--card);border-radius:8px;border:1px solid var(--border)}
+.chat-messages{flex:1;overflow:auto;padding:12px;background:var(--card);border-radius:8px;border:1px solid var(--border)}
+.message{display:flex;gap:10px;margin:8px 0;align-items:flex-start}
+.message .avatar{width:32px;height:32px;border-radius:50%;background:#c7d2fe;display:flex;align-items:center;justify-content:center;font-weight:700}
+.message .text{background:var(--div-bg);padding:8px 12px;border-radius:8px;max-width:70%}
+
+/* Attach card style */
+.attached-file{display:inline-flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid var(--border);box-shadow:0 2px 6px #00000006;margin-top:6px}
+.attached-file .name{font-weight:700}
+
+/* Input area */
+.chat-input{display:flex;gap:10px;padding:8px 0;align-items:center}
+.file-btn{width:44px;height:44px;border-radius:8px;background:#eef3fb;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.file-btn:hover{background:#f1f5ff}
+.chat-input input{flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--input)}
+.send-btn{padding:10px 14px;border-radius:8px;border:none;background:linear-gradient(90deg,#3182ce,#2563eb);color:#fff;cursor:pointer}
+
+/* Right panel */
+.right-panel{width:320px;background:var(--card);border-radius:8px;padding:16px;border:1px solid var(--border);display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 22px #00000006}
+.user-item{display:flex;flex-direction:column;background:#fff;border-radius:8px;padding:10px;border:1px solid #e5e7eb}
+.user-top{display:flex;align-items:center;gap:10px}
+.user-actions{display:flex;gap:6px;margin-top:8px}
+.user-actions button{flex:1;padding:8px;border-radius:8px;border:none;background:var(--accent);cursor:pointer}
+.add-member{margin-top:auto;padding:12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-weight:900;color:#2563eb;box-shadow:0 6px 18px #00000006}
+.add-member.active-style{background:linear-gradient(90deg,#FFD6A5,#FFB74D);color:#3b2f25;border:none;box-shadow:0 8px 24px #FFD6A525}
+
+/* Popup */
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(49,130,206,0.08);align-items:center;justify-content:center;z-index:1200}
+.popup-overlay.active{display:flex}
+.popup-content{width:420px;background:var(--card);border-radius:8px;padding:22px;border:1.5px solid #e0e7ff;box-shadow:0 12px 48px rgba(49,130,206,0.16)}
+
+/* Right panel halves (calendar/notif) */
+.right-panel-stack{position:fixed;top:calc(var(--header-height) + 10px);right:18px;display:flex;flex-direction:column;gap:12px;z-index:1000}
+.right-panel-half{width:360px;height:0;overflow:hidden;border-left:2px solid var(--border);background:var(--card);border-radius:8px;transition:height .35s,transform .35s,opacity .25s;transform:translateX(100%);opacity:0;pointer-events:none}
+.right-panel-half.show{height:48%;transform:translateX(0);opacity:1;pointer-events:auto}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--border);background:#f1f5ff}
+.panel-title{display:flex;align-items:center;gap:8px;color:var(--accent);font-weight:800}
+.notif-list{padding:12px;display:flex;flex-direction:column;gap:12px;overflow:auto;max-height:calc(48% - 70px)}
+.notif-item{display:flex;align-items:center;gap:12px;padding:12px;background:#fff;border-radius:8px;border:1px solid var(--border);box-shadow:0 6px 18px #00000004}
+.notif-dot{width:18px;height:18px;border-radius:6px;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.notif-time{font-size:12px;color:#64748b;margin-left:auto}
+
+/* calendar grid */
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:12px;background:#fff;border-radius:6px}
+.calendar-grid .dow{height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#64748b}
+.calendar-grid .cell{height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:#f9fafb;border:1px solid #eef2f7;cursor:pointer}
+.calendar-grid .cell.faded{opacity:.45;background:#e0e7ff;color:#64748b}
+.calendar-grid .cell.today{outline:3px solid var(--accent);background:#dbeafe;font-weight:800}
+
+/* helpers */
+.btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+.close-btn{background:none;border:none;font-size:20px;cursor:pointer}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="dashboard-frame">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="logo-bar">
+      <span class="site-name">WorkHub</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btnMenu" title="Menu" aria-label="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="6" x2="21" y2="6" stroke-width="2"/><line x1="3" y1="12" x2="21" y2="12" stroke-width="2"/><line x1="3" y1="18" x2="21" y2="18" stroke-width="2"/></svg></button>
+      <button class="icon-btn" id="btnTheme" title="Chuyển chế độ" aria-pressed="false">🌙</button>
+      <button class="icon-btn" id="btnCalendar" title="Lịch" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"></rect><line x1="16" y1="2" x2="16" y2="6" stroke-width="2"></line><line x1="8" y1="2" x2="8" y2="6" stroke-width="2"></line><line x1="3" y1="10" x2="21" y2="10" stroke-width="2"></line></svg></button>
+      <button class="icon-btn" id="btnNotif" title="Thông báo" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path><path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path></svg></button>
+
+      <div class="user-account" id="openProfile" title="Account">
+        <div style="position:relative;">
+          <div class="user-avatar">A</div>
+          <span class="user-online" aria-hidden="true"></span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;">
+          <span style="font-weight:800">Tên người dùng</span>
+          <span style="font-size:12px;color:#64748b">@example.com</span>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" style="margin-left:8px;fill:none;stroke:#94a3b8;stroke-width:2"><path d="M6 9l6 6 6-6" /></svg>
+
+        <div id="userMenu" style="display:none;position:absolute;top:60px;right:0;min-width:200px;background:var(--card);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);padding:6px;border:1px solid var(--border);z-index:200">
+          <button class="btn" id="menuProfile" style="width:100%;text-align:left;background:none;border:none;padding:10px;color:#2563eb">Xem thông tin</button>
+          <button class="btn" id="menuChange" style="width:100%;text-align:left;background:none;border:none;padding:10px;color:#2563eb">Đổi mật khẩu</button>
+          <button class="btn" id="menuLogout" style="width:100%;text-align:left;background:none;border:none;padding:10px;color:#ef4444">Đăng xuất</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="dashboard-body">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="mini-pill">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"/></svg>
+        <input id="groupSearch" placeholder="Tìm kiếm group..." style="border:0;background:transparent;outline:0;width:100%"/>
+      </div>
+      <div class="sidebar-list" id="groupList"></div>
+      <div class="sidebar-plus" id="btnAddGroup" title="Thêm nhóm">+</div>
+    </div>
+
+    <!-- Main -->
+    <div class="main-content">
+      <div class="main-toolbar">
+        <div class="task-tabs">
+          <button class="tab-btn active">Đã giao</button>
+          <button class="tab-btn">Được giao</button>
+        </div>
+        <div class="search-pill"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"/></svg><input placeholder="Tìm kiếm công việc..." style="border:0;background:transparent;outline:0;width:100%"/></div>
+        <div style="margin-left:auto">
+          <ul style="list-style:none;margin:0;padding:0">
+            <li style="display:inline-block;position:relative">
+              <a class="tab-btn" href="#" style="background:transparent;padding:8px 12px;border-radius:8px">Bộ lọc công việc ▾</a>
+              <ul id="filterMenu" style="position:absolute;left:0;top:calc(100% + 6px);display:none;background:var(--card);padding:6px;border-radius:8px;border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,0.08)">
+                <li><a href="#" class="btn" style="display:block;padding:8px 12px">Tất cả</a></li>
+                <li><a href="#" class="btn" style="display:block;padding:8px 12px">Đã hoàn thành</a></li>
+                <li><a href="#" class="btn" style="display:block;padding:8px 12px">Đang làm</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="chat-header"><div><strong>Group 1</strong></div><div id="memberCount">2 thành viên</div></div>
+      <div class="chat-messages" id="chatMessages" style="min-height:260px">
+        <div class="message"><div class="avatar">A</div><div class="text"><strong>A:</strong> Xin chào!</div></div>
+        <div class="message"><div class="avatar">B</div><div class="text"><strong>B:</strong> Chào bạn!</div></div>
+      </div>
+
+      <div class="chat-input">
+        <label class="file-btn" title="Gửi tệp">
+          <input id="fileInput" type="file" style="display:none"/>
+          📎
+        </label>
+        <input id="chatInput" placeholder="Nhập tin nhắn..." style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border)"/>
+        <button id="sendBtn" class="send-btn">Gửi</button>
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="right-panel">
+      <div id="usersWrap" style="display:flex;flex-direction:column;gap:8px">
+          <div class="user-item"><div class="user-top"><div style="width:36px;height:36px;border-radius:50%;background:#c7d2fe"></div><div><strong>Người dùng 1</strong><div style="font-size:12px;color:#64748b">@u1</div></div></div><div class="user-actions"><button onclick="alert('Xem người dùng 1')">👁️ Xem</button><button onclick="alert('Nhắn người dùng 1')">💬 Nhắn</button></div></div>
+          <div class="user-item"><div class="user-top"><div style="width:36px;height:36px;border-radius:50%;background:#c7d2fe"></div><div><strong>Người dùng 2</strong><div style="font-size:12px;color:#64748b">@u2</div></div></div><div class="user-actions"><button onclick="alert('Xem người dùng 2')">👁️ Xem</button><button onclick="alert('Nhắn người dùng 2')">💬 Nhắn</button></div></div>
+        </div>
+        <button class="add-member active-style" id="btnAddMember">+ Thêm thành viên</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right panel stack -->
+  <div class="right-panel-stack" id="rightStack">
+    <div class="right-panel-half" id="calendarPanel">
+      <div class="panel-head">
+        <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="14" height="14" rx="2" stroke-width="2"/><line x1="7" y1="2" x2="7" y2="6" stroke-width="2"/><line x1="13" y1="2" x2="13" y2="6" stroke-width="2"/></svg> Lịch</div>
+        <div><button class="btn" id="prevMth">◀</button><button class="btn" id="nextMth">▶</button></div>
+      </div>
+      <div style="padding:10px" id="calendarContent">
+        <div style="padding:8px;background:#f8fafc;border-radius:8px;border:1px solid var(--border)">
+          <div id="titleDay" style="font-weight:700">Mon, Sep 29</div>
+          <div id="subMonth" style="font-size:13px;color:#64748b">SEPTEMBER 2025</div>
+        </div>
+        <div class="calendar-grid" id="calGrid" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <div class="right-panel-half" id="notifPanel">
+      <div class="panel-head">
+        <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path><path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path></svg> Thông báo</div>
+        <div><button class="close-btn" id="closeNotifPanel">&times;</button></div>
+      </div>
+      <div class="notif-list" id="notifList">
+      </div>
+    </div>
+  </div>
+
+  <!-- Popups -->
+  <div class="popup-overlay" id="popupGroup">
+    <div class="popup-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0;color:var(--accent)">Tạo nhóm mới</h3><button class="close-btn" id="closeGroupPopup">&times;</button></div>
+      <form id="groupForm" style="display:flex;flex-direction:column;gap:12px">
+        <input id="groupName" placeholder="Tên nhóm" style="padding:10px;border-radius:8px;border:1px solid var(--border)"/>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button type="button" class="btn" id="cancelGroupBtn">Huỷ</button>
+          <button type="submit" class="btn" style="background:linear-gradient(90deg,#3182ce,#2563eb);color:#fff">Tạo nhóm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="popupProfile">
+    <div class="popup-content" style="max-width:480px">
+      <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0;color:#8b25eb">Thông tin tài khoản</h3><button class="close-btn" id="closeProfileBtn">&times;</button></div>
+      <div style="margin-top:12px">
+        <div style="display:flex;gap:12px;align-items:center"><img src="" alt="" style="width:76px;height:76px;border-radius:50%;background:#cbd5e1"/><div><strong>Người dùng</strong><div style="font-size:13px;color:#64748b">@example.com</div></div></div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+          <input value="Nguyễn Văn A" readonly style="padding:10px;border-radius:8px;border:1px solid var(--border)"/>
+          <input value="@example.com" readonly style="padding:10px;border-radius:8px;border:1px solid var(--border)"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---------- Data ----------
+let groups = [{name:"Group 1", leader:"Nguyễn Văn A"},{name:"Group 2", leader:"Trần Thị B"}];
+let users = [{name:"Người dùng 1", handle:"@u1"},{name:"Người dùng 2", handle:"@u2"}];
+let notifs = [
+  {text:"Nguyễn Văn A đã tạo nhóm 'Nhóm A'", time:"2 giờ trước"},
+  {text:"Bạn được thêm vào Group 2", time:"Hôm qua"},
+  {text:"Báo cáo tuần đã được gửi", time:"3 ngày trước"},
+];
+
+// ---------- Render ----------
+const groupListEl = document.getElementById('groupList');
+function renderGroups(filter=""){
+  const html = groups.filter(g=>g.name.toLowerCase().includes(filter.trim().toLowerCase())).map(g=>`<div class="group-item"><div style="font-weight:700">${g.name}</div><div style="font-size:13px;color:#64748b">Nhóm trưởng: ${g.leader||''}</div></div>`).join('');
+  groupListEl.innerHTML = html;
+}
+renderGroups();
+document.getElementById('groupSearch').addEventListener('input',e=>renderGroups(e.target.value));
+
+const usersWrap = document.getElementById('usersWrap');
+function renderUsers(){
+  usersWrap.innerHTML = users.map((u,i)=>`<div class="user-item"><div class="user-top"><div style="width:36px;height:36px;border-radius:50%;background:#c7d2fe"></div><div><strong>${u.name}</strong><div style="font-size:12px;color:#64748b">${u.handle}</div></div></div><div class="user-actions"><button onclick="alert('Xem ${u.name}')">👁️ Xem</button><button onclick="alert('Nhắn ${u.name}')">💬 Nhắn</button></div></div>`).join('');
+  document.getElementById('memberCount').textContent = users.length + " thành viên";
+}
+renderUsers();
+
+function renderNotifs(){
+  const el = document.getElementById('notifList');
+  el.innerHTML = notifs.map(n=>`<div class="notif-item"><div class="notif-dot"></div><div style="flex:1;font-weight:700;color:var(--accent)">${n.text}</div><div class="notif-time">${n.time}</div></div>`).join('');
+}
+renderNotifs();
+
+// ---------- Add group popup ----------
+const btnAddGroup = document.getElementById('btnAddGroup');
+const popupGroup = document.getElementById('popupGroup');
+const closeGroupPopup = document.getElementById('closeGroupPopup');
+const cancelGroupBtn = document.getElementById('cancelGroupBtn');
+const groupForm = document.getElementById('groupForm');
+
+btnAddGroup.onclick = ()=>{ popupGroup.classList.add('active'); document.getElementById('groupName').value=''; }
+closeGroupPopup.onclick = ()=>popupGroup.classList.remove('active');
+cancelGroupBtn.onclick = ()=>popupGroup.classList.remove('active');
+popupGroup.addEventListener('mousedown', e=>{ if(e.target===popupGroup) popupGroup.classList.remove('active'); });
+groupForm.addEventListener('submit',e=>{
+  e.preventDefault();
+  const name = document.getElementById('groupName').value.trim();
+  if(!name) return;
+  groups.push({name, leader:"Bạn"});
+  renderGroups();
+  popupGroup.classList.remove('active');
+});
+
+// ---------- Chat send ----------
+const sendBtn = document.getElementById('sendBtn');
+const chatInput = document.getElementById('chatInput');
+const chatMessages = document.getElementById('chatMessages');
+
+function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+sendBtn.addEventListener('click', ()=> {
+  const txt = chatInput.value.trim();
+  if(!txt) return;
+  const div = document.createElement('div');
+  div.className = 'message';
+  div.innerHTML = `<div class="avatar">T</div><div class="text"><strong>Bạn:</strong> ${escapeHtml(txt)}</div>`;
+  chatMessages.appendChild(div);
+  chatInput.value = '';
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+
+// ---------- File upload (attach card) ----------
+const fileInput = document.getElementById('fileInput');
+fileInput.addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const div = document.createElement('div');
+  div.className = 'message';
+  const safeName = escapeHtml(f.name);
+  div.innerHTML = `<div class="avatar">T</div><div class="text"><div class="attached-file">📎<div class="name">${safeName}</div></div></div>`;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  fileInput.value = '';
+});
+
+// ---------- Theme toggle ----------
+const THEME_KEY = 'workhub-theme-v3';
+const themeBtn = document.getElementById('btnTheme');
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.textContent = t==='dark' ? '☀️' : '🌙';
+}
+(function initTheme(){
+  const saved = localStorage.getItem(THEME_KEY) || 'light';
+  applyTheme(saved);
+})();
+themeBtn.onclick = ()=>{
+  const cur = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+};
+
+// ---------- Panels: calendar & notif (stacked behavior) ----------
+const calendarPanel = document.getElementById('calendarPanel');
+const notifPanel = document.getElementById('notifPanel');
+const btnCalendar = document.getElementById('btnCalendar');
+const btnNotif = document.getElementById('btnNotif');
+const closeNotifPanel = document.getElementById('closeNotifPanel');
+
+let panelOrder = [];
+function showPanel(panel){
+  if(panelOrder.includes(panel)){ closePanel(panel); return; }
+  panelOrder = [panel, ...panelOrder].slice(0,2);
+  updatePanels();
+}
+function closePanel(panel){
+  panelOrder = panelOrder.filter(p=>p!==panel);
+  updatePanels();
+}
+function updatePanels(){
+  calendarPanel.classList.remove('show');
+  notifPanel.classList.remove('show');
+  if(panelOrder[0]==='calendar') calendarPanel.classList.add('show');
+  if(panelOrder[0]==='notif') notifPanel.classList.add('show');
+  if(panelOrder[1]==='calendar') calendarPanel.classList.add('show');
+  if(panelOrder[1]==='notif') notifPanel.classList.add('show');
+}
+btnCalendar.onclick = ()=> showPanel('calendar');
+btnNotif.onclick = ()=> showPanel('notif');
+closeNotifPanel.onclick = ()=> closePanel('notif');
+document.addEventListener('mousedown', (e)=>{
+  if(notifPanel.classList.contains('show') && !notifPanel.contains(e.target) && !btnNotif.contains(e.target)) closePanel('notif');
+  if(calendarPanel.classList.contains('show') && !calendarPanel.contains(e.target) && !btnCalendar.contains(e.target)) closePanel('calendar');
+});
+
+// ---------- Calendar logic (from template) ----------
+function initCalendar(){
+  const calGrid = document.getElementById('calGrid');
+  const titleDay = document.getElementById('titleDay');
+  const subMonth = document.getElementById('subMonth');
+  const prevMth = document.getElementById('prevMth');
+  const nextMth = document.getElementById('nextMth');
+  let view = new Date();
+  function headText(d){
+    const w = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+    const m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()];
+    return `${w}, ${m} ${String(d.getDate()).padStart(2,"0")}`;
+  }
+  function buildCalendar(date){
+    const y = date.getFullYear(), m = date.getMonth();
+    titleDay.textContent = headText(new Date());
+    subMonth.textContent = new Intl.DateTimeFormat("en-US",{month:"long",year:"numeric"}).format(new Date(y,m,1)).toUpperCase();
+    const first = new Date(y,m,1);
+    const start = (first.getDay() + 6) % 7; // Monday first
+    const days = new Date(y,m+1,0).getDate();
+    const prevDays = new Date(y,m,0).getDate();
+    const parts = [];
+    ["M","T","W","T","F","S","S"].forEach(d=>parts.push(`<div class="dow">${d}</div>`));
+    for(let i=0;i<42;i++){
+      let label, cls="cell";
+      if(i < start){ label = prevDays - start + i + 1; cls += " faded"; }
+      else if(i < start + days){ label = i - start + 1; }
+      else { label = i - (start + days) + 1; cls += " faded"; }
+      const today = new Date();
+      if(y===today.getFullYear() && m===today.getMonth() && label===today.getDate() && !cls.includes("faded")) cls += " today";
+      parts.push(`<div class="${cls}">${label}</div>`);
+    }
+    calGrid.innerHTML = parts.join('');
+  }
+  prevMth.onclick = ()=>{ view.setMonth(view.getMonth()-1); buildCalendar(view); };
+  nextMth.onclick = ()=>{ view.setMonth(view.getMonth()+1); buildCalendar(view); };
+  buildCalendar(view);
+}
+setTimeout(initCalendar, 0);
+
+// ---------- User menu & profile popup ----------
+const openProfile = document.getElementById('openProfile');
+const userMenu = document.getElementById('userMenu');
+openProfile.addEventListener('click', e=>{ e.stopPropagation(); userMenu.style.display = userMenu.style.display==='block' ? 'none' : 'block'; });
+document.addEventListener('mousedown', e=>{ if(!openProfile.contains(e.target)) userMenu.style.display='none'; });
+document.getElementById('menuProfile').onclick = ()=>{ document.getElementById('popupProfile').classList.add('active'); userMenu.style.display='none'; }
+document.getElementById('closeProfileBtn').onclick = ()=> document.getElementById('popupProfile').classList.remove('active');
+document.getElementById('menuChange').onclick = ()=> { alert('Đổi mật khẩu'); userMenu.style.display='none'; }
+document.getElementById('menuLogout').onclick = ()=> { alert('Đăng xuất'); userMenu.style.display='none'; }
+
+// ---------- Add member (quick add like group) ----------
+const btnAddMember = document.getElementById('btnAddMember');
+btnAddMember.onclick = ()=>{
+  const id = users.length + 1;
+  users.push({name:`Người dùng ${id}`, handle:`@u${id}`});
+  renderUsers();
+  // flash animation
+  btnAddMember.classList.add('active-style');
+  setTimeout(()=>btnAddMember.classList.remove('active-style'), 700);
+};
+
+// ---------- Notifications initial ----------
+function addNotif(text, time){
+  notifs.unshift({text,time});
+  renderNotifs();
+}
+</script>
+</body>
+</html>

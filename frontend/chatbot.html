@@ -1,0 +1,215 @@
+<!-- 💬 CHATBOT WIDGET -->
+<style>
+  #chatbot-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    font-size: 28px;
+    cursor: pointer;
+    z-index: 9999;
+  }
+
+  #chatbot-box {
+    position: fixed;
+    bottom: 90px;
+    right: 25px;
+    width: 340px;
+    height: 440px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 9998;
+  }
+
+  #chatbot-header {
+    background: #2563eb;
+    color: #fff;
+    padding: 12px;
+    text-align: center;
+    font-weight: 600;
+    position: relative;
+  }
+
+  #chatbot-header button {
+    position: absolute;
+    right: 12px;
+    top: 8px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  #chatbot-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .msg {
+    margin: 6px 0;
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 80%;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+
+  .msg-user {
+    background: #2563eb;
+    color: #fff;
+    align-self: flex-end;
+    margin-left: auto;
+  }
+
+  .msg-bot {
+    background: #f1f5f9;
+    color: #333;
+    align-self: flex-start;
+  }
+
+  #chatbot-input-area {
+    display: flex;
+    border-top: 1px solid #eee;
+    padding: 8px;
+    gap: 5px;
+  }
+
+  #chatbot-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  #chatbot-send, #chatbot-file {
+    border: none;
+    background: #2563eb;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  #chatbot-file {
+    background: #6b7280;
+  }
+
+  .chatbot-faq {
+    padding: 6px 10px;
+    border-top: 1px solid #eee;
+    background: #f9fafb;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chatbot-faq button {
+    font-size: 12px;
+    padding: 6px 10px;
+    background: #e5e7eb;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .chatbot-faq button:hover {
+    background: #d1d5db;
+  }
+</style>
+
+<!-- Widget -->
+<button id="chatbot-toggle">💬</button>
+
+<div id="chatbot-box">
+  <div id="chatbot-header">
+    Trợ lý WorkHub
+    <button id="chatbot-close">&times;</button>
+  </div>
+
+  <div id="chatbot-messages">
+    <div class="msg msg-bot">Xin chào 👋 Mình là trợ lý WorkHub! Bạn cần hỗ trợ gì?</div>
+  </div>
+
+  <div class="chatbot-faq">
+    <button class="faq-btn">Công việc chưa hoàn thành</button>
+    <button class="faq-btn">Thống kê nhóm</button>
+    <button class="faq-btn">Hướng dẫn tạo nhóm</button>
+    <button class="faq-btn">Gợi ý ưu tiên công việc</button>
+  </div>
+
+  <div id="chatbot-input-area">
+    <input id="chatbot-input" type="text" placeholder="Nhập tin nhắn..." />
+    <button id="chatbot-file">📎</button>
+    <button id="chatbot-send">Gửi</button>
+  </div>
+</div>
+
+<script>
+  const toggle = document.getElementById("chatbot-toggle");
+  const box = document.getElementById("chatbot-box");
+  const closeBtn = document.getElementById("chatbot-close");
+  const sendBtn = document.getElementById("chatbot-send");
+  const input = document.getElementById("chatbot-input");
+  const messages = document.getElementById("chatbot-messages");
+  const faqButtons = document.querySelectorAll(".faq-btn");
+
+  toggle.onclick = () => box.style.display = "flex";
+  closeBtn.onclick = () => box.style.display = "none";
+
+  function addMessage(text, isUser = false) {
+    const div = document.createElement("div");
+    div.classList.add("msg", isUser ? "msg-user" : "msg-bot");
+    div.textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  async function sendMessage(text) {
+    addMessage(text, true);
+    input.value = "";
+
+    try {
+      // ⚠️ SỬA: Gửi đến đúng endpoint backend
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await res.json();
+      addMessage(data.reply || "Xin lỗi, mình chưa hiểu ý bạn 😅");
+    } catch (err) {
+      addMessage("Lỗi kết nối chatbot 😢");
+      console.error(err);
+    }
+  }
+
+  sendBtn.onclick = () => {
+    const msg = input.value.trim();
+    if (msg) sendMessage(msg);
+  };
+
+  input.addEventListener("keypress", e => {
+    if (e.key === "Enter") sendBtn.click();
+  });
+
+  faqButtons.forEach(btn => {
+    btn.onclick = () => sendMessage(btn.textContent);
+  });
+</script>

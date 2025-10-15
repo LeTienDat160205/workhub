@@ -17,6 +17,7 @@
   "author": "Tên Nhóm",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cjs": "^0.0.11",
@@ -31,6 +32,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "mysql2": "^3.15.1",
+    "path": "^0.12.7",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

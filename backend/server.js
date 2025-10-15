@@ -12,6 +12,7 @@ import { fileURLToPath } from "url";
 // Import các files
 import authRoutes from "./routes/auth.js";
 import infoRoutes from "./routes/info.js";
+import chatbotRoutes from "./routes/chatbot.js";
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use(
 // Sử dụng routes
 app.use("/auth", authRoutes);
 app.use("/info", infoRoutes);
+app.use("/api", chatbotRoutes);
 
 // Trang mặc định: nếu chưa login thì hiện form đăng nhập
 app.get('/', (req, res) => {

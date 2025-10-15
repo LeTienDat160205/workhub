@@ -658,14 +658,31 @@
     cancelGroupBtn.onclick  = () => popupGroup.classList.remove('active');
     popupGroup.onclick = (e) => { if(e.target === popupGroup) popupGroup.classList.remove('active'); };
 
-    // Submit tạo nhóm
-    groupForm.onsubmit = function(e){
+    // Submit tạo nhóm -> gửi tới backend /groups
+    groupForm.onsubmit = async function(e){
       e.preventDefault();
       const name = groupForm.groupName.value.trim();
       if(!name){ groupForm.groupName.focus(); return; }
-      groups.push({ name, leader: "Bạn" });
-      renderGroups();
-      popupGroup.classList.remove('active');
+      try{
+        const res = await fetch('/groups', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ groupName: name })
+        });
+        if(!res.ok) throw new Error('Tạo nhóm thất bại');
+        const data = await res.json();
+        // thêm nhóm vào UI
+        groups.push({ name: data.groupName || name, leader: "Bạn" });
+        renderGroups();
+        popupGroup.classList.remove('active');
+      }catch(err){
+        console.error('Create group error', err);
+        // fallback: still add locally so dev can see it
+        groups.push({ name, leader: "Bạn" });
+        renderGroups();
+        popupGroup.classList.remove('active');
+        alert('Không thể tạo nhóm trên server. Đã thêm tạm vào UI.');
+      }
     };
 
     // Theme

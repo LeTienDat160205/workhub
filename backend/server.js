@@ -3,7 +3,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
 import session from "express-session";
-import db from "./db.js";
+import db from "./config/db.js";
 import { v7 as uuidv7 } from "uuid";
 
 import path from "path";
@@ -12,7 +12,7 @@ import { fileURLToPath } from "url";
 // Import các files
 import authRoutes from "./routes/auth.js";
 import infoRoutes from "./routes/info.js";
-import chatbotRoutes from "./routes/chatbot.js";
+import groupRoutes from "./routes/group.js";
 
 const app = express();
 
@@ -41,14 +41,20 @@ app.use(
 // Sử dụng routes
 app.use("/auth", authRoutes);
 app.use("/info", infoRoutes);
-app.use("/api", chatbotRoutes);
+app.use("/groups", groupRoutes);
 
 // Trang mặc định: nếu chưa login thì hiện form đăng nhập
 app.get('/', (req, res) => {
-    if (!req.session.user) {
-    return res.redirect("/auth/login");
+  if (!req.session.user) {
+      return res.redirect("/auth/login");
   }
-  res.render("info", { user: req.session.user, error: null, success: null }); 
+  res.render("home", { 
+    user: req.session.user, 
+    error: null, 
+    success: null, 
+    keepProfileOpen: false 
+  });
+  // res.render("home", { user: req.session.user, error: null, success: null }); 
 });
 
 app.listen(3000, () => console.log('Server running at http://localhost:3000'));

@@ -3,7 +3,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
 import session from "express-session";
-import db from "../db.js";
+import db from "../config/db.js";
 import { v7 as uuidv7 } from "uuid";
 import { body, validationResult } from "express-validator";
 import upload from "../middlewares/upload.js";
@@ -40,7 +40,7 @@ router.get("/info", ensureAuth, async (req, res) => {
 
     const user = rows[0];
 
-    res.render("info", { user, error: null, success: null });
+    res.render("home", { user, error: null, success: null });
   } catch (err) {
     console.error("GET /info error:", err);
     res.status(500).send("Lỗi server");
@@ -48,7 +48,7 @@ router.get("/info", ensureAuth, async (req, res) => {
 });
 
 //  ============================== Cập nhật thông tin ==============================
-router.post("/info",
+router.post("/",
   ensureAuth,
   // validation middleware (express-validator)
   upload.fields([
@@ -71,10 +71,28 @@ router.post("/info",
       address: req.body.address || null
     };
 
-    if (!errors.isEmpty()) {
-      // nếu validation fail -> render lại với lỗi
-      return res.render("info", { user: { ...req.session.user, ...formData, dobString: formData.dob ? new Date(formData.dob).toISOString().slice(0,10) : "" }, error: errors.array()[0].msg, success: null });
-    }
+    const userId = req.session.user.id;
+
+    try {
+    // if (!errors.isEmpty()) {
+    //   // nếu validation fail -> render lại với lỗi
+    //   // return res.render("home", { user: { ...req.session.user, ...formData, dobString: formData.dob ? new Date(formData.dob).toISOString().slice(0,10) : "" }, error: errors.array()[0].msg, success: null });
+    //   //req.session.alert = { type: "error", message: errors.array()[0].msg };
+    //   return res.redirect("/", { user: { ...req.session.user, ...formData, dobString: formData.dob ? new Date(formData.dob).toISOString().slice(0,10) : "" }, error: errors.array()[0].msg, success: null });
+    // }
+      if (!errors.isEmpty()) {
+        const [rows] = await db.promise().query(
+          "SELECT BIN_TO_UUID(id) AS id, username, email, name, dob, gender, phoneNumber, address, avatarPath, backgroundPath FROM user WHERE id = UUID_TO_BIN(?)",
+          [userId]
+        );
+        const user = rows[0];
+        return res.render("home", { 
+          user, 
+          error: errors.array()[0].msg, 
+          success: null, 
+          keepProfileOpen: true 
+        });
+      }
 
     // Lấy file upload từ Cloudinary
       const avatarUrl = req.files?.avatar
@@ -85,20 +103,23 @@ router.post("/info",
       ? req.files.background[0].path || req.files.background[0].url
       : req.session.user.backgroundPath;
 
-
-    try {
-      const userId = req.session.user.id;
       const sql = `UPDATE user SET name = ?, dob = ?, gender = ?, phoneNumber = ?, address = ?, avatarPath=?, backgroundPath=? WHERE id = UUID_TO_BIN(?)`;
       await db.promise().query(sql, [formData.name, formData.dob || null, formData.gender, formData.phoneNumber, formData.address, avatarUrl, backgroundUrl, userId]);
 
       // cập nhật session 
-      req.session.user = {
+      // req.session.user = {
+      //   ...req.session.user,
+      //   name: formData.name,
+      //   dob: formData.dob ,
+      //   gender: formData.gender,
+      //   phoneNumber: formData.phoneNumber,
+      //   address: formData.address,
+      //   avatarPath: avatarUrl,
+      //   backgroundPath: backgroundUrl,
+      // };
+       req.session.user = {
         ...req.session.user,
-        name: formData.name,
-        dob: formData.dob ,
-        gender: formData.gender,
-        phoneNumber: formData.phoneNumber,
-        address: formData.address,
+        ...formData,
         avatarPath: avatarUrl,
         backgroundPath: backgroundUrl,
       };
@@ -109,10 +130,24 @@ router.post("/info",
       if (user && user.dob && user.dob instanceof Date) user.dobString = user.dob.toISOString().slice(0,10);
       else user.dobString = user.dob || "";
 
-      res.render("info", { user, error: null, success: "Cập nhật thông tin thành công" });
+      // res.render("home", { user, error: null, success: "Cập nhật thông tin thành công" });
+      //req.session.alert = { type: "success", message: "Cập nhật thông tin thành công!" };
+      res.render("home", { 
+        user: req.session.user, 
+        success: "Cập nhật thông tin thành công!", 
+        error: null, 
+        keepProfileOpen: true 
+      });
     } catch (err) {
       console.error("POST /info error:", err);
-      res.status(500).render("info", { user: { ...req.session.user, ...formData }, error: "Lỗi khi cập nhật", success: null });
+      // res.status(500).render("home", { user: { ...req.session.user, ...formData }, error: "Lỗi khi cập nhật", success: null });
+      //req.session.alert = { type: "error", message: "Lỗi khi cập nhật thông tin." };
+      res.render("home", { 
+        user: req.session.user, 
+        error: "Đã xảy ra lỗi khi cập nhật thông tin!", 
+        success: null, 
+        keepProfileOpen: true 
+      });
     }
   }
 );

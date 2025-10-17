@@ -3,7 +3,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt";
 import session from "express-session";
-import db from "../db.js";
+import db from "../config/db.js";
 import { v7 as uuidv7 } from "uuid";
 import upload from "../middlewares/upload.js";
 import cloudinary from "../config/cloudinary.js";
@@ -150,9 +150,64 @@ router.post('/login', (req, res) => {
 });
 
 // Xử lý quên mật khẩu
-router.post('/forgot', (req, res) => {
-    // ...xử lý gửi mail...
-    res.redirect('/auth/login');
+router.post("/forgot", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.render("forgot", { error: "Vui lòng nhập email!", success: null });
+  }
+
+  try {
+    db.query("SELECT * FROM user WHERE email = ?", [email], async (err, results) => {
+      if (err) {
+        console.error(err);
+        return res.render("forgot", { error: "Lỗi hệ thống!", success: null });
+      }
+
+      if (results.length === 0) {
+        return res.render("forgot", { error: "Email không tồn tại!", success: null });
+      }
+
+      const newPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      db.query("UPDATE user SET password = ? WHERE email = ?", [hashedPassword, email], async (updateErr) => {
+        if (updateErr) {
+          console.error(updateErr);
+          return res.render("forgot", { error: "Không thể cập nhật mật khẩu!", success: null });
+        }
+
+        const transporter = nodemailer.createTransport({
+          host: "smtp.gmail.com",
+          port: 465,          // SMTP SSL port của Gmail
+          secure: true,       // true vì port 465 dùng SSL
+          auth: {
+            user: "doanhongduongcbb@gmail.com", // Doi sang email chong cua nhom mik
+            pass: "btjnzykhvfzvtzyu",      
+          },
+        });
+
+
+        const mailOptions = {
+          from: "youremail@gmail.com",
+          to: email,
+          subject: "Mật khẩu mới của bạn - WorkHub",
+          text: `Xin chào,\n\nMật khẩu mới của bạn là: ${newPassword}\nVui lòng đăng nhập và đổi lại mật khẩu sau.\n\nTrân trọng,\nĐội ngũ WorkHub.`,
+        };
+
+        try {
+          await transporter.sendMail(mailOptions);
+          return res.render("forgot", { error: null, success: "Mật khẩu mới đã được gửi tới email của bạn!" });
+        } catch (mailErr) {
+          console.error("❌ LỖI GỬI MAIL CHI TIẾT:", mailErr);
+          return res.render("forgot", { error: "Không thể gửi email, vui lòng thử lại!", success: null });
+        }
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    res.render("forgot", { error: "Đã xảy ra lỗi không xác định!", success: null });
+  }
 });
 
 export default router;

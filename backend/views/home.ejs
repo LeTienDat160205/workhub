@@ -1389,8 +1389,8 @@
             <span style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;"></span>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-start;">
-            <span style="font-weight: 700; font-size: 1.08rem; line-height: 1.1; color: var(--text);">Tên người dùng</span>
-            <span style="font-size: 0.97rem; color: var(--text-muted); line-height: 1.1;">@example.com</span>
+            <span style="font-weight: 700; font-size: 1.08rem; line-height: 1.1; color: var(--text);"><%= user.name || 'Tên người dùng' %></span>
+            <span style="font-size: 0.97rem; color: var(--text-muted); line-height: 1.1;"><%= user.email || 'example.com' %></span>
           </div>
           <svg style="margin-left: 8px" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M6 9l6 6 6-6" />
@@ -2216,13 +2216,7 @@
           .getElementById("popupProfile")
           .setAttribute("aria-hidden", "false");
         userMenu.style.display = "none";
-      };
-      document.getElementById("Logout").onclick = function () {
-        alert("Đăng xuất");
-        userMenu.style.display = "none";
-      };
-
-      
+      };   
 
       // ===== WORKHUB SETTINGS (mở/đóng) =====
       const whOverlay = document.getElementById("whSettings");
@@ -2270,6 +2264,11 @@
             .forEach((b) => b.classList.remove("wh-active"));
           btn.classList.add("wh-active");
         });
+      });
+
+      //logout 
+      document.getElementById("Logout").addEventListener("click", () => {
+        window.location.href = "/auth/logout";
       });
     </script>
   </div>

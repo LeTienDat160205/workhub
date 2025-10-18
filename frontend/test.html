@@ -1,1302 +1,1402 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <title>WorkHub Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      /* ================================================================
+
+<head>
+  <meta charset="UTF-8" />
+  <title>WorkHub Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* ================================================================
          WORKHUB THEME — LIGHT / DARK (áp theo guideline + góp ý)
       ================================================================== */
 
-      /* ========= THEME TOKENS (Light) ========= */
-      :root {
-        /* Palette (Light) */
-        --primary: #4caf50; /* logo green (Primary Color) */
-        --primary-hover: #43a047;
-        --secondary: #2e7d32; /* Secondary Color (emphasis) */
+    /* ========= THEME TOKENS (Light) ========= */
+    :root {
+      /* Palette (Light) */
+      --primary: #4caf50;
+      /* logo green (Primary Color) */
+      --primary-hover: #43a047;
+      --secondary: #2e7d32;
+      /* Secondary Color (emphasis) */
 
-        --bg: #f5f5f5; /* App background */
-        --surface: #ffffff; /* Surfaces: header, sidebar, cards */
-        --text: #212121; /* Main text */
-        --text-muted: #9e9e9e; /* Secondary text */
-        --text-subtle: #6b6b6b; /* Long paragraphs, soft */
-        --border: #e0e0e0; /* Subtle borders */
+      --bg: #f5f5f5;
+      /* App background */
+      --surface: #ffffff;
+      /* Surfaces: header, sidebar, cards */
+      --text: #212121;
+      /* Main text */
+      --text-muted: #9e9e9e;
+      /* Secondary text */
+      --text-subtle: #6b6b6b;
+      /* Long paragraphs, soft */
+      --border: #e0e0e0;
+      /* Subtle borders */
 
-        /* Logo */
-        --logo-color: #4caf50;
+      /* Logo */
+      --logo-color: #4caf50;
 
-        /* Tabs (idle state) */
-        --tab-idle-bg: #f1f1f1;
-        --tab-idle-text: #424242;
+      /* Tabs (idle state) */
+      --tab-idle-bg: #f1f1f1;
+      --tab-idle-text: #424242;
 
-        /* Mappings để tương thích với code cũ */
-        --primary-bg: var(--bg);
-        --card-bg: var(--surface);
-        --input-bg: var(--surface);
-        --primary-text: var(--text);
-        --border-color: var(--border);
-        --accent: var(--primary);
-        --accent-hover: var(--primary-hover);
+      /* Mappings để tương thích với code cũ */
+      --primary-bg: var(--bg);
+      --card-bg: var(--surface);
+      --input-bg: var(--surface);
+      --primary-text: var(--text);
+      --border-color: var(--border);
+      --accent: var(--primary);
+      --accent-hover: var(--primary-hover);
 
-        /* Extras */
-        --on-primary: #ffffff;
-        --shadow-soft: 0 2px 16px rgba(0, 0, 0, 0.06);
-        --radius: 8px;
-      }
+      /* Extras */
+      --on-primary: #ffffff;
+      --shadow-soft: 0 2px 16px rgba(0, 0, 0, 0.06);
+      --radius: 8px;
+    }
 
-      /* ========= THEME TOKENS (Dark) ========= */
-      [data-theme="dark"] {
-        --primary: #66bb6a; /* bright accent on dark */
-        --primary-hover: #81c784;
-        --secondary: #37474f; /* navy/charcoal for side elements */
+    /* ========= THEME TOKENS (Dark) ========= */
+    [data-theme="dark"] {
+      --primary: #66bb6a;
+      /* bright accent on dark */
+      --primary-hover: #81c784;
+      --secondary: #37474f;
+      /* navy/charcoal for side elements */
 
-        --bg: #121212; /* Background */
-        --surface: #1a1a1a; /* Surfaces */
-        --text: #e0e0e0; /* Soft white (less glare) */
-        --text-muted: #bdbdbd;
-        --text-subtle: #9aa0a6; /* Long paragraphs */
-        --border: #424242;
+      --bg: #121212;
+      /* Background */
+      --surface: #1a1a1a;
+      /* Surfaces */
+      --text: #e0e0e0;
+      /* Soft white (less glare) */
+      --text-muted: #bdbdbd;
+      --text-subtle: #9aa0a6;
+      /* Long paragraphs */
+      --border: #424242;
 
-        /* Logo sáng/đồng bộ */
-        --logo-color: #81c784;
+      /* Logo sáng/đồng bộ */
+      --logo-color: #81c784;
 
-        /* Tabs (idle) */
-        --tab-idle-bg: #263238;
-        --tab-idle-text: #d6d6d6;
+      /* Tabs (idle) */
+      --tab-idle-bg: #263238;
+      --tab-idle-text: #d6d6d6;
 
-        --primary-bg: var(--bg);
-        --card-bg: var(--surface);
-        --input-bg: var(--surface);
-        --primary-text: var(--text);
-        --border-color: var(--border);
-        --accent: var(--primary);
-        --accent-hover: var(--primary-hover);
+      --primary-bg: var(--bg);
+      --card-bg: var(--surface);
+      --input-bg: var(--surface);
+      --primary-text: var(--text);
+      --border-color: var(--border);
+      --accent: var(--primary);
+      --accent-hover: var(--primary-hover);
 
-        --on-primary: #0b0b0b;
-        --shadow-soft: 0 2px 16px rgba(0, 0, 0, 0.35);
-      }
+      --on-primary: #0b0b0b;
+      --shadow-soft: 0 2px 16px rgba(0, 0, 0, 0.35);
+    }
 
-      /* ========= Base ========= */
-      * {
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        min-height: 100vh;
-        height: 100vh;
-        width: 100vw;
-        font-family: "Segoe UI", Arial, sans-serif;
-        background: var(--primary-bg);
-        color: var(--primary-text);
-        overflow: hidden;
-        position: relative;
-        transition: background 0.3s, color 0.3s;
-      }
+    /* ========= Base ========= */
+    * {
+      box-sizing: border-box;
+    }
 
-      .dashboard-frame {
-        position: absolute;
-        inset: 0;
-        width: 100vw;
-        height: 100vh;
-        margin: 0;
-        margin-top: 5px;
-        border-radius: 5px;
-        border: none;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        z-index: 1;
-        animation: fadeInDash 0.7s;
-      }
-      @keyframes fadeInDash {
-        from {
-          opacity: 0;
-          transform: scale(1.03);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
 
-      /* HEADER */
-      .dashboard-header {
-        display: grid;
-        grid-template-columns: 180px auto;
-        gap: 12px;
-        align-items: center;
-        padding: 16px 32px 12px 32px;
-        border-bottom: 1px solid var(--border-color);
-        background: var(--surface);
-        box-shadow: var(--shadow-soft);
-        position: relative;
-        z-index: 10;
-        border-radius: 5px;
-        margin: 10px;
-        transition: background 0.3s, color 0.3s, border-color 0.3s;
-      }
-      .logo-bar {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        min-width: 140px;
-      }
-      .site-name {
-        font-size: 1.45rem;
-        font-weight: 900;
-        color: var(--logo-color);
-        letter-spacing: 1.5px;
-        text-shadow: none;
-        transition: color 0.3s;
-      }
-      .header-actions {
-        justify-self: end;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
-      .icon-btn {
-        background: var(--primary);
-        color: var(--on-primary);
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        padding: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        line-height: 0;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-        transition: background 0.2s, color 0.2s, transform 0.05s;
-      }
-      .icon-btn:hover {
-        background: var(--primary-hover);
-      }
-      .icon-btn:active {
-        transform: translateY(1px);
-      }
-      .icon-btn svg {
-        width: 20px;
-        height: 20px;
-      }
-      .user-account {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
-        font-weight: 700;
-        margin-left: 10px;
-        margin-right: -15px;
-        font-size: 1.05rem;
-        color: var(--text);
-        padding: 4px 18px 4px 8px;
-        border-radius: 16px;
-        background: var(--surface);
-        border: 1px solid var(--border-color);
-      }
-      .user-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: #c7d2fe;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-        color: #2563eb;
-        font-weight: 700;
-        border: 2px solid #2563eb33;
-        box-shadow: 0 2px 8px #2563eb22;
-      }
+    body {
+      min-height: 100vh;
+      height: 100vh;
+      width: 100vw;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--primary-bg);
+      color: var(--primary-text);
+      overflow: hidden;
+      position: relative;
+      transition: background 0.3s, color 0.3s;
+    }
 
-      /* BODY */
-      .dashboard-body {
-        flex: 1;
-        display: flex;
-        min-height: 0;
-        height: 0;
-        background: transparent;
-      }
+    .dashboard-frame {
+      position: absolute;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1;
+      animation: fadeInDash 0.7s;
+    }
 
-      /* SIDEBAR */
-      .sidebar {
-        width: 240px;
-        border-right: 1px solid var(--border-color);
-        border-radius: 5px;
-        background: var(--surface);
-        display: flex;
-        flex-direction: column;
-        padding: 24px 0 56px;
-        position: relative;
-        box-shadow: var(--shadow-soft);
-        z-index: 1;
-        margin: 5px 0 10px 10px;
-        height: 97%;
-        min-height: 0;
-        transition: background 0.3s;
-      }
-      .sidebar-section {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-      }
-      .sidebar-section label {
-        display: none;
-      }
-      .sidebar-search {
-        margin: -15px 16px 14px 24px;
-        border-radius: var(--radius);
-        overflow: hidden;
-        background: var(--surface);
-        border: 1px solid var(--border-color);
-      }
-      .mini-pill {
-        height: 36px;
-        border-radius: var(--radius);
-        display: flex;
-        align-items: center;
-        padding: 0 14px;
-        gap: 8px;
-      }
-      .mini-pill svg {
-        width: 18px;
-        height: 18px;
-        opacity: 0.7;
-        stroke: var(--text-muted);
-      }
-      .mini-pill input {
-        border: 0;
-        outline: 0;
-        background: transparent;
-        width: 100%;
-        color: inherit;
-        font-size: 1rem;
-      }
-      .sidebar-list {
-        flex: 1;
-        min-height: 0;
-        margin: 0 16px 0 20px;
-        max-height: 450px;
-        overflow-y: auto;
-        background: var(--surface);
-        border-radius: var(--radius);
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-soft);
-        padding: 0;
-      }
-      .sidebar-list::-webkit-scrollbar {
-        width: 8px;
-        background: transparent;
-        border-radius: 5px;
-      }
-      .sidebar-list::-webkit-scrollbar-thumb {
-        background: #cfd8dc;
-        border-radius: 5px;
-      }
-      [data-theme="dark"] .sidebar-list::-webkit-scrollbar-thumb {
-        background: #455a64;
-      }
-
-      /* MAIN */
-      .main-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-        background: transparent;
-      }
-      .main-toolbar {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 5px 10px 0 10px;
-        padding: 16px 18px;
-        border: 1px solid var(--border-color);
-        background: var(--surface);
-        color: var(--text);
-        border-radius: 12px;
-        box-shadow: var(--shadow-soft);
-        margin-bottom: 18px;
-        transition: background 0.3s, color 0.3s;
-      }
-      .task-tabs {
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        display: flex;
-        gap: 6px;
-        padding: 2px;
-        background: transparent;
-      }
-      .tab-btn {
-        padding: 8px 22px;
-        border: none;
-        background: var(--tab-idle-bg);
-        font-weight: 700;
-        cursor: pointer;
-        font-size: 1rem;
-        color: var(--tab-idle-text);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        border-radius: 6px;
-        min-width: 90px;
-        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-      }
-      .tab-btn.active {
-        background: var(--primary);
-        color: var(--on-primary);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      }
-      .tab-btn:not(.active):hover {
-        background: rgba(76, 175, 80, 0.12);
-        color: var(--text);
-      }
-      .tab-btn svg {
-        width: 18px;
-        height: 18px;
-        stroke: currentColor;
-        stroke-width: 2;
-        fill: none;
-      }
-      .search-pill {
-        flex: 1;
-        height: 44px;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        background: var(--surface);
-        display: flex;
-        align-items: center;
-        padding: 0 18px;
-        gap: 12px;
-        margin-left: 18px;
-      }
-      .search-pill svg {
-        width: 20px;
-        height: 20px;
-        opacity: 0.9;
-        stroke: var(--text-muted);
-      }
-      .search-pill input {
-        width: 100%;
-        border: 0;
-        outline: 0;
-        background: transparent;
-        font-size: 1.05rem;
-        color: inherit;
-      }
-      .task-menu {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        background: var(--surface);
-        border: 1px solid var(--border-color);
-        display: inline-block;
-        border-radius: 10px;
-        box-shadow: var(--shadow-soft);
-      }
-      .task-menu > li {
-        position: relative;
-      }
-      .task-menu > li > a {
-        display: block;
-        padding: 12px 18px;
-        color: var(--text);
-        text-decoration: none;
-        font-weight: 600;
-        transition: background 0.3s ease, color 0.3s ease;
-      }
-      .task-menu > li > a::after {
-        content: "▼";
-        font-size: 0.6rem;
-        margin-left: 6px;
-        transition: transform 0.3s;
-      }
-      .task-menu > li:hover > a {
-        background: rgba(76, 175, 80, 0.08);
-      }
-      .task-menu > li:hover > a::after {
-        transform: rotate(180deg);
-      }
-      .task-sub {
-        position: absolute;
-        left: 0;
-        top: 100%;
-        list-style: none;
-        margin: 0;
-        padding: 5px 0;
-        background: var(--surface);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        box-shadow: var(--shadow-soft);
+    @keyframes fadeInDash {
+      from {
         opacity: 0;
-        visibility: hidden;
-        transform: translateY(5px);
-        transition: all 0.25s ease;
-        min-width: 180px;
-        z-index: 10;
+        transform: scale(1.03);
       }
-      .task-menu > li:hover .task-sub {
+
+      to {
         opacity: 1;
-        visibility: visible;
+        transform: scale(1);
+      }
+    }
+
+    /* HEADER */
+    .dashboard-header {
+      display: grid;
+      grid-template-columns: 180px auto;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 32px 12px 32px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      z-index: 10;
+      border-radius: 5px;
+      margin: 10px;
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    .logo-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 140px;
+    }
+
+    .site-name {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--logo-color);
+      letter-spacing: 1.5px;
+      text-shadow: none;
+      transition: color 0.3s;
+    }
+
+    .header-actions {
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .icon-btn {
+      background: var(--primary);
+      color: var(--on-primary);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      transition: background 0.2s, color 0.2s, transform 0.05s;
+    }
+
+    .icon-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .icon-btn:active {
+      transform: translateY(1px);
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .user-account {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      margin-left: 10px;
+      margin-right: -15px;
+      font-size: 1.05rem;
+      color: var(--text);
+      padding: 4px 18px 4px 8px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #c7d2fe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #2563eb;
+      font-weight: 700;
+      border: 2px solid #2563eb33;
+      box-shadow: 0 2px 8px #2563eb22;
+    }
+
+    /* BODY */
+    .dashboard-body {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      height: 0;
+      background: transparent;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px;
+      border-right: 1px solid var(--border-color);
+      border-radius: 5px;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0 56px;
+      position: relative;
+      box-shadow: var(--shadow-soft);
+      z-index: 1;
+      margin: 5px 0 10px 10px;
+      height: 97%;
+      min-height: 0;
+      transition: background 0.3s;
+    }
+
+    .sidebar-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .sidebar-section label {
+      display: none;
+    }
+
+    .sidebar-search {
+      margin: -15px 16px 14px 24px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+    }
+
+    .mini-pill {
+      height: 36px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 8px;
+    }
+
+    .mini-pill svg {
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+      stroke: var(--text-muted);
+    }
+
+    .mini-pill input {
+      border: 0;
+      outline: 0;
+      background: transparent;
+      width: 100%;
+      color: inherit;
+      font-size: 1rem;
+    }
+
+    .sidebar-list {
+      flex: 1;
+      min-height: 0;
+      margin: 0 16px 0 20px;
+      max-height: 450px;
+      overflow-y: auto;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-soft);
+      padding: 0;
+    }
+
+    .sidebar-list::-webkit-scrollbar {
+      width: 8px;
+      background: transparent;
+      border-radius: 5px;
+    }
+
+    .sidebar-list::-webkit-scrollbar-thumb {
+      background: #cfd8dc;
+      border-radius: 5px;
+    }
+
+    [data-theme="dark"] .sidebar-list::-webkit-scrollbar-thumb {
+      background: #455a64;
+    }
+
+    /* MAIN */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: transparent;
+    }
+
+    .main-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 5px 10px 0 10px;
+      padding: 16px 18px;
+      border: 1px solid var(--border-color);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 12px;
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 18px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .task-tabs {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      display: flex;
+      gap: 6px;
+      padding: 2px;
+      background: transparent;
+    }
+
+    .tab-btn {
+      padding: 8px 22px;
+      border: none;
+      background: var(--tab-idle-bg);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--tab-idle-text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 6px;
+      min-width: 90px;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .tab-btn:not(.active):hover {
+      background: rgba(76, 175, 80, 0.12);
+      color: var(--text);
+    }
+
+    .tab-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .search-pill {
+      flex: 1;
+      height: 44px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      gap: 12px;
+      margin-left: 18px;
+    }
+
+    .search-pill svg {
+      width: 20px;
+      height: 20px;
+      opacity: 0.9;
+      stroke: var(--text-muted);
+    }
+
+    .search-pill input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      font-size: 1.05rem;
+      color: inherit;
+    }
+
+    .task-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      display: inline-block;
+      border-radius: 10px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .task-menu>li {
+      position: relative;
+    }
+
+    .task-menu>li>a {
+      display: block;
+      padding: 12px 18px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .task-menu>li>a::after {
+      content: "▼";
+      font-size: 0.6rem;
+      margin-left: 6px;
+      transition: transform 0.3s;
+    }
+
+    .task-menu>li:hover>a {
+      background: rgba(76, 175, 80, 0.08);
+    }
+
+    .task-menu>li:hover>a::after {
+      transform: rotate(180deg);
+    }
+
+    .task-sub {
+      position: absolute;
+      left: 0;
+      top: 100%;
+      list-style: none;
+      margin: 0;
+      padding: 5px 0;
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: var(--shadow-soft);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(5px);
+      transition: all 0.25s ease;
+      min-width: 180px;
+      z-index: 10;
+    }
+
+    .task-menu>li:hover .task-sub {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .task-sub li a {
+      display: block;
+      padding: 10px 16px;
+      color: var(--text);
+      text-decoration: none;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .task-sub li a:hover {
+      background: rgba(76, 175, 80, 0.08);
+    }
+
+    /* CONTENT — giấy kẻ ngang như hình */
+    .content-task {
+      flex: 1;
+      overflow-y: auto;
+      margin: -5px 10px 12px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      min-height: 300px;
+      box-shadow: var(--shadow-soft);
+      color: var(--text);
+      background-color: var(--surface);
+      padding: 16px 20px;
+
+      /* giấy kẻ ngang */
+      background-image: linear-gradient(#ffffff 1.1rem, #e0e0e0 1.2rem);
+      background-size: 100% 1.2rem;
+    }
+
+    [data-theme="dark"] .content-task {
+      background-image: linear-gradient(#1a1a1a 1.1rem, #2a2a2a 1.2rem);
+      background-size: 100% 1.2rem;
+    }
+
+    /* RIGHT PANEL STACK */
+    .right-panel-stack {
+      position: fixed;
+      top: 84px;
+      right: 0;
+      height: calc(100vh - 84px);
+      width: 420px;
+      max-width: 100vw;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      pointer-events: none;
+    }
+
+    .right-panel.half {
+      width: 100%;
+      height: 0;
+      background: var(--surface);
+      border-left: 1px solid var(--border-color);
+      border-radius: 5px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: height 0.4s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.3s,
+        transform 0.45s cubic-bezier(0.7, 0, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transform: translateX(100%);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .right-panel.half.show {
+      height: 50%;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .right-panel.half.top {
+      z-index: 2;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .right-panel.half.bottom {
+      z-index: 1;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 13px 18px 11px 18px;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+      gap: 4px;
+    }
+
+    .panel-title svg {
+      stroke: var(--primary);
+    }
+
+    .close-panel {
+      background: none;
+      border: 1px solid var(--border-color);
+      font-size: 24px;
+      color: var(--text);
+      cursor: pointer;
+      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s, color 0.18s;
+    }
+
+    .close-panel:hover {
+      background: rgba(76, 175, 80, 0.08);
+      color: #ef4444;
+    }
+
+    .right-section {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--surface);
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .notif-list {
+      padding: 12px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .notif-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 18px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      margin: 0 6px;
+      box-shadow: var(--shadow-soft);
+      min-height: 48px;
+      position: relative;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: var(--text);
+      border: 1px solid var(--border-color);
+    }
+
+    .notif-item:hover {
+      background: rgba(76, 175, 80, 0.08);
+    }
+
+    .notif-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 0 2px var(--surface) inset;
+      flex-shrink: 0;
+    }
+
+    /* Calendar mini */
+    .calendar-card {
+      background: var(--surface);
+    }
+
+    .calendar-head {
+      padding: 10px 16px 6px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+    }
+
+    .calendar-title {
+      font-weight: 800;
+      color: var(--primary);
+      font-size: 1.02rem;
+      letter-spacing: 0.5px;
+    }
+
+    .calendar-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .calendar-head .btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      padding: 8px 8px 10px 8px;
+      background: var(--surface);
+    }
+
+    .calendar-grid .dow {
+      height: 22px;
+      border: 0;
+      background: transparent;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.93rem;
+    }
+
+    .calendar-grid .cell {
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-color);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.93rem;
+      font-weight: 500;
+      transition: background 0.18s, color 0.18s;
+      cursor: pointer;
+    }
+
+    .calendar-grid .cell.faded {
+      opacity: 0.45;
+      color: var(--text-muted);
+    }
+
+    .calendar-grid .cell.today {
+      outline: 2px solid var(--primary);
+      outline-offset: -2px;
+      font-weight: 700;
+      background: rgba(76, 175, 80, 0.08);
+      color: var(--text);
+    }
+
+    .calendar-grid .cell:hover:not(.faded) {
+      background: rgba(76, 175, 80, 0.08);
+      color: var(--text);
+    }
+
+    /* POPUP chung */
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+    }
+
+    .popup-overlay.active {
+      display: flex;
+    }
+
+    .popup-content {
+      width: 420px;
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.18);
+      padding: 36px 32px 28px 32px;
+      position: relative;
+      animation: fadeInUp 0.35s;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      color: var(--text);
+    }
+
+    .popup-content::before {
+      content: "";
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 140px;
+      height: 140px;
+      background: radial-gradient(circle,
+          rgba(102, 187, 106, 0.25) 60%,
+          transparent 100%);
+      z-index: 0;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
         transform: translateY(0);
       }
-      .task-sub li a {
-        display: block;
-        padding: 10px 16px;
-        color: var(--text);
-        text-decoration: none;
-        transition: background 0.3s ease, color 0.3s ease;
-      }
-      .task-sub li a:hover {
-        background: rgba(76, 175, 80, 0.08);
-      }
+    }
 
-      /* CONTENT — giấy kẻ ngang như hình */
-      .content-task {
-        flex: 1;
-        overflow-y: auto;
-        margin: -5px 10px 12px 10px;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        min-height: 300px;
-        box-shadow: var(--shadow-soft);
-        color: var(--text);
-        background-color: var(--surface);
-        padding: 16px 20px;
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.2s, transform 0.2s;
+      position: absolute;
+      top: 16px;
+      right: 22px;
+      z-index: 2;
+    }
 
-        /* giấy kẻ ngang */
-        background-image: linear-gradient(#ffffff 1.1rem, #e0e0e0 1.2rem);
-        background-size: 100% 1.2rem;
-      }
-      [data-theme="dark"] .content-task {
-        background-image: linear-gradient(#1a1a1a 1.1rem, #2a2a2a 1.2rem);
-        background-size: 100% 1.2rem;
-      }
+    .close-btn:hover {
+      color: #ef4444;
+      transform: rotate(90deg) scale(1.15);
+    }
 
-      /* RIGHT PANEL STACK */
-      .right-panel-stack {
-        position: fixed;
-        top: 84px;
-        right: 0;
-        height: calc(100vh - 84px);
-        width: 420px;
-        max-width: 100vw;
-        z-index: 20;
-        display: flex;
-        flex-direction: column;
-        pointer-events: none;
-      }
-      .right-panel.half {
-        width: 100%;
-        height: 0;
-        background: var(--surface);
-        border-left: 1px solid var(--border-color);
-        border-radius: 5px;
-        overflow: hidden;
-        opacity: 0;
-        pointer-events: none;
-        transition: height 0.4s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.3s,
-          transform 0.45s cubic-bezier(0.7, 0, 0.3, 1);
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        transform: translateX(100%);
-        box-shadow: var(--shadow-soft);
-      }
-      .right-panel.half.show {
-        height: 50%;
-        opacity: 1;
-        pointer-events: auto;
-        transform: translateX(0);
-      }
-      .right-panel.half.top {
-        z-index: 2;
-        border-bottom: 1px solid var(--border-color);
-      }
-      .right-panel.half.bottom {
-        z-index: 1;
-        border-top: 1px solid var(--border-color);
-      }
-      .panel-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: var(--surface);
-        border-bottom: 1px solid var(--border-color);
-        padding: 13px 18px 11px 18px;
-        font-size: 1.08rem;
-        font-weight: 700;
-        color: var(--primary);
-        letter-spacing: 0.5px;
-        box-shadow: var(--shadow-soft);
-      }
-      .panel-title {
-        display: flex;
-        align-items: center;
-        font-size: 1.08rem;
-        font-weight: 700;
-        color: var(--primary);
-        letter-spacing: 0.5px;
-        gap: 4px;
-      }
-      .panel-title svg {
-        stroke: var(--primary);
-      }
-      .close-panel {
-        background: none;
-        border: 1px solid var(--border-color);
-        font-size: 24px;
-        color: var(--text);
-        cursor: pointer;
-        border-radius: 8px;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.18s, color 0.18s;
-      }
-      .close-panel:hover {
-        background: rgba(76, 175, 80, 0.08);
-        color: #ef4444;
-      }
-      .right-section {
-        flex: 1;
-        overflow-y: auto;
-        background: var(--surface);
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-      }
-      .notif-list {
-        padding: 12px;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      .notif-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 13px 18px;
-        background: var(--surface);
-        border-radius: var(--radius);
-        margin: 0 6px;
-        box-shadow: var(--shadow-soft);
-        min-height: 48px;
-        position: relative;
-        font-size: 1.02rem;
-        font-weight: 600;
-        color: var(--text);
-        border: 1px solid var(--border-color);
-      }
-      .notif-item:hover {
-        background: rgba(76, 175, 80, 0.08);
-      }
-      .notif-dot {
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        background: var(--primary);
-        box-shadow: 0 0 0 2px var(--surface) inset;
-        flex-shrink: 0;
-      }
+    .popup-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+    }
 
-      /* Calendar mini */
-      .calendar-card {
-        background: var(--surface);
-      }
-      .calendar-head {
-        padding: 10px 16px 6px 16px;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: var(--surface);
-      }
-      .calendar-title {
-        font-weight: 800;
-        color: var(--primary);
-        font-size: 1.02rem;
-        letter-spacing: 0.5px;
-      }
-      .calendar-sub {
-        font-size: 12px;
-        color: var(--text-muted);
-        letter-spacing: 1px;
-      }
-      .calendar-head .btn {
-        min-width: 32px;
-        height: 32px;
-        padding: 0;
-        font-size: 1.1rem;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        background: var(--surface);
-        color: var(--text);
-      }
-      .calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 2px;
-        padding: 8px 8px 10px 8px;
-        background: var(--surface);
-      }
-      .calendar-grid .dow {
-        height: 22px;
-        border: 0;
-        background: transparent;
-        font-weight: 700;
-        color: var(--text-muted);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.93rem;
-      }
-      .calendar-grid .cell {
-        height: 28px;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--border-color);
-        background: var(--surface);
-        color: var(--text);
-        font-size: 0.93rem;
-        font-weight: 500;
-        transition: background 0.18s, color 0.18s;
-        cursor: pointer;
-      }
-      .calendar-grid .cell.faded {
-        opacity: 0.45;
-        color: var(--text-muted);
-      }
-      .calendar-grid .cell.today {
-        outline: 2px solid var(--primary);
-        outline-offset: -2px;
-        font-weight: 700;
-        background: rgba(76, 175, 80, 0.08);
-        color: var(--text);
-      }
-      .calendar-grid .cell:hover:not(.faded) {
-        background: rgba(76, 175, 80, 0.08);
-        color: var(--text);
-      }
+    .btn {
+      background: var(--primary);
+      color: var(--on-primary);
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.11);
+      transition: background 0.2s, color 0.2s, transform 0.05s;
+      padding: 8px 12px;
+    }
 
-      /* POPUP chung */
-      .popup-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.15);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(2px);
-      }
-      .popup-overlay.active {
-        display: flex;
-      }
-      .popup-content {
-        width: 420px;
-        background: var(--surface);
-        border-radius: 12px;
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.18);
-        padding: 36px 32px 28px 32px;
-        position: relative;
-        animation: fadeInUp 0.35s;
-        border: 1px solid var(--border-color);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        color: var(--text);
-      }
-      .popup-content::before {
-        content: "";
-        position: absolute;
-        top: -60px;
-        right: -60px;
-        width: 140px;
-        height: 140px;
-        background: radial-gradient(
-          circle,
-          rgba(102, 187, 106, 0.25) 60%,
-          transparent 100%
-        );
-        z-index: 0;
-      }
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .close-btn {
-        background: none;
-        border: none;
-        font-size: 28px;
-        color: var(--text-muted);
-        cursor: pointer;
-        transition: color 0.2s, transform 0.2s;
-        position: absolute;
-        top: 16px;
-        right: 22px;
-        z-index: 2;
-      }
-      .close-btn:hover {
-        color: #ef4444;
-        transform: rotate(90deg) scale(1.15);
-      }
-      .popup-title {
-        font-size: 1.3rem;
-        font-weight: 800;
-        color: var(--primary);
-        letter-spacing: 0.5px;
-      }
-      .btn {
-        background: var(--primary);
-        color: var(--on-primary);
-        border: none;
-        border-radius: 8px;
-        font-weight: 700;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.11);
-        transition: background 0.2s, color 0.2s, transform 0.05s;
-        padding: 8px 12px;
-      }
-      .btn:hover {
-        background: var(--primary-hover);
-      }
-      .btn:active {
-        transform: translateY(1px);
-      }
-      #editProfileBtn,
-      #saveProfileBtn {
-        background: var(--secondary);
-        color: #fff;
-        border-radius: 8px;
-        border: none;
-        min-width: 90px;
-        font-size: 15px;
-        padding: 8px 12px;
-      }
-      #editProfileBtn:hover,
-      #saveProfileBtn:hover {
-        filter: brightness(1.05);
-      }
-      .form-label {
-        color: var(--text) !important;
-      }
-      .form-input,
-      select.form-input {
-        background: var(--input-bg);
-        color: var(--text);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        font-size: 15px;
-        transition: background 0.2s, color 0.2s, border-color 0.2s;
-      }
+    .btn:hover {
+      background: var(--primary-hover);
+    }
 
-      /* ===== NÚT UIVERSE: TẠO NHÓM ===== */
-      .cssbuttons-io-button {
-        background: var(--primary);
-        color: var(--on-primary);
-        font-family: inherit;
-        padding: 0.35em 1.2em;
-        font-size: 16px;
-        font-weight: 700;
-        border-radius: 12px;
-        border: none;
-        letter-spacing: 0.02em;
-        display: flex;
-        align-items: center;
-        box-shadow: inset 0 0 1.6em -0.6em rgba(0, 0, 0, 0.12);
-        overflow: hidden;
-        position: absolute;
-        left: 18px;
-        right: 18px;
-        bottom: 18px;
-        height: 48px;
-        padding-right: 3.3em;
-        cursor: pointer;
-        transition: background 0.2s, color 0.2s;
-      }
-      .cssbuttons-io-button:hover {
-        background: var(--primary-hover);
-      }
-      .cssbuttons-io-button .icon {
-        background: var(--surface);
-        margin-left: 1em;
-        position: absolute;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 2.2em;
-        width: 2.2em;
-        border-radius: 10px;
-        box-shadow: 0.1em 0.1em 0.6em 0.2em rgba(0, 0, 0, 0.12);
-        right: 0.3em;
-        transition: all 0.3s;
-      }
-      .cssbuttons-io-button:hover .icon {
-        width: calc(100% - 0.6em);
-      }
-      .cssbuttons-io-button .icon svg {
-        width: 1.1em;
-        transition: transform 0.3s;
-        color: var(--secondary);
-      }
-      .cssbuttons-io-button:hover .icon svg {
-        transform: rotate(90deg) scale(1.1);
-      }
-      .cssbuttons-io-button:active .icon {
-        transform: scale(0.95);
-      }
+    .btn:active {
+      transform: translateY(1px);
+    }
 
-      /* ====== WORKHUB SETTINGS (namespaced .wh-*) ====== */
-      .wh-settings {
-        position: fixed;
-        inset: 0;
-        background: var(--bg);
-        color: var(--text);
-        z-index: 9999;
-        overflow: hidden;
-        display: none;
-      }
-      .wh-wrap {
-        display: flex;
-        height: 100%;
-      }
-      .wh-side {
-        width: 260px;
-        background: var(--surface);
-        padding: 16px 0;
-        overflow-y: auto;
-        border-right: 1px solid var(--border-color);
-      }
-      .wh-search {
-        padding: 0 16px 10px;
-      }
-      .wh-search input {
-        width: 100%;
-        padding: 8px 10px;
-        border-radius: 6px;
-        border: 1px solid var(--border-color);
-        outline: none;
-        background: var(--surface);
-        color: var(--text);
-      }
-      .wh-group {
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        padding: 8px 16px 4px;
-      }
-      .wh-nav {
-        display: flex;
-        flex-direction: column;
-      }
-      .wh-nav-item {
-        background: none;
-        border: none;
-        color: var(--text);
-        text-align: left;
-        padding: 10px 16px;
-        font-size: 0.95rem;
-        cursor: pointer;
-        border-left: 3px solid transparent;
-        transition: 0.2s;
-      }
-      .wh-nav-item:hover {
-        background: rgba(76, 175, 80, 0.08);
-      }
-      .wh-nav-item.wh-active {
-        background: rgba(76, 175, 80, 0.12);
-        border-left: 3px solid var(--primary);
-        color: var(--text);
-      }
-      .wh-main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-        background: var(--bg);
-      }
-      .wh-topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 24px;
-        border-bottom: 1px solid var(--border-color);
-      }
-      .wh-title {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: var(--text);
-      }
-      .wh-card {
-        background: var(--surface);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        margin: 16px 24px;
-        padding: 16px 20px;
-        color: var(--text);
-      }
-      .wh-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid var(--border-color);
-        padding: 10px 0;
-      }
-      .wh-row:last-child {
-        border: none;
-      }
-      .wh-label {
-        font-size: 0.9rem;
-        color: var(--text-muted);
-      }
-      .wh-value {
-        font-weight: 600;
-      }
-      .wh-mini {
-        background: var(--surface);
-        color: var(--text);
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        padding: 6px 10px;
-        cursor: pointer;
-      }
-      .wh-mini:hover {
-        background: rgba(76, 175, 80, 0.08);
-      }
-      .wh-btn {
-        border: none;
-        border-radius: 8px;
-        padding: 8px 12px;
-        cursor: pointer;
-        font-weight: 600;
-      }
-      .wh-primary {
-        background: var(--primary);
-        color: var(--on-primary);
-      }
-      .wh-primary:hover {
-        background: var(--primary-hover);
-      }
-      .wh-secondary {
-        background: var(--secondary);
-        color: #fff;
-      }
-      .wh-secondary:hover {
-        filter: brightness(1.05);
-      }
-      .wh-danger {
-        background: #ef4444;
-        color: #fff;
-      }
-      .wh-outline {
-        background: none;
-        border: 1px solid #ef4444;
-        color: #ef4444;
-      }
-      .wh-outline:hover {
-        background: #ef4444;
-        color: #fff;
-      }
-      .wh-link {
-        color: var(--primary);
-        text-decoration: none;
-        font-size: 0.9rem;
-        margin-left: 6px;
-      }
-      .wh-link:hover {
-        text-decoration: underline;
-      }
-      .wh-danger-zone {
-        border: 1px solid #ef4444;
-      }
-      .wh-tabs {
-        display: flex;
-        gap: 10px;
-        padding: 0 24px;
-        margin-top: 10px;
-      }
-      .wh-tab {
-        background: none;
-        border: none;
-        color: var(--text-muted);
-        padding: 10px 14px;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      .wh-tab.wh-active {
-        color: var(--text);
-        border-bottom: 2px solid var(--primary);
-      }
-      .wh-panel {
-        display: none;
-        padding: 0 24px 24px;
-      }
-      .wh-panel.wh-show {
-        display: block;
-      }
-      .wh-section {
-        font-size: 1.1rem;
-        color: var(--text);
-        margin: 12px 0;
-      }
-      .wh-t {
-        font-weight: 600;
-      }
-      .wh-sub {
-        color: var(--text-muted);
-      }
-      .wh-between {
-        justify-content: space-between;
-      }
-      .wh-pill-ok {
-        background: #16a34a;
-        color: #fff;
-        padding: 4px 8px;
-        border-radius: 8px;
-        font-size: 0.9rem;
-      }
+    #editProfileBtn,
+    #saveProfileBtn {
+      background: var(--secondary);
+      color: #fff;
+      border-radius: 8px;
+      border: none;
+      min-width: 90px;
+      font-size: 15px;
+      padding: 8px 12px;
+    }
 
-      /* === Profile hero (BG + Avatar upload) === */
-      .profile-hero {
-        position: relative;
-        width: 100%;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-soft);
-        margin-bottom: 16px;
-        background: var(--surface);
-      }
-      .profile-hero .background {
-        position: relative;
-        width: 100%;
-        height: 140px;
-        background: #e5e7eb;
-      }
-      [data-theme="dark"] .profile-hero .background {
-        background: #263238;
-      }
-      .profile-hero .background img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-      .profile-hero .bg-upload,
-      .profile-hero .avatar-upload {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        background: var(--primary);
-        color: var(--on-primary);
-        border: none;
-        border-radius: 8px;
-        padding: 6px 10px;
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.11);
-      }
-      .profile-hero .bg-upload:hover,
-      .profile-hero .avatar-upload:hover {
-        background: var(--primary-hover);
-      }
-      .profile-hero .avatar {
-        position: absolute;
-        left: 18px;
-        bottom: -28px;
-        width: 84px;
-        height: 84px;
-        border-radius: 50%;
-        border: 3px solid var(--surface);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-        overflow: hidden;
-        background: #cbd5e1;
-      }
-      .profile-hero .avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-      .profile-hero .avatar-upload {
-        left: 90px;
-        right: auto;
-        bottom: -36px;
-        padding: 6px 10px;
-      }
-      #popupProfile .profile-form {
-        margin-top: 30px;
-      }
+    #editProfileBtn:hover,
+    #saveProfileBtn:hover {
+      filter: brightness(1.05);
+    }
 
-      /* helper */
-      .muted {
-        color: var(--text-subtle) !important;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="dashboard-frame">
-      <!-- HEADER -->
-      <div class="dashboard-header" style="margin-top: 0">
-        <div class="logo-bar">
-          <span
-            class="site-name"
-            style="font-size: 35px; font-weight: 900; letter-spacing: 1.5px"
-            >WorkHub</span
-          >
-        </div>
-        <div class="header-actions actions-cluster">
-          <button class="icon-btn" title="Menu" aria-label="Menu">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <line x1="3" y1="6" x2="21" y2="6" stroke-width="2" />
-              <line x1="3" y1="12" x2="21" y2="12" stroke-width="2" />
-              <line x1="3" y1="18" x2="21" y2="18" stroke-width="2" />
-            </svg>
-          </button>
-          <button
-            class="icon-btn"
-            id="btnTheme"
-            title="Chuyển chế độ sáng/tối"
-            aria-pressed="false"
-          >
-            <svg
-              id="themeIcon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <circle cx="12" cy="12" r="5" stroke-width="2" />
-              <path
-                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-                stroke-width="2"
-              />
-            </svg>
-          </button>
-          <button
-            class="icon-btn"
-            id="btnCalendar"
-            title="Lịch"
-            aria-label="Lịch"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <rect
-                x="3"
-                y="4"
-                width="18"
-                height="18"
-                rx="2"
-                ry="2"
-                stroke-width="2"
-              ></rect>
-              <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"></line>
-              <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"></line>
-              <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"></line>
-            </svg>
-          </button>
-          <button
-            class="icon-btn"
-            id="btnNotif"
-            title="Thông báo"
-            aria-label="Thông báo"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path
-                d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"
-                stroke-width="2"
-              ></path>
-              <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
-            </svg>
-          </button>
-          <!-- account -->
-          <div
-            class="user-account"
-            id="openProfile"
-            title="Account"
-            style="position: relative"
-          >
-            <div style="position: relative">
-              <div
-                style="
-                  width: 32px;
-                  height: 32px;
-                  border-radius: 50%;
-                  background: #cbd5e1;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                "
-              ></div>
-              <span
-                style="
-                  position: absolute;
-                  bottom: 0;
-                  right: -2px;
-                  width: 10px;
-                  height: 10px;
-                  background: #22c55e;
-                  border-radius: 50%;
-                  border: 2px solid var(--surface);
-                  display: block;
-                "
-              ></span>
-            </div>
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-              "
-            >
-              <span
-                style="
-                  font-weight: 700;
-                  font-size: 1.08rem;
-                  line-height: 1.1;
-                  color: var(--text);
-                "
-                >Tên người dùng</span
-              >
-              <span
-                style="
-                  font-size: 0.97rem;
-                  color: var(--text-muted);
-                  line-height: 1.1;
-                "
-                >@example.com</span
-              >
-            </div>
-            <svg
-              style="margin-left: 8px"
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M6 9l6 6 6-6" />
-            </svg>
+    .form-label {
+      color: var(--text) !important;
+    }
 
-            <div
-              id="userMenu"
-              style="
+    .form-input,
+    select.form-input {
+      background: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 15px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    /* ===== NÚT UIVERSE: TẠO NHÓM ===== */
+    .cssbuttons-io-button {
+      background: var(--primary);
+      color: var(--on-primary);
+      font-family: inherit;
+      padding: 0.35em 1.2em;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 12px;
+      border: none;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      box-shadow: inset 0 0 1.6em -0.6em rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      height: 48px;
+      padding-right: 3.3em;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .cssbuttons-io-button:hover {
+      background: var(--primary-hover);
+    }
+
+    .cssbuttons-io-button .icon {
+      background: var(--surface);
+      margin-left: 1em;
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 2.2em;
+      width: 2.2em;
+      border-radius: 10px;
+      box-shadow: 0.1em 0.1em 0.6em 0.2em rgba(0, 0, 0, 0.12);
+      right: 0.3em;
+      transition: all 0.3s;
+    }
+
+    .cssbuttons-io-button:hover .icon {
+      width: calc(100% - 0.6em);
+    }
+
+    .cssbuttons-io-button .icon svg {
+      width: 1.1em;
+      transition: transform 0.3s;
+      color: var(--secondary);
+    }
+
+    .cssbuttons-io-button:hover .icon svg {
+      transform: rotate(90deg) scale(1.1);
+    }
+
+    .cssbuttons-io-button:active .icon {
+      transform: scale(0.95);
+    }
+
+    /* ====== WORKHUB SETTINGS (namespaced .wh-*) ====== */
+    .wh-settings {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      color: var(--text);
+      z-index: 9999;
+      overflow: hidden;
+      display: none;
+    }
+
+    .wh-wrap {
+      display: flex;
+      height: 100%;
+    }
+
+    .wh-side {
+      width: 260px;
+      background: var(--surface);
+      padding: 16px 0;
+      overflow-y: auto;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .wh-search {
+      padding: 0 16px 10px;
+    }
+
+    .wh-search input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      outline: none;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .wh-group {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 8px 16px 4px;
+    }
+
+    .wh-nav {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wh-nav-item {
+      background: none;
+      border: none;
+      color: var(--text);
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: 0.2s;
+    }
+
+    .wh-nav-item:hover {
+      background: rgba(76, 175, 80, 0.08);
+    }
+
+    .wh-nav-item.wh-active {
+      background: rgba(76, 175, 80, 0.12);
+      border-left: 3px solid var(--primary);
+      color: var(--text);
+    }
+
+    .wh-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    .wh-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .wh-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .wh-card {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin: 16px 24px;
+      padding: 16px 20px;
+      color: var(--text);
+    }
+
+    .wh-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 0;
+    }
+
+    .wh-row:last-child {
+      border: none;
+    }
+
+    .wh-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .wh-value {
+      font-weight: 600;
+    }
+
+    .wh-mini {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    .wh-mini:hover {
+      background: rgba(76, 175, 80, 0.08);
+    }
+
+    .wh-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .wh-primary {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+
+    .wh-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .wh-secondary {
+      background: var(--secondary);
+      color: #fff;
+    }
+
+    .wh-secondary:hover {
+      filter: brightness(1.05);
+    }
+
+    .wh-danger {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .wh-outline {
+      background: none;
+      border: 1px solid #ef4444;
+      color: #ef4444;
+    }
+
+    .wh-outline:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .wh-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin-left: 6px;
+    }
+
+    .wh-link:hover {
+      text-decoration: underline;
+    }
+
+    .wh-danger-zone {
+      border: 1px solid #ef4444;
+    }
+
+    .wh-tabs {
+      display: flex;
+      gap: 10px;
+      padding: 0 24px;
+      margin-top: 10px;
+    }
+
+    .wh-tab {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .wh-tab.wh-active {
+      color: var(--text);
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .wh-panel {
+      display: none;
+      padding: 0 24px 24px;
+    }
+
+    .wh-panel.wh-show {
+      display: block;
+    }
+
+    .wh-section {
+      font-size: 1.1rem;
+      color: var(--text);
+      margin: 12px 0;
+    }
+
+    .wh-t {
+      font-weight: 600;
+    }
+
+    .wh-sub {
+      color: var(--text-muted);
+    }
+
+    .wh-between {
+      justify-content: space-between;
+    }
+
+    .wh-pill-ok {
+      background: #16a34a;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+/* ===== Khối tổng thể ===== */
+.profile-hero {
+  position: relative;
+  width: calc(100% + 2px);
+  background: #fff;
+  border-radius: 12px;
+  overflow: visible;
+  padding-bottom: 12px;
+  padding: 0;
+}
+
+/* ===== Background ===== */
+.profile-hero .background {
+  position: relative;
+  width: 420px;
+  left: -33px;
+  height: 160px;
+  overflow: hidden;
+  background: #e5e7eb;
+  z-index: 1;
+}
+
+.profile-hero .background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-hero .bg-upload {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+  z-index: 3;
+}
+
+/* ===== Avatar ===== */
+.profile-hero .avatar {
+  position: absolute;
+  top: 100px;                /* đặt avatar đè lên phần dưới của background */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #eee;
+  overflow: visible;         /* để nút chỉnh sửa không bị cắt */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.profile-hero .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ===== Nút đổi avatar ===== */
+.profile-hero .avatar-upload {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: gray;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 5;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* ===== Tên người dùng ===== */
+.profile-hero .name {
+  display: block;
+  margin: 80px auto 8px auto;  /* cách background một khoảng hợp lý */
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #111827;
+  outline: none;
+}
+
+/* Responsive nhỏ */
+@media (max-width: 480px) {
+  .profile-hero .avatar {
+    width: 96px;
+    height: 96px;
+    top: 90px;
+  }
+
+  .profile-hero .avatar-upload {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .profile-hero .name {
+    margin-top: 60px;
+  }
+}
+
+
+    #popupProfile .profile-form {
+      margin-top: 30px;
+    }
+
+    /* helper */
+    .muted {
+      color: var(--text-subtle) !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard-frame">
+    <!-- HEADER -->
+    <div class="dashboard-header" style="margin-top: 0">
+      <div class="logo-bar">
+        <span class="site-name" style="font-size: 35px; font-weight: 900; letter-spacing: 1.5px">WorkHub</span>
+      </div>
+      <div class="header-actions actions-cluster">
+        <button class="icon-btn" title="Menu" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="3" y1="6" x2="21" y2="6" stroke-width="2" />
+            <line x1="3" y1="12" x2="21" y2="12" stroke-width="2" />
+            <line x1="3" y1="18" x2="21" y2="18" stroke-width="2" />
+          </svg>
+        </button>
+        <button class="icon-btn" id="btnTheme" title="Chuyển chế độ sáng/tối" aria-pressed="false">
+          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="5" stroke-width="2" />
+            <path
+              d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+              stroke-width="2" />
+          </svg>
+        </button>
+        <button class="icon-btn" id="btnCalendar" title="Lịch" aria-label="Lịch">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"></line>
+            <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"></line>
+            <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"></line>
+          </svg>
+        </button>
+        <button class="icon-btn" id="btnNotif" title="Thông báo" aria-label="Thông báo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path>
+            <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
+          </svg>
+        </button>
+        <!-- account -->
+        <div class="user-account" id="openProfile" title="Account" style="position: relative">
+          <div style="position: relative">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;"></div>
+            <span style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;"></span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-start;">
+            <span style="font-weight: 700; font-size: 1.08rem; line-height: 1.1; color: var(--text);">Tên người dùng</span>
+            <span style="font-size: 0.97rem; color: var(--text-muted); line-height: 1.1;">@example.com</span>
+          </div>
+          <svg style="margin-left: 8px" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+
+          <div id="userMenu" style="
                 display: none;
                 position: absolute;
                 top: 48px;
@@ -1308,10 +1408,8 @@
                 padding: 10px 0;
                 z-index: 100;
                 border: 1px solid var(--border-color);
-              "
-            >
-              <button
-                style="
+              ">
+            <button style="
                   width: 100%;
                   background: none;
                   border: none;
@@ -1320,13 +1418,10 @@
                   font-size: 1rem;
                   color: var(--primary);
                   cursor: pointer;
-                "
-                id="Profile"
-              >
-                Xem thông tin
-              </button>
-              <button
-                style="
+                " id="Profile">
+              Xem thông tin
+            </button>
+            <button style="
                   width: 100%;
                   background: none;
                   border: none;
@@ -1335,13 +1430,10 @@
                   font-size: 1rem;
                   color: var(--primary);
                   cursor: pointer;
-                "
-                id="OpenSettings"
-              >
-                Cài đặt người dùng
-              </button>
-              <button
-                style="
+                " id="OpenSettings">
+              Cài đặt người dùng
+            </button>
+            <button style="
                   width: 100%;
                   background: none;
                   border: none;
@@ -1350,807 +1442,633 @@
                   font-size: 1rem;
                   color: #ef4444;
                   cursor: pointer;
-                "
-                id="Logout"
-              >
-                Đăng xuất
-              </button>
-            </div>
+                " id="Logout">
+              Đăng xuất
+            </button>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- BODY -->
-      <div class="dashboard-body" id="dashboardBody">
-        <!-- SIDEBAR -->
-        <div class="sidebar">
-          <div class="sidebar-section">
-            <div class="sidebar-search">
-              <div class="mini-pill">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
-                  <line
-                    x1="21"
-                    y1="21"
-                    x2="16.65"
-                    y2="16.65"
-                    stroke-width="2"
-                  ></line>
-                </svg>
-                <input type="text" placeholder="Search" />
-              </div>
-            </div>
-            <div class="sidebar-list" id="groupList"></div>
-          </div>
-
-          <!-- NÚT: TẠO NHÓM -->
-          <button
-            class="cssbuttons-io-button"
-            id="btnAddGroup"
-            title="Tạo nhóm"
-          >
-            Tạo nhóm
-            <div class="icon">
-              <svg
-                height="24"
-                width="24"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 5v14M5 12h14"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  fill="none"
-                />
-              </svg>
-            </div>
-          </button>
-        </div>
-
-        <!-- MAIN -->
-        <div class="main-content" id="mainContent">
-          <div class="main-toolbar">
-            <div class="task-tabs">
-              <button class="tab-btn active" tabindex="0">
-                <svg viewBox="0 0 20 20"><path d="M4 10l4 4 8-8" /></svg>
-                Đã giao
-              </button>
-              <button class="tab-btn" tabindex="0">
-                <svg viewBox="0 0 20 20">
-                  <circle cx="9" cy="9" r="7" />
-                  <path d="M13 13l4 4" />
-                </svg>
-                Được giao
-              </button>
-            </div>
-
-            <div class="search-pill">
+    <!-- BODY -->
+    <div class="dashboard-body" id="dashboardBody">
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-search">
+            <div class="mini-pill">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
-                <line
-                  x1="21"
-                  y1="21"
-                  x2="16.65"
-                  y2="16.65"
-                  stroke-width="2"
-                ></line>
+                <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"></line>
               </svg>
               <input type="text" placeholder="Search" />
             </div>
-
-            <div class="">
-              <ul class="task-menu">
-                <li>
-                  <a href="javascript:void(0)">Bộ lọc công việc</a>
-                  <ul class="task-sub">
-                    <li><a href="javascript:void(0)">Tất cả</a></li>
-                    <li><a href="javascript:void(0)">Đã hoàn thành</a></li>
-                    <li><a href="javascript:void(0)">Đang làm</a></li>
-                    <li><a href="javascript:void(0)">Chưa nhận</a></li>
-                  </ul>
-                </li>
-              </ul>
-            </div>
           </div>
-
-          <!-- Nội dung dạng "giấy kẻ ngang" -->
-          <div class="content-task" id="paperArea">WorkHub</div>
+          <div class="sidebar-list" id="groupList"></div>
         </div>
 
-        <!-- RIGHT PANEL STACK -->
-        <div class="right-panel-stack" id="rightPanelStack">
-          <div class="right-panel half" id="calendarPanel">
-            <div class="panel-head">
-              <span class="panel-title">
-                <svg
-                  width="20"
-                  height="20"
-                  style="vertical-align: middle; margin-right: 6px"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <rect
-                    x="3"
-                    y="4"
-                    width="14"
-                    height="14"
-                    rx="2"
-                    stroke-width="2"
-                  />
-                  <line x1="7" y1="2" x2="7" y2="6" stroke-width="2" />
-                  <line x1="13" y1="2" x2="13" y2="6" stroke-width="2" />
-                </svg>
-                Lịch
-              </span>
-              <button class="close-panel" id="closeCalendarPanel" title="Đóng">
-                &times;
-              </button>
-            </div>
-            <div class="right-section" id="calendarPanelContent"></div>
+        <!-- NÚT: TẠO NHÓM -->
+        <button class="cssbuttons-io-button" id="btnAddGroup" title="Tạo nhóm">
+          Tạo nhóm
+          <div class="icon">
+            <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none" />
+            </svg>
+          </div>
+        </button>
+      </div>
+
+      <!-- MAIN -->
+      <div class="main-content" id="mainContent">
+        <div class="main-toolbar">
+          <div class="task-tabs">
+            <button class="tab-btn active" tabindex="0">
+              <svg viewBox="0 0 20 20">
+                <path d="M4 10l4 4 8-8" />
+              </svg>
+              Đã giao
+            </button>
+            <button class="tab-btn" tabindex="0">
+              <svg viewBox="0 0 20 20">
+                <circle cx="9" cy="9" r="7" />
+                <path d="M13 13l4 4" />
+              </svg>
+              Được giao
+            </button>
           </div>
 
-          <div class="right-panel half" id="notifPanel">
-            <div class="panel-head">
-              <span class="panel-title">
-                <svg
-                  width="20"
-                  height="20"
-                  style="vertical-align: middle; margin-right: 6px"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"
-                    stroke-width="2"
-                  ></path>
-                  <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
-                </svg>
-                Thông báo
-              </span>
-              <button class="close-panel" id="closeNotifPanel" title="Đóng">
-                &times;
-              </button>
-            </div>
-            <div class="right-section" id="notifPanelContent"></div>
+          <div class="search-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"></line>
+            </svg>
+            <input type="text" placeholder="Search" />
+          </div>
+
+          <div class="">
+            <ul class="task-menu">
+              <li>
+                <a href="javascript:void(0)">Bộ lọc công việc</a>
+                <ul class="task-sub">
+                  <li><a href="javascript:void(0)">Tất cả</a></li>
+                  <li><a href="javascript:void(0)">Đã hoàn thành</a></li>
+                  <li><a href="javascript:void(0)">Đang làm</a></li>
+                  <li><a href="javascript:void(0)">Chưa nhận</a></li>
+                </ul>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <!-- POPUP TẠO NHÓM -->
-        <div class="popup-overlay" id="popupGroup" aria-hidden="true">
-          <div
-            class="popup-content"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="create-group-title"
-          >
-            <button class="close-btn" id="closeGroupPopup" aria-label="Đóng">
+        <!-- Nội dung dạng "giấy kẻ ngang" -->
+        <div class="content-task" id="paperArea">WorkHub</div>
+      </div>
+
+      <!-- RIGHT PANEL STACK -->
+      <div class="right-panel-stack" id="rightPanelStack">
+        <div class="right-panel half" id="calendarPanel">
+          <div class="panel-head">
+            <span class="panel-title">
+              <svg width="20" height="20" style="vertical-align: middle; margin-right: 6px" fill="none"
+                stroke="currentColor">
+                <rect x="3" y="4" width="14" height="14" rx="2" stroke-width="2" />
+                <line x1="7" y1="2" x2="7" y2="6" stroke-width="2" />
+                <line x1="13" y1="2" x2="13" y2="6" stroke-width="2" />
+              </svg>
+              Lịch
+            </span>
+            <button class="close-panel" id="closeCalendarPanel" title="Đóng">
               &times;
             </button>
-            <div
-              class="popup-inner-content"
-              style="flex-direction: column; width: 100%"
-            >
-              <div>
-                <div id="create-group-title" class="popup-title">
-                  Tạo nhóm mới
-                </div>
-                <form
-                  id="groupForm"
-                  action="/groups"
-                  method="POST"
-                  style="
+          </div>
+          <div class="right-section" id="calendarPanelContent"></div>
+        </div>
+
+        <div class="right-panel half" id="notifPanel">
+          <div class="panel-head">
+            <span class="panel-title">
+              <svg width="20" height="20" style="vertical-align: middle; margin-right: 6px" fill="none"
+                stroke="currentColor">
+                <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path>
+                <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
+              </svg>
+              Thông báo
+            </span>
+            <button class="close-panel" id="closeNotifPanel" title="Đóng">
+              &times;
+            </button>
+          </div>
+          <div class="right-section" id="notifPanelContent"></div>
+        </div>
+      </div>
+
+      <!-- POPUP TẠO NHÓM -->
+      <div class="popup-overlay" id="popupGroup" aria-hidden="true">
+        <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
+          <button class="close-btn" id="closeGroupPopup" aria-label="Đóng">
+            &times;
+          </button>
+          <div class="popup-inner-content" style="flex-direction: column; width: 100%">
+            <div>
+              <div id="create-group-title" class="popup-title">
+                Tạo nhóm mới
+              </div>
+              <form id="groupForm" action="/groups" method="POST" style="
                     display: flex;
                     flex-direction: column;
                     gap: 18px;
                     min-width: 260px;
-                  "
-                >
-                  <input type="hidden" name="csrf_token" value="" />
-                  <div style="display: flex; flex-direction: column; gap: 6px">
-                    <label
-                      for="groupName"
-                      class="form-label"
-                      style="font-weight: 600"
-                      >Tên nhóm</label
-                    >
-                    <input
-                      id="groupName"
-                      name="groupName"
-                      type="text"
-                      required
-                      placeholder="Nhập tên nhóm"
-                      class="form-input"
-                      style="padding: 10px 13px"
-                    />
-                  </div>
-                  <div
-                    style="display: flex; justify-content: flex-end; gap: 12px"
-                  >
-                    <button
-                      type="button"
-                      class="btn"
-                      id="cancelGroupBtn"
-                      style="background: #9e9e9e"
-                    >
-                      Huỷ
-                    </button>
-                    <button type="submit" class="btn" id="createGroupBtn">
-                      Tạo nhóm
-                    </button>
-                  </div>
-                </form>
-              </div>
+                  ">
+                <input type="hidden" name="csrf_token" value="" />
+                <div style="display: flex; flex-direction: column; gap: 6px">
+                  <label for="groupName" class="form-label" style="font-weight: 600">Tên nhóm</label>
+                  <input id="groupName" name="groupName" type="text" required placeholder="Nhập tên nhóm"
+                    class="form-input" style="padding: 10px 13px" />
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 12px">
+                  <button type="button" class="btn" id="cancelGroupBtn" style="background: #9e9e9e">
+                    Huỷ
+                  </button>
+                  <button type="submit" class="btn" id="createGroupBtn">
+                    Tạo nhóm
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- POPUP THÔNG TIN TÀI KHOẢN -->
-        <div
-          class="popup-overlay"
-          id="popupProfile"
-          style="
-            display: none;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(2px);
-            z-index: 1000;
-          "
-          aria-hidden="true"
-        >
-          <div
-            class="popup-content"
-            style="width: 420px; max-width: 95vw"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="profile-title"
-          >
-            <div
-              class="popup-header"
-              style="
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 14px;
-              "
-            >
-              <div
-                id="profile-title"
-                class="popup-title"
-                style="font-size: 23px"
-              >
-                Thông tin tài khoản
-              </div>
-              <button
-                class="close-btn"
-                id="closeProfileBtn"
-                style="font-size: 28px"
-                aria-label="Đóng"
-              >
-                &times;
-              </button>
-            </div>
+      <!-- POPUP THÔNG TIN TÀI KHOẢN -->
+      <div class="popup-overlay" id="popupProfile" style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); z-index: 1000;" aria-hidden="true">
+        <div class="popup-content" style="width: 420px; max-width: 95vw" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+          <div class="popup-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <div id="profile-title" class="popup-title" style="font-size: 23px">Thông tin tài khoản</div>
+            <button class="close-btn" id="closeProfileBtn" style="font-size: 28px" aria-label="Đóng">&times;</button>
+          </div>
 
-            <!-- HERO: Background + Avatar upload -->
+          <!-- FORM -->
+          <form class="profile-form" id="profileForm" action="/info" method="POST" style=" display: flex; flex-direction: column; gap: 13px; margin-bottom: 22px;">
+            <!-- Background + Avatar upload -->
             <div class="profile-hero">
               <div class="background">
-                <img
-                  id="bgPreview"
-                  name="backgroundPath"
-                  alt="background"
-                  src="<%= user.backgroundPath || '/uploads/default-bg.png' %>"
-                />
+                <img id="bgPreview" name="backgroundPath" alt="background" src="<%= user.backgroundPath || '/uploads/default-bg.png' %>" />
                 <label class="bg-upload">
                   Thay đổi
-                  <input
-                    type="file"
-                    id="backgroundInput"
-                    name="background"
-                    accept="image/*"
-                    style="display: none"
-                    onchange="previewImage(event, 'bgPreview')"
-                  />
+                  <input type="file" id="backgroundInput" name="background" accept="image/*" style="display: none" onchange="previewImage(event, 'bgPreview')" />
                 </label>
               </div>
 
               <div class="avatar">
-                <img
-                  id="avatarPreview"
-                  name="avatarPath"
-                  alt="avatar"
-                  src="<%= user.avatarPath || '/uploads/default-avatar.png' %>"
-                />
+                <img id="avatarPreview" name="avatarPath" alt="avatar" src="<%= user.avatarPath || '/uploads/default-avatar.png' %>" />
+                <label class="avatar-upload">
+                  ✎
+                  <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none" onchange="previewImage(event, 'avatarPreview')" />
+                </label>
               </div>
-              <label class="avatar-upload">
-                ✎
-                <input
-                  type="file"
-                  id="avatarInput"
-                  name="avatar"
-                  accept="image/*"
-                  style="display: none"
-                  onchange="previewImage(event, 'avatarPreview')"
-                />
-              </label>
+              <div>
+                <input class="name" type="text" name="name" value="<%= user.name || '' %>" readonly>
+              </div>
             </div>
+            <!-- Thông tin tài  khoản -->
+            <input type="hidden" name="csrf_token" value="" />
+            <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+              <label class="form-label" for="username" style="width: 110px">Tên tài khoản</label>
+              <input class="form-input" name="username" type="text" value="<%= user.username %>" readonly id="username"
+                style="flex: 1; padding: 10px 13px" />
+            </div>
+            <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+              <label class="form-label" for="email" style="width: 110px">Email</label>
+              <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email" style="flex: 1; padding: 10px 13px" />
+            </div>
+            <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+              <label class="form-label" for="phone" style="width: 110px">Số điện thoại</label>
+              <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>" readonly id="phone" style="flex: 1; padding: 10px 13px" />
+            </div>
+            <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+              <label class="form-label" for="dob" style="width: 110px">Ngày sinh</label>
+              <input class="form-input" name="dob" type="date" value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob" style="flex: 1; padding: 10px 13px" />
+            </div>
+            <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+              <label class="form-label" for="gender" style="width: 110px">Giới tính</label>
+              <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
+                <option value="">--Chọn--</option>
+                <option value="male" <%= user.gender==='male' ? 'selected' : '' %>>Nam</option>
+                <option value="female" <%= user.gender==='female' ? 'selected' : '' %>>Nữ</option>
+                <option value="other" <%= user.gender==='other' ? 'selected' : '' %>>Khác</option>
+              </select>
+            </div>
+            <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+              <label class="form-label" for="address" style="width: 110px">Địa chỉ</label>
+              <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly id="address" style="flex: 1; padding: 10px 13px" />
+            </div>
+            <div class="form-actions" style="display: flex; justify-content: center; gap: 12px; margin-top: 6px;">
+              <button class="btn" type="button" id="editProfileBtn" style="background: var(--secondary)">Sửa</button>
+              <button class="btn" type="submit" id="saveProfileBtn" style="display: none; background: var(--secondary)">Xác nhận</button>
+              <!-- javascript sửa thông tin -->
+              <script>
+                const popupProfile = document.getElementById("popupProfile"); // thẻ bao quanh cửa sổ thông tin
 
-            <!-- FORM -->
-            <form
-              class="profile-form"
-              id="profileForm"
-              action="/account/update"
-              method="POST"
-              style="
-                display: flex;
-                flex-direction: column;
-                gap: 13px;
-                margin-bottom: 22px;
-              "
-            >
-              <input type="hidden" name="csrf_token" value="" />
-              <div
-                class="form-row"
-                style="display: flex; align-items: center; gap: 10px"
-              >
-                <label class="form-label" for="username" style="width: 110px"
-                  >Tên tài khoản</label
-                >
-                <input
-                  class="form-input"
-                  name="username"
-                  type="text"
-                  value="Nguyễn Văn A"
-                  readonly
-                  id="username"
-                  style="flex: 1; padding: 10px 13px"
-                />
-              </div>
-              <div
-                class="form-row"
-                style="display: flex; align-items: center; gap: 10px"
-              >
-                <label class="form-label" for="email" style="width: 110px"
-                  >Email</label
-                >
-                <input
-                  class="form-input"
-                  name="email"
-                  type="email"
-                  value="@example.com"
-                  readonly
-                  id="email"
-                  style="flex: 1; padding: 10px 13px"
-                />
-              </div>
-              <div
-                class="form-row"
-                style="display: flex; align-items: center; gap: 10px"
-              >
-                <label class="form-label" for="phone" style="width: 110px"
-                  >Số điện thoại</label
-                >
-                <input
-                  class="form-input"
-                  name="phone"
-                  type="text"
-                  value="0123456789"
-                  readonly
-                  id="phone"
-                  style="flex: 1; padding: 10px 13px"
-                />
-              </div>
-              <div
-                class="form-row"
-                style="display: flex; align-items: center; gap: 10px"
-              >
-                <label class="form-label" for="address" style="width: 110px"
-                  >Quê quán</label
-                >
-                <input
-                  class="form-input"
-                  name="address"
-                  type="text"
-                  value="Hà Nội"
-                  readonly
-                  id="address"
-                  style="flex: 1; padding: 10px 13px"
-                />
-              </div>
-              <div
-                class="form-row"
-                style="display: flex; align-items: center; gap: 10px"
-              >
-                <label class="form-label" for="gender" style="width: 110px"
-                  >Giới tính</label
-                >
-                <select
-                  class="form-input"
-                  name="gender"
-                  id="gender"
-                  disabled
-                  style="flex: 1; padding: 10px 13px"
-                >
-                  <option value="Nam">Nam</option>
-                  <option value="Nữ">Nữ</option>
-                  <option value="Khác">Khác</option>
-                </select>
-              </div>
-              <div
-                class="form-row"
-                style="display: flex; align-items: center; gap: 10px"
-              >
-                <label class="form-label" for="dob" style="width: 110px"
-                  >Ngày sinh</label
-                >
-                <input
-                  class="form-input"
-                  name="dob"
-                  type="date"
-                  value="1995-01-01"
-                  readonly
-                  id="dob"
-                  style="flex: 1; padding: 10px 13px"
-                />
-              </div>
-              <div
-                class="form-actions"
-                style="
-                  display: flex;
-                  justify-content: center;
-                  gap: 12px;
-                  margin-top: 6px;
-                "
-              >
-                <button
-                  class="btn"
-                  type="button"
-                  id="editProfileBtn"
-                  style="background: var(--secondary)"
-                >
-                  Sửa
-                </button>
-                <button
-                  class="btn"
-                  type="submit"
-                  id="saveProfileBtn"
-                  style="display: none; background: var(--secondary)"
-                >
-                  Xác nhận
-                </button>
-              </div>
-            </form>
-          </div>
+                const editBtn = document.getElementById("editProfileBtn");
+                const saveBtn = document.getElementById("saveProfileBtn");
+                const closeProfileBtn = document.getElementById("closeProfileBtn");
+
+                editBtn.addEventListener("click", () => {
+                  // Ẩn nút "Sửa"
+                  editBtn.style.display = "none";
+
+                  // Hiện nút "Xác nhận"
+                  saveBtn.style.display = "inline-block";
+
+                  // Mở khóa các input (trừ username và email)
+                  document.querySelectorAll("input[readonly], select[disabled]").forEach(el => {
+                    const fieldName = el.getAttribute("name");
+                    if (fieldName !== "username" && fieldName !== "email") {
+                      el.removeAttribute("readonly");
+                      el.removeAttribute("disabled");
+                      el.style.background = "#fff";
+                    }
+                  });
+                });
+
+                // Khi bấm "Xác nhận" thì đổi lại nút "Sửa"
+                saveBtn.addEventListener("click", () => {
+                  editBtn.style.display = "inline-block";
+                  saveBtn.style.display = "none";
+                });
+
+                // allow form submit to proceed
+                saveBtn.addEventListener("click", () => {
+                  // Sau khi gửi biểu mẫu sẽ tải lại hoặc được xử lý bởi máy chủ; chúng ta vẫn chuyển giao diện người dùng trở lại
+                  disableEditing();
+                });
+
+                // Đóng cửa sổ (sử dụng hàm chung để đảm bảo trạng thái được reset)
+                function closeProfile() {
+                  if (!popupProfile) return;
+                  popupProfile.style.display = "none";
+                  popupProfile.setAttribute("aria-hidden", "true");
+
+                  // Reset editing state
+                  disableEditing();
+                }
+
+                // Gắn listener cho nút đóng
+                closeProfileBtn && closeProfileBtn.addEventListener("click", closeProfile);
+
+                // Đóng khi click ra ngoài popup-content
+                popupProfile && popupProfile.addEventListener("click", (e) => {
+                  // if clicked directly on overlay (not the dialog content), close
+                  if (e.target === popupProfile) closeProfile();
+                });
+
+                // Đóng khi nhấn Escape
+                document.addEventListener("keydown", (e) => {
+                  if (e.key === "Escape" && popupProfile && popupProfile.style.display !== "none") closeProfile();
+                });
+
+                // Kiem tra duy tri popup khi render lai trang (server side flag)
+                const keepProfileOpen = popupProfile && popupProfile.dataset.keepOpen === '1';
+                if (keepProfileOpen) {
+                  const popup = document.getElementById("popupProfile");
+                  if (popup) popup.style.display = "flex";
+                }
+              </script>
+            </div>
+            <% if (error) { %>
+              <p class="error"><%= error %></p>
+            <% } %>
+            <% if (success) { %>
+              <p class="success"><%= success %></p>
+            <% } %>
+          </form>
         </div>
-
-        <!-- ========== WORKHUB SETTINGS OVERLAY ========== -->
-        <div id="whSettings" class="wh-settings" aria-hidden="true">
-          <div class="wh-wrap">
-            <aside class="wh-side">
-              <div class="wh-search"><input placeholder="Tìm kiếm..." /></div>
-              <div class="wh-group">CÀI ĐẶT NGƯỜI DÙNG</div>
-              <nav class="wh-nav">
-                <button class="wh-nav-item wh-active" data-view="account">
-                  Tài Khoản Của Tôi
-                </button>
-                <button class="wh-nav-item" data-view="profile">Hồ sơ</button>
-                <button class="wh-nav-item" data-view="community">
-                  Nội dung & Cộng đồng
-                </button>
-                <button class="wh-nav-item" data-view="privacy">
-                  Dữ liệu & Bảo Mật
-                </button>
-                <button class="wh-nav-item" data-view="devices">
-                  Thiết bị
-                </button>
-                <button class="wh-nav-item" data-view="connections">
-                  Kết Nối
-                </button>
-              </nav>
-              <div class="wh-group">CÀI ĐẶT ỨNG DỤNG</div>
-              <nav class="wh-nav">
-                <button class="wh-nav-item">Hiển thị</button>
-                <button class="wh-nav-item">Trợ năng</button>
-                <button class="wh-nav-item">Giọng nói & Video</button>
-                <button class="wh-nav-item">Trò chuyện</button>
-              </nav>
-            </aside>
-            <main class="wh-main">
-              <header class="wh-topbar">
-                <div class="wh-title">Tài Khoản Của Tôi</div>
-                <button class="wh-btn wh-primary" id="whClose" title="ESC">
-                  Đóng
-                </button>
-              </header>
-
-              <section class="wh-card">
-                <div class="wh-row">
-                  <div>
-                    <div class="wh-label">Tên hiển thị</div>
-                    <div class="wh-value">Brian</div>
-                  </div>
-                  <button class="wh-mini">Chỉnh sửa</button>
-                </div>
-                <div class="wh-row">
-                  <div>
-                    <div class="wh-label">Tên đăng nhập</div>
-                    <div class="wh-value">beaklynn</div>
-                  </div>
-                  <button class="wh-mini">Chỉnh sửa</button>
-                </div>
-                <div class="wh-row">
-                  <div>
-                    <div class="wh-label">Email</div>
-                    <div class="wh-value">
-                      ********@gmail.com
-                      <a href="#" class="wh-link">Hiển thị</a>
-                    </div>
-                  </div>
-                  <button class="wh-mini">Chỉnh sửa</button>
-                </div>
-                <div class="wh-row">
-                  <div>
-                    <div class="wh-label">Số Điện Thoại</div>
-                    <div class="wh-value">
-                      *******4108 <a href="#" class="wh-link">Hiển thị</a>
-                    </div>
-                  </div>
-                  <div style="display: flex; gap: 10px; align-items: center">
-                    <button
-                      class="wh-link wh-danger"
-                      style="background: none; border: none; cursor: pointer"
-                    >
-                      Gỡ bỏ
-                    </button>
-                    <button class="wh-mini">Chỉnh sửa</button>
-                  </div>
-                </div>
-              </section>
-
-              <div class="wh-tabs">
-                <button class="wh-tab wh-active" data-tab="security">
-                  Bảo mật
-                </button>
-                <button class="wh-tab" data-tab="status">Trạng thái</button>
-              </div>
-              <div class="wh-panel wh-show" data-tab="security">
-                <h3 class="wh-section">Mật Khẩu và Xác Thực</h3>
-                <div class="wh-card">
-                  <div class="wh-row wh-between">
-                    <div>
-                      <div class="wh-t">Đổi Mật Khẩu</div>
-                      <div class="wh-sub">
-                        Cập nhật mật khẩu để bảo vệ tài khoản.
-                      </div>
-                    </div>
-                    <button class="wh-btn wh-primary">Đổi Mật Khẩu</button>
-                  </div>
-                  <hr
-                    style="border: 0; border-top: 1px solid var(--border-color)"
-                  />
-                  <div class="wh-row wh-between">
-                    <div>
-                      <div class="wh-t">Ứng Dụng Xác Thực</div>
-                      <div class="wh-sub">
-                        Thêm lớp bảo mật bổ sung khi đăng nhập.
-                      </div>
-                    </div>
-                    <button class="wh-btn wh-primary">
-                      Bật Ứng Dụng Xác Thực
-                    </button>
-                  </div>
-                  <hr
-                    style="border: 0; border-top: 1px solid var(--border-color)"
-                  />
-                  <div class="wh-row wh-between">
-                    <div>
-                      <div class="wh-t">Mã bảo mật</div>
-                      <div class="wh-sub">
-                        Tạo mã dự phòng để đăng nhập an toàn.
-                      </div>
-                    </div>
-                    <button class="wh-btn wh-secondary">
-                      Đăng ký Mã Bảo Mật
-                    </button>
-                  </div>
-                </div>
-                <div class="wh-card wh-danger-zone">
-                  <h4 class="wh-section">Ngừng Sử Dụng Tài Khoản</h4>
-                  <div class="wh-row" style="gap: 10px">
-                    <button class="wh-btn wh-danger">
-                      Vô Hiệu Hóa Tài Khoản
-                    </button>
-                    <button class="wh-btn wh-outline">Xóa Tài Khoản</button>
-                  </div>
-                </div>
-              </div>
-              <div class="wh-panel" data-tab="status">
-                <div class="wh-card">
-                  <div class="wh-row wh-between">
-                    <div>
-                      <div class="wh-t">Trạng thái tài khoản</div>
-                      <div class="wh-sub">Tài khoản hoạt động bình thường.</div>
-                    </div>
-                    <span class="wh-pill-ok">Đang hoạt động</span>
-                  </div>
-                </div>
-              </div>
-            </main>
-          </div>
-        </div>
-        <!-- ========== /WORKHUB SETTINGS OVERLAY ========== -->
       </div>
 
-      <script>
-        // ===== CONFIG =====
-        const USE_FETCH = true;
-        const API = {
-          createGroup: "/api/groups",
-          updateProfile: "/api/profile/update",
-        };
+      <!-- ========== WORKHUB SETTINGS OVERLAY ========== -->
+      <div id="whSettings" class="wh-settings" aria-hidden="true">
+        <div class="wh-wrap">
+          <aside class="wh-side">
+            <div class="wh-search"><input placeholder="Tìm kiếm..." /></div>
+            <div class="wh-group">CÀI ĐẶT NGƯỜI DÙNG</div>
+            <nav class="wh-nav">
+              <button class="wh-nav-item wh-active" data-view="account">
+                Tài Khoản Của Tôi
+              </button>
+              <button class="wh-nav-item" data-view="profile">Hồ sơ</button>
+              <button class="wh-nav-item" data-view="community">
+                Nội dung & Cộng đồng
+              </button>
+              <button class="wh-nav-item" data-view="privacy">
+                Dữ liệu & Bảo Mật
+              </button>
+              <button class="wh-nav-item" data-view="devices">
+                Thiết bị
+              </button>
+              <button class="wh-nav-item" data-view="connections">
+                Kết Nối
+              </button>
+            </nav>
+            <div class="wh-group">CÀI ĐẶT ỨNG DỤNG</div>
+            <nav class="wh-nav">
+              <button class="wh-nav-item">Hiển thị</button>
+              <button class="wh-nav-item">Trợ năng</button>
+              <button class="wh-nav-item">Giọng nói & Video</button>
+              <button class="wh-nav-item">Trò chuyện</button>
+            </nav>
+          </aside>
+          <main class="wh-main">
+            <header class="wh-topbar">
+              <div class="wh-title">Tài Khoản Của Tôi</div>
+              <button class="wh-btn wh-primary" id="whClose" title="ESC">
+                Đóng
+              </button>
+            </header>
 
-        // Xem trước hình (background/avatar)
-        function previewImage(evt, targetId) {
-          const file = evt.target.files?.[0];
-          if (!file) return;
-          const url = URL.createObjectURL(file);
-          const img = document.getElementById(targetId);
-          if (img) {
-            img.src = url;
-          }
+            <section class="wh-card">
+              <div class="wh-row">
+                <div>
+                  <div class="wh-label">Tên hiển thị</div>
+                  <div class="wh-value">Brian</div>
+                </div>
+                <button class="wh-mini">Chỉnh sửa</button>
+              </div>
+              <div class="wh-row">
+                <div>
+                  <div class="wh-label">Tên đăng nhập</div>
+                  <div class="wh-value">beaklynn</div>
+                </div>
+                <button class="wh-mini">Chỉnh sửa</button>
+              </div>
+              <div class="wh-row">
+                <div>
+                  <div class="wh-label">Email</div>
+                  <div class="wh-value">
+                    ********@gmail.com
+                    <a href="#" class="wh-link">Hiển thị</a>
+                  </div>
+                </div>
+                <button class="wh-mini">Chỉnh sửa</button>
+              </div>
+              <div class="wh-row">
+                <div>
+                  <div class="wh-label">Số Điện Thoại</div>
+                  <div class="wh-value">
+                    *******4108 <a href="#" class="wh-link">Hiển thị</a>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center">
+                  <button class="wh-link wh-danger" style="background: none; border: none; cursor: pointer">
+                    Gỡ bỏ
+                  </button>
+                  <button class="wh-mini">Chỉnh sửa</button>
+                </div>
+              </div>
+            </section>
+
+            <div class="wh-tabs">
+              <button class="wh-tab wh-active" data-tab="security">
+                Bảo mật
+              </button>
+              <button class="wh-tab" data-tab="status">Trạng thái</button>
+            </div>
+            <div class="wh-panel wh-show" data-tab="security">
+              <h3 class="wh-section">Mật Khẩu và Xác Thực</h3>
+              <div class="wh-card">
+                <div class="wh-row wh-between">
+                  <div>
+                    <div class="wh-t">Đổi Mật Khẩu</div>
+                    <div class="wh-sub">
+                      Cập nhật mật khẩu để bảo vệ tài khoản.
+                    </div>
+                  </div>
+                  <button class="wh-btn wh-primary">Đổi Mật Khẩu</button>
+                </div>
+                <hr style="border: 0; border-top: 1px solid var(--border-color)" />
+                <div class="wh-row wh-between">
+                  <div>
+                    <div class="wh-t">Ứng Dụng Xác Thực</div>
+                    <div class="wh-sub">
+                      Thêm lớp bảo mật bổ sung khi đăng nhập.
+                    </div>
+                  </div>
+                  <button class="wh-btn wh-primary">
+                    Bật Ứng Dụng Xác Thực
+                  </button>
+                </div>
+                <hr style="border: 0; border-top: 1px solid var(--border-color)" />
+                <div class="wh-row wh-between">
+                  <div>
+                    <div class="wh-t">Mã bảo mật</div>
+                    <div class="wh-sub">
+                      Tạo mã dự phòng để đăng nhập an toàn.
+                    </div>
+                  </div>
+                  <button class="wh-btn wh-secondary">
+                    Đăng ký Mã Bảo Mật
+                  </button>
+                </div>
+              </div>
+              <div class="wh-card wh-danger-zone">
+                <h4 class="wh-section">Ngừng Sử Dụng Tài Khoản</h4>
+                <div class="wh-row" style="gap: 10px">
+                  <button class="wh-btn wh-danger">
+                    Vô Hiệu Hóa Tài Khoản
+                  </button>
+                  <button class="wh-btn wh-outline">Xóa Tài Khoản</button>
+                </div>
+              </div>
+            </div>
+            <div class="wh-panel" data-tab="status">
+              <div class="wh-card">
+                <div class="wh-row wh-between">
+                  <div>
+                    <div class="wh-t">Trạng thái tài khoản</div>
+                    <div class="wh-sub">Tài khoản hoạt động bình thường.</div>
+                  </div>
+                  <span class="wh-pill-ok">Đang hoạt động</span>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+      <!-- ========== /WORKHUB SETTINGS OVERLAY ========== -->
+    </div>
+
+    <script>
+      // ===== CONFIG =====
+      const USE_FETCH = true;
+      const API = {
+        createGroup: "/groups",
+        updateProfile: "/api/profile/update",
+      };
+
+      // Xem trước hình (background/avatar)
+      function previewImage(evt, targetId) {
+        const file = evt.target.files?.[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        const img = document.getElementById(targetId);
+        if (img) {
+          img.src = url;
         }
+      }
 
-        // --- TẠO NHÓM POPUP ---
-        const btnAddGroup = document.getElementById("btnAddGroup");
-        const popupGroup = document.getElementById("popupGroup");
-        const closeGroupPopup = document.getElementById("closeGroupPopup");
-        const cancelGroupBtn = document.getElementById("cancelGroupBtn");
-        const groupForm = document.getElementById("groupForm");
-        const groupList = document.getElementById("groupList");
-        const groupSearchInput = document.querySelector(
-          ".sidebar-search input"
+      // --- TẠO NHÓM POPUP ---
+      const btnAddGroup = document.getElementById("btnAddGroup");
+      const popupGroup = document.getElementById("popupGroup");
+      const closeGroupPopup = document.getElementById("closeGroupPopup");
+      const cancelGroupBtn = document.getElementById("cancelGroupBtn");
+      const groupForm = document.getElementById("groupForm");
+      const groupList = document.getElementById("groupList");
+      const groupSearchInput = document.querySelector(
+        ".sidebar-search input"
+      );
+
+      let groups = [
+        { name: "Nhóm A", leader: "Nguyễn Văn A" },
+        { name: "Nhóm B", leader: "Trần Thị B" },
+      ];
+
+      function renderGroups(filter = "") {
+        const filtered = groups.filter((g) =>
+          g.name.toLowerCase().includes(filter.trim().toLowerCase())
         );
-
-        let groups = [
-          { name: "Nhóm A", leader: "Nguyễn Văn A" },
-          { name: "Nhóm B", leader: "Trần Thị B" },
-        ];
-
-        function renderGroups(filter = "") {
-          const filtered = groups.filter((g) =>
-            g.name.toLowerCase().includes(filter.trim().toLowerCase())
-          );
-          groupList.innerHTML =
-            filtered
-              .map(
-                (g) => `
+        groupList.innerHTML =
+          filtered
+            .map(
+              (g) => `
           <div style="padding:10px 14px;border-bottom:1px solid var(--border-color);cursor:pointer;">
             <div style="font-weight:600;color:var(--text)">${g.name}</div>
-            <div style="font-size:13px;color:var(--text-muted);opacity:.95;">Nhóm trưởng: ${
-              g.leader || ""
-            }</div>
+            <div style="font-size:13px;color:var(--text-muted);opacity:.95;">Nhóm trưởng: ${g.leader || ""
+                }</div>
           </div>
         `
-              )
-              .join("") ||
-            `<div style="padding:12px 14px;color:var(--text-muted)">Không có nhóm phù hợp</div>`;
-        }
-        renderGroups();
-        groupSearchInput.addEventListener("input", (e) =>
-          renderGroups(e.target.value)
-        );
+            )
+            .join("") ||
+          `<div style="padding:12px 14px;color:var(--text-muted)">Không có nhóm phù hợp</div>`;
+      }
+      renderGroups();
+      groupSearchInput.addEventListener("input", (e) =>
+        renderGroups(e.target.value)
+      );
 
-        btnAddGroup.onclick = () => {
-          popupGroup.classList.add("active");
-          popupGroup.setAttribute("aria-hidden", "false");
-          groupForm.reset();
-          setTimeout(() => document.getElementById("groupName").focus(), 0);
-        };
-        function closeGroup() {
-          popupGroup.classList.remove("active");
-          popupGroup.setAttribute("aria-hidden", "true");
-        }
-        closeGroupPopup && (closeGroupPopup.onclick = closeGroup);
-        cancelGroupBtn && (cancelGroupBtn.onclick = closeGroup);
-        popupGroup.onclick = (e) => {
-          if (e.target === popupGroup) closeGroup();
-        };
+      btnAddGroup.onclick = () => {
+        popupGroup.classList.add("active");
+        popupGroup.setAttribute("aria-hidden", "false");
+        groupForm.reset();
+        setTimeout(() => document.getElementById("groupName").focus(), 0);
+      };
+      function closeGroup() {
+        popupGroup.classList.remove("active");
+        popupGroup.setAttribute("aria-hidden", "true");
+      }
+      closeGroupPopup && (closeGroupPopup.onclick = closeGroup);
+      cancelGroupBtn && (cancelGroupBtn.onclick = closeGroup);
+      popupGroup.onclick = (e) => {
+        if (e.target === popupGroup) closeGroup();
+      };
 
-        groupForm.addEventListener("submit", async (e) => {
-          if (USE_FETCH) e.preventDefault();
-          const name = groupForm.groupName.value.trim();
-          if (!name) {
-            groupForm.groupName.focus();
-            return;
-          }
-          if (!USE_FETCH) return;
-          try {
-            const res = await fetch(API.createGroup, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ groupName: name }),
-            });
-            if (!res.ok) throw new Error("Tạo nhóm thất bại");
-            const created = await res.json().catch(() => ({ leader: "Bạn" }));
-            groups.push({ name, leader: created.leader || "Bạn" });
-            renderGroups();
-            closeGroup();
-          } catch (err) {
-            alert(err.message || "Có lỗi xảy ra");
-          }
-        });
-
-        // ===== Theme =====
-        const THEME_KEY = "workhub-theme";
-        const themeBtn = document.getElementById("btnTheme");
-        const themeIcon = document.getElementById("themeIcon");
-
-        function getPreferredTheme() {
-          const saved = localStorage.getItem(THEME_KEY);
-          if (saved === "light" || saved === "dark") return saved;
-          return window.matchMedia &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
+      groupForm.addEventListener("submit", async (e) => {
+        if (USE_FETCH) e.preventDefault();
+        const name = groupForm.groupName.value.trim();
+        if (!name) {
+          groupForm.groupName.focus();
+          return;
         }
-        function applyTheme(t) {
-          document.documentElement.setAttribute("data-theme", t);
-          themeBtn.title =
-            t === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối";
-          themeBtn.setAttribute("aria-pressed", t === "dark");
-          themeIcon.innerHTML =
-            t === "dark"
-              ? `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2"/>`
-              : `<circle cx="12" cy="12" r="5" stroke-width="2"/> 
-                 <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/>`;
-        }
-        function toggleTheme() {
-          const current =
-            document.documentElement.getAttribute("data-theme") || "light";
-          const next = current === "dark" ? "light" : "dark";
-          localStorage.setItem(THEME_KEY, next);
-          applyTheme(next);
-        }
-        applyTheme(getPreferredTheme());
-        themeBtn.addEventListener("click", toggleTheme);
-
-        // Tabs (toolbar)
-        document.querySelectorAll(".tab-btn").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            document
-              .querySelectorAll(".tab-btn")
-              .forEach((b) => b.classList.remove("active"));
-            btn.classList.add("active");
+        if (!USE_FETCH) return;
+        try {
+          const res = await fetch(API.createGroup, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ groupName: name }),
           });
+          if (!res.ok) throw new Error("Tạo nhóm thất bại");
+          const created = await res.json().catch(() => ({ leader: "Bạn" }));
+          groups.push({ name, leader: created.leader || "Bạn" });
+          renderGroups();
+          closeGroup();
+        } catch (err) {
+          console.warn('Create group failed, falling back to local UI:', err);
+          // nguoi tao nhom se la truong nhom
+          groups.push({ name, leader: "Bạn" });
+          renderGroups();
+          closeGroup();
+        }
+      });
+
+      // ===== Theme =====
+      const THEME_KEY = "workhub-theme";
+      const themeBtn = document.getElementById("btnTheme");
+      const themeIcon = document.getElementById("themeIcon");
+
+      function getPreferredTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "light" || saved === "dark") return saved;
+        return window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      }
+      function applyTheme(t) {
+        document.documentElement.setAttribute("data-theme", t);
+        themeBtn.title =
+          t === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối";
+        themeBtn.setAttribute("aria-pressed", t === "dark");
+        themeIcon.innerHTML =
+          t === "dark"
+            ? `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2"/>`
+            : `<circle cx="12" cy="12" r="5" stroke-width="2"/> 
+                 <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/>`;
+      }
+      function toggleTheme() {
+        const current =
+          document.documentElement.getAttribute("data-theme") || "light";
+        const next = current === "dark" ? "light" : "dark";
+        localStorage.setItem(THEME_KEY, next);
+        applyTheme(next);
+      }
+      applyTheme(getPreferredTheme());
+      themeBtn.addEventListener("click", toggleTheme);
+
+      // Tabs (toolbar)
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tab-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
         });
+      });
 
-        // Right panels
-        const notifPanel = document.getElementById("notifPanel");
-        const notifPanelContent = document.getElementById("notifPanelContent");
-        const calendarPanel = document.getElementById("calendarPanel");
-        const calendarPanelContent = document.getElementById(
-          "calendarPanelContent"
-        );
-        const closeNotifPanel = document.getElementById("closeNotifPanel");
-        const closeCalendarPanel =
-          document.getElementById("closeCalendarPanel");
-        const btnNotif = document.getElementById("btnNotif");
-        const btnCalendar = document.getElementById("btnCalendar");
+      // Right panels
+      const notifPanel = document.getElementById("notifPanel");
+      const notifPanelContent = document.getElementById("notifPanelContent");
+      const calendarPanel = document.getElementById("calendarPanel");
+      const calendarPanelContent = document.getElementById(
+        "calendarPanelContent"
+      );
+      const closeNotifPanel = document.getElementById("closeNotifPanel");
+      const closeCalendarPanel =
+        document.getElementById("closeCalendarPanel");
+      const btnNotif = document.getElementById("btnNotif");
+      const btnCalendar = document.getElementById("btnCalendar");
 
-        let panelOrder = [];
-        function showPanel(panel) {
-          if (panelOrder.includes(panel)) {
-            closePanel(panel);
-            return;
-          }
-          panelOrder = [panel, ...panelOrder];
-          if (panelOrder.length > 2) panelOrder = panelOrder.slice(0, 2);
+      let panelOrder = [];
+      function showPanel(panel) {
+        if (panelOrder.includes(panel)) {
+          closePanel(panel);
+          return;
+        }
+        panelOrder = [panel, ...panelOrder];
+        if (panelOrder.length > 2) panelOrder = panelOrder.slice(0, 2);
 
-          notifPanel.classList.remove("top", "bottom", "show");
-          calendarPanel.classList.remove("top", "bottom", "show");
+        notifPanel.classList.remove("top", "bottom", "show");
+        calendarPanel.classList.remove("top", "bottom", "show");
 
-          function renderNotif() {
-            notifPanelContent.innerHTML = `
+        function renderNotif() {
+          notifPanelContent.innerHTML = `
             <div class="notif-list">
               <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
               <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
@@ -2158,9 +2076,9 @@
               <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
             </div>
           `;
-          }
-          function renderCalendar() {
-            calendarPanelContent.innerHTML = `
+        }
+        function renderCalendar() {
+          calendarPanelContent.innerHTML = `
             <div class="calendar-card" id="calendarCard">
               <div class="calendar-head">
                 <div>
@@ -2175,344 +2093,205 @@
               <div class="calendar-grid" id="calGrid"></div>
             </div>
           `;
-            setTimeout(initCalendar, 0);
-          }
+          setTimeout(initCalendar, 0);
+        }
 
-          if (panelOrder.length === 1) {
-            if (panelOrder[0] === "notif") {
-              notifPanel.classList.add("show", "top");
-              renderNotif();
-            } else {
-              calendarPanel.classList.add("show", "top");
-              renderCalendar();
-            }
+        if (panelOrder.length === 1) {
+          if (panelOrder[0] === "notif") {
+            notifPanel.classList.add("show", "top");
+            renderNotif();
           } else {
-            if (panelOrder[0] === "notif" && panelOrder[1] === "calendar") {
-              notifPanel.classList.add("show", "top");
-              calendarPanel.classList.add("show", "bottom");
-              renderNotif();
-            } else {
-              calendarPanel.classList.add("show", "top");
-              notifPanel.classList.add("show", "bottom");
-              renderCalendar();
-            }
+            calendarPanel.classList.add("show", "top");
+            renderCalendar();
+          }
+        } else {
+          if (panelOrder[0] === "notif" && panelOrder[1] === "calendar") {
+            notifPanel.classList.add("show", "top");
+            calendarPanel.classList.add("show", "bottom");
+            renderNotif();
+          } else {
+            calendarPanel.classList.add("show", "top");
+            notifPanel.classList.add("show", "bottom");
+            renderCalendar();
           }
         }
-        function closePanel(panel) {
-          panelOrder = panelOrder.filter((p) => p !== panel);
-          notifPanel.classList.remove("top", "bottom", "show");
-          calendarPanel.classList.remove("top", "bottom", "show");
-          if (panelOrder.length === 1) {
-            if (panelOrder[0] === "notif") {
-              notifPanel.classList.add("show", "top");
-            } else {
-              calendarPanel.classList.add("show", "top");
-            }
+      }
+      function closePanel(panel) {
+        panelOrder = panelOrder.filter((p) => p !== panel);
+        notifPanel.classList.remove("top", "bottom", "show");
+        calendarPanel.classList.remove("top", "bottom", "show");
+        if (panelOrder.length === 1) {
+          if (panelOrder[0] === "notif") {
+            notifPanel.classList.add("show", "top");
+          } else {
+            calendarPanel.classList.add("show", "top");
           }
         }
-        btnNotif.onclick = () => showPanel("notif");
-        btnCalendar.onclick = () => showPanel("calendar");
-        closeNotifPanel &&
-          (closeNotifPanel.onclick = () => closePanel("notif"));
-        closeCalendarPanel &&
-          (closeCalendarPanel.onclick = () => closePanel("calendar"));
-        document.addEventListener("mousedown", (e) => {
-          if (
-            notifPanel.classList.contains("show") &&
-            !notifPanel.contains(e.target) &&
-            !btnNotif.contains(e.target)
-          )
-            closePanel("notif");
-          if (
-            calendarPanel.classList.contains("show") &&
-            !calendarPanel.contains(e.target) &&
-            !btnCalendar.contains(e.target)
-          )
-            closePanel("calendar");
-        });
+      }
+      btnNotif.onclick = () => showPanel("notif");
+      btnCalendar.onclick = () => showPanel("calendar");
+      closeNotifPanel &&
+        (closeNotifPanel.onclick = () => closePanel("notif"));
+      closeCalendarPanel &&
+        (closeCalendarPanel.onclick = () => closePanel("calendar"));
+      document.addEventListener("mousedown", (e) => {
+        if (
+          notifPanel.classList.contains("show") &&
+          !notifPanel.contains(e.target) &&
+          !btnNotif.contains(e.target)
+        )
+          closePanel("notif");
+        if (
+          calendarPanel.classList.contains("show") &&
+          !calendarPanel.contains(e.target) &&
+          !btnCalendar.contains(e.target)
+        )
+          closePanel("calendar");
+      });
 
-        function initCalendar() {
-          const calGrid = document.getElementById("calGrid");
-          const titleDay = document.getElementById("titleDay");
-          const subMonth = document.getElementById("subMonth");
-          const prevMth = document.getElementById("prevMth");
-          const nextMth = document.getElementById("nextMth");
+      function initCalendar() {
+        const calGrid = document.getElementById("calGrid");
+        const titleDay = document.getElementById("titleDay");
+        const subMonth = document.getElementById("subMonth");
+        const prevMth = document.getElementById("prevMth");
+        const nextMth = document.getElementById("nextMth");
 
-          let view = new Date();
-          function headText(d) {
-            return new Intl.DateTimeFormat("vi-VN", {
-              weekday: "short",
-              month: "short",
-              day: "2-digit",
-            }).format(d);
-          }
-          function buildCalendar(date) {
-            const y = date.getFullYear(),
-              m = date.getMonth();
-            titleDay.textContent = headText(new Date());
-            subMonth.textContent = new Intl.DateTimeFormat("vi-VN", {
-              month: "long",
-              year: "numeric",
-            })
-              .format(new Date(y, m, 1))
-              .toUpperCase();
-            const first = new Date(y, m, 1);
-            const start = (first.getDay() + 6) % 7; // Monday first
-            const days = new Date(y, m + 1, 0).getDate();
-            const prevDays = new Date(y, m, 0).getDate();
-            const parts = [];
-            ["T2", "T3", "T4", "T5", "T6", "T7", "CN"].forEach((d) =>
-              parts.push(`<div class="dow">${d}</div>`)
-            );
-            for (let i = 0; i < 42; i++) {
-              let label,
-                cls = "cell";
-              if (i < start) {
-                label = prevDays - start + i + 1;
-                cls += " faded";
-              } else if (i < start + days) {
-                label = i - start + 1;
-              } else {
-                label = i - (start + days) + 1;
-                cls += " faded";
-              }
-              const today = new Date();
-              if (
-                y === today.getFullYear() &&
-                m === today.getMonth() &&
-                label === today.getDate() &&
-                !cls.includes("faded")
-              )
-                cls += " today";
-              parts.push(`<div class="${cls}">${label}</div>`);
-            }
-            calGrid.innerHTML = parts.join("");
-          }
-          prevMth.addEventListener("click", () => {
-            view.setMonth(view.getMonth() - 1);
-            buildCalendar(view);
-          });
-          nextMth.addEventListener("click", () => {
-            view.setMonth(view.getMonth() + 1);
-            buildCalendar(view);
-          });
-          buildCalendar(view);
+        let view = new Date();
+        function headText(d) {
+          return new Intl.DateTimeFormat("vi-VN", {
+            weekday: "short",
+            month: "short",
+            day: "2-digit",
+          }).format(d);
         }
-
-        // ===== Account menu & profile popup =====
-        const openProfile = document.getElementById("openProfile");
-        const userMenu = document.getElementById("userMenu");
-        openProfile.addEventListener("click", function (e) {
-          e.stopPropagation();
-          userMenu.style.display =
-            userMenu.style.display === "block" ? "none" : "block";
-        });
-        document.addEventListener("mousedown", function (e) {
-          if (!openProfile.contains(e.target)) {
-            userMenu.style.display = "none";
-          }
-        });
-        document.getElementById("Profile").onclick = function () {
-          document.getElementById("popupProfile").style.display = "flex";
-          document
-            .getElementById("popupProfile")
-            .setAttribute("aria-hidden", "false");
-          userMenu.style.display = "none";
-        };
-        document.getElementById("Logout").onclick = function () {
-          alert("Đăng xuất");
-          userMenu.style.display = "none";
-        };
-
-        const popupProfile = document.getElementById("popupProfile");
-        const closeProfileBtn = document.getElementById("closeProfileBtn");
-        const editProfileBtn = document.getElementById("editProfileBtn");
-        const saveProfileBtn = document.getElementById("saveProfileBtn");
-        const genderSelect = document.getElementById("gender");
-        const profileForm = document.getElementById("profileForm");
-        const profileFormInputs = [
-          document.getElementById("email"),
-          document.getElementById("phone"),
-          document.getElementById("address"),
-          genderSelect,
-          document.getElementById("dob"),
-        ];
-        const usernameInput = document.getElementById("username");
-        const backgroundInput = document.getElementById("backgroundInput");
-        const avatarInput = document.getElementById("avatarInput");
-
-        let isEditingProfile = false;
-        let originalValues = null;
-
-        function closeProfilePopup() {
-          popupProfile.style.display = "none";
-          popupProfile.setAttribute("aria-hidden", "true");
-          setProfileReadOnly(true);
-          isEditingProfile = false;
-          hideConfirm();
-          removeDirtyWatchers();
-        }
-        closeProfileBtn.onclick = closeProfilePopup;
-        popupProfile.onclick = function (e) {
-          if (e.target === popupProfile) closeProfilePopup();
-        };
-
-        editProfileBtn.onclick = function () {
-          isEditingProfile = true;
-          setProfileReadOnly(false);
-          usernameInput.readOnly = true; // không cho sửa username
-          originalValues = snapshotValues();
-          hideConfirm();
-          addDirtyWatchers();
-        };
-
-        function setProfileReadOnly(readonly) {
-          profileFormInputs.forEach((input) => {
-            if (input.tagName === "SELECT") {
-              input.disabled = readonly;
-            } else {
-              input.readOnly = readonly;
-            }
-          });
-          usernameInput.readOnly = true;
-        }
-        function showConfirm() {
-          saveProfileBtn.style.display = "inline-block";
-        }
-        function hideConfirm() {
-          saveProfileBtn.style.display = "none";
-        }
-        function snapshotValues() {
-          const map = {};
-          profileFormInputs.forEach((el) => {
-            map[el.id] = el.value;
-          });
-          return map;
-        }
-        function isDirty() {
-          if (!originalValues) return false;
-          const baseDirty = profileFormInputs.some(
-            (el) => el.value !== originalValues[el.id]
+        function buildCalendar(date) {
+          const y = date.getFullYear(),
+            m = date.getMonth();
+          titleDay.textContent = headText(new Date());
+          subMonth.textContent = new Intl.DateTimeFormat("vi-VN", {
+            month: "long",
+            year: "numeric",
+          })
+            .format(new Date(y, m, 1))
+            .toUpperCase();
+          const first = new Date(y, m, 1);
+          const start = (first.getDay() + 6) % 7; // Monday first
+          const days = new Date(y, m + 1, 0).getDate();
+          const prevDays = new Date(y, m, 0).getDate();
+          const parts = [];
+          ["T2", "T3", "T4", "T5", "T6", "T7", "CN"].forEach((d) =>
+            parts.push(`<div class="dow">${d}</div>`)
           );
-          const fileDirty =
-            backgroundInput?.files?.length > 0 ||
-            avatarInput?.files?.length > 0;
-          return baseDirty || fileDirty;
-        }
-        function onAnyChange() {
-          if (!isEditingProfile) return;
-          if (isDirty()) showConfirm();
-          else hideConfirm();
-        }
-        function addDirtyWatchers() {
-          profileFormInputs.forEach((el) => {
-            el.addEventListener("input", onAnyChange);
-            el.addEventListener("change", onAnyChange);
-          });
-          backgroundInput?.addEventListener("change", onAnyChange);
-          avatarInput?.addEventListener("change", onAnyChange);
-        }
-        function removeDirtyWatchers() {
-          profileFormInputs.forEach((el) => {
-            el.removeEventListener("input", onAnyChange);
-            el.removeEventListener("change", onAnyChange);
-          });
-          backgroundInput?.removeEventListener("change", onAnyChange);
-          avatarInput?.removeEventListener("change", onAnyChange);
-        }
-
-        // Submit hồ sơ
-        profileForm.addEventListener("submit", async (e) => {
-          if (USE_FETCH) e.preventDefault();
-          if (!isEditingProfile) {
-            return;
-          }
-          if (!USE_FETCH) return;
-
-          const hasFiles =
-            (backgroundInput &&
-              backgroundInput.files &&
-              backgroundInput.files.length > 0) ||
-            (avatarInput && avatarInput.files && avatarInput.files.length > 0);
-
-          try {
-            let res;
-            if (hasFiles) {
-              const fd = new FormData(profileForm);
-              res = await fetch(API.updateProfile, {
-                method: "POST",
-                body: fd,
-              });
+          for (let i = 0; i < 42; i++) {
+            let label,
+              cls = "cell";
+            if (i < start) {
+              label = prevDays - start + i + 1;
+              cls += " faded";
+            } else if (i < start + days) {
+              label = i - start + 1;
             } else {
-              const payload = Object.fromEntries(
-                new FormData(profileForm).entries()
-              );
-              res = await fetch(API.updateProfile, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-              });
+              label = i - (start + days) + 1;
+              cls += " faded";
             }
-            if (!res.ok) throw new Error("Cập nhật hồ sơ thất bại");
-
-            setProfileReadOnly(true);
-            isEditingProfile = false;
-            hideConfirm();
-            removeDirtyWatchers();
-            alert("Thông tin đã được lưu!");
-          } catch (err) {
-            alert(err.message || "Có lỗi xảy ra");
+            const today = new Date();
+            if (
+              y === today.getFullYear() &&
+              m === today.getMonth() &&
+              label === today.getDate() &&
+              !cls.includes("faded")
+            )
+              cls += " today";
+            parts.push(`<div class="${cls}">${label}</div>`);
           }
-        });
-
-        // ===== WORKHUB SETTINGS (mở/đóng) =====
-        const whOverlay = document.getElementById("whSettings");
-        const whBtnOpen = document.getElementById("OpenSettings");
-        const whBtnClose = document.getElementById("whClose");
-
-        if (whBtnOpen) {
-          whBtnOpen.addEventListener("click", () => {
-            whOverlay.style.display = "block";
-            if (userMenu) userMenu.style.display = "none";
-          });
+          calGrid.innerHTML = parts.join("");
         }
-        if (whBtnClose) {
-          whBtnClose.addEventListener("click", () => {
-            whOverlay.style.display = "none";
-          });
+        prevMth.addEventListener("click", () => {
+          view.setMonth(view.getMonth() - 1);
+          buildCalendar(view);
+        });
+        nextMth.addEventListener("click", () => {
+          view.setMonth(view.getMonth() + 1);
+          buildCalendar(view);
+        });
+        buildCalendar(view);
+      }
+
+      // ===== Account menu & profile popup =====
+      const openProfile = document.getElementById("openProfile");
+      const userMenu = document.getElementById("userMenu");
+      openProfile.addEventListener("click", function (e) {
+        e.stopPropagation();
+        userMenu.style.display =
+          userMenu.style.display === "block" ? "none" : "block";
+      });
+      document.addEventListener("mousedown", function (e) {
+        if (!openProfile.contains(e.target)) {
+          userMenu.style.display = "none";
         }
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape" && whOverlay.style.display === "block") {
-            whOverlay.style.display = "none";
-          }
-        });
+      });
+      document.getElementById("Profile").onclick = function () {
+        document.getElementById("popupProfile").style.display = "flex";
+        document
+          .getElementById("popupProfile")
+          .setAttribute("aria-hidden", "false");
+        userMenu.style.display = "none";
+      };   
 
-        // Tabs trong trang cài đặt
-        document.querySelectorAll(".wh-tab").forEach((tab) => {
-          tab.addEventListener("click", () => {
-            document
-              .querySelectorAll(".wh-tab")
-              .forEach((t) => t.classList.remove("wh-active"));
-            document
-              .querySelectorAll(".wh-panel")
-              .forEach((p) => p.classList.remove("wh-show"));
-            tab.classList.add("wh-active");
-            document
-              .querySelector(`.wh-panel[data-tab="${tab.dataset.tab}"]`)
-              ?.classList.add("wh-show");
-          });
-        });
+      // ===== WORKHUB SETTINGS (mở/đóng) =====
+      const whOverlay = document.getElementById("whSettings");
+      const whBtnOpen = document.getElementById("OpenSettings");
+      const whBtnClose = document.getElementById("whClose");
 
-        // Sidebar highlight
-        document.querySelectorAll(".wh-nav-item").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            document
-              .querySelectorAll(".wh-nav-item")
-              .forEach((b) => b.classList.remove("wh-active"));
-            btn.classList.add("wh-active");
-          });
+      if (whBtnOpen) {
+        whBtnOpen.addEventListener("click", () => {
+          whOverlay.style.display = "block";
+          if (userMenu) userMenu.style.display = "none";
         });
-      </script>
-    </div>
-  </body>
+      }
+      if (whBtnClose) {
+        whBtnClose.addEventListener("click", () => {
+          whOverlay.style.display = "none";
+        });
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && whOverlay.style.display === "block") {
+          whOverlay.style.display = "none";
+        }
+      });
+
+      // Tabs trong trang cài đặt
+      document.querySelectorAll(".wh-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document
+            .querySelectorAll(".wh-tab")
+            .forEach((t) => t.classList.remove("wh-active"));
+          document
+            .querySelectorAll(".wh-panel")
+            .forEach((p) => p.classList.remove("wh-show"));
+          tab.classList.add("wh-active");
+          document
+            .querySelector(`.wh-panel[data-tab="${tab.dataset.tab}"]`)
+            ?.classList.add("wh-show");
+        });
+      });
+
+      // Sidebar highlight
+      document.querySelectorAll(".wh-nav-item").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".wh-nav-item")
+            .forEach((b) => b.classList.remove("wh-active"));
+          btn.classList.add("wh-active");
+        });
+      });
+
+      //logout 
+      document.getElementById("Logout").addEventListener("click", () => {
+        window.location.href = "/auth/logout";
+      });
+    </script>
+  </div>
+</body>
+
 </html>

@@ -14,12 +14,12 @@ const router = express.Router();
 
 // Trang đăng nhập
 router.get('/login', (req, res) => {
-  res.render('login', {error: null});
+  res.render('login', { error: null });
 });
 
 // Trang đăng ký
 router.get('/register', (req, res) => {
-  res.render('register', {error: null});
+  res.render('register', { error: null });
 });
 
 // Trang quên mật khẩu
@@ -27,7 +27,7 @@ router.get('/forgot', (req, res) => res.render('forgot'));
 
 // ============================== ĐĂNG KÝ ==============================
 router.post('/register', async (req, res) => {
-  const {name, username, email, password, confirmPassword } = req.body;
+  const { name, username, email, password, confirmPassword } = req.body;
   const formData = { name, username, email };
 
   // Kiem tra nhap du thong tin khong
@@ -79,7 +79,7 @@ router.post('/register', async (req, res) => {
       // chưa tồn tại thì băm mk ra và nhét vào
       const hashedPassword = await bcrypt.hash(password, 10);
       const id = uuidv7();  // tạo UUID v7
-    
+
       const sql = "INSERT INTO `user` (id, username, email, password, name) VALUES (UUID_TO_BIN(?), ?, ?, ?, ?)";
 
       db.query(sql, [id, username, email, hashedPassword, name], (err, result) => {
@@ -99,7 +99,7 @@ router.post('/register', async (req, res) => {
 // ============================== ĐĂNG NHẬP ==============================
 router.post('/login', (req, res) => {
   const { usernameOrEmail, password } = req.body;
-  const formData = {usernameOrEmail};
+  const formData = { usernameOrEmail };
 
   // Kiem tra nhap du thong tin khong
   if (!usernameOrEmail || !password) {
@@ -109,18 +109,18 @@ router.post('/login', (req, res) => {
   // Kiem tra la username hay email
   const isEmail = usernameOrEmail.includes("@");
 
-  const sql = isEmail 
-  ? "SELECT BIN_TO_UUID(id) AS id, username, email, password, name, dob, gender, phoneNumber, address, avatarPath, backgroundPath FROM user WHERE email = ?" 
-  : "SELECT BIN_TO_UUID(id) AS id, username, email, password, name, dob, gender, phoneNumber, address, avatarPath, backgroundPath FROM user WHERE username = ?"
+  const sql = isEmail
+    ? "SELECT BIN_TO_UUID(id) AS id, username, email, password, name, dob, gender, phoneNumber, address, avatarPath, backgroundPath FROM user WHERE email = ?"
+    : "SELECT BIN_TO_UUID(id) AS id, username, email, password, name, dob, gender, phoneNumber, address, avatarPath, backgroundPath FROM user WHERE username = ?"
 
-  db.query(sql, [usernameOrEmail], async (err, results) => {  
+  db.query(sql, [usernameOrEmail], async (err, results) => {
     if (err) {
       console.error(err);
       return res.status(500).send("Lỗi hệ thống");
     }
 
     if (results.length === 0) {
-      return res.render("login", { error: "Tài khoản không tồn tại", formData});
+      return res.render("login", { error: "Tài khoản không tồn tại", formData });
     }
 
     const user = results[0];
@@ -128,23 +128,23 @@ router.post('/login', (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.render("login", {error: "Sai mật khẩu!" , formData});
+      return res.render("login", { error: "Sai mật khẩu!", formData });
       console.log(password, user.password)
     }
 
     // Lưu session
-   req.session.user = {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    name: user.name,
-    dob: user.dob ? new Date(user.dob).toISOString().split('T')[0] : '',
-    gender: user.gender,
-    phoneNumber: user.phoneNumber,
-    address: user.address,
-    avatarPath: user.avatarPath,
-    backgroundPath: user.backgroundPath
-  };
+    req.session.user = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      name: user.name,
+      dob: user.dob ? new Date(user.dob).toISOString().split('T')[0] : '',
+      gender: user.gender,
+      phoneNumber: user.phoneNumber,
+      address: user.address,
+      avatarPath: user.avatarPath,
+      backgroundPath: user.backgroundPath
+    };
     res.redirect("/");
   });
 });
@@ -183,7 +183,7 @@ router.post("/forgot", async (req, res) => {
           secure: true,       // true vì port 465 dùng SSL
           auth: {
             user: "doanhongduongcbb@gmail.com", // Doi sang email chong cua nhom mik
-            pass: "btjnzykhvfzvtzyu",      
+            pass: "btjnzykhvfzvtzyu",
           },
         });
 
@@ -207,6 +207,21 @@ router.post("/forgot", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.render("forgot", { error: "Đã xảy ra lỗi không xác định!", success: null });
+  }
+});
+// logout 
+router.get("/logout", (req, res) => {
+  if (req.session) {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Lỗi khi đăng xuất:", err);
+        return res.redirect("/"); // quay lại home nếu lỗi
+      }
+      res.clearCookie("connect.sid");
+      res.redirect("/auth/login"); // chuyển về trang đăng nhập
+    });
+  } else {
+    res.redirect("/auth/login");
   }
 });
 

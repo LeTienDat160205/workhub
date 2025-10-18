@@ -90,7 +90,6 @@ router.post("/",
           user, 
           error: errors.array()[0].msg, 
           success: null, 
-          keepProfileOpen: true 
         });
       }
 
@@ -136,7 +135,6 @@ router.post("/",
         user: req.session.user, 
         success: "Cập nhật thông tin thành công!", 
         error: null, 
-        keepProfileOpen: true 
       });
     } catch (err) {
       console.error("POST /info error:", err);
@@ -146,7 +144,6 @@ router.post("/",
         user: req.session.user, 
         error: "Đã xảy ra lỗi khi cập nhật thông tin!", 
         success: null, 
-        keepProfileOpen: true 
       });
     }
   }

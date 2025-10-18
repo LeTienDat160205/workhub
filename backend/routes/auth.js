@@ -209,7 +209,8 @@ router.post("/forgot", async (req, res) => {
     res.render("forgot", { error: "Đã xảy ra lỗi không xác định!", success: null });
   }
 });
-// logout 
+
+// ================================ Đăng xuất ================================
 router.get("/logout", (req, res) => {
   if (req.session) {
     req.session.destroy((err) => {

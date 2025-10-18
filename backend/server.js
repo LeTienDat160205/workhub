@@ -52,9 +52,7 @@ app.get('/', (req, res) => {
     user: req.session.user, 
     error: null, 
     success: null, 
-    keepProfileOpen: false 
   });
-  // res.render("home", { user: req.session.user, error: null, success: null }); 
 });
 
 app.listen(3000, () => console.log('Server running at http://localhost:3000'));

@@ -10,8 +10,7 @@ function ensureAuth(req, res, next) {
   next();
 }
 
-// Create group
-// POST /groups
+// =================================== Tạo nhóm =====================================
 router.post("/", ensureAuth, async (req, res) => {
   try {
     const { groupName } = req.body;

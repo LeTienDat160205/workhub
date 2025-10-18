@@ -1214,124 +1214,127 @@
       font-size: 0.9rem;
     }
 
-/* ===== Khối tổng thể ===== */
-.profile-hero {
-  position: relative;
-  width: calc(100% + 2px);
-  background: #fff;
-  border-radius: 12px;
-  overflow: visible;
-  padding-bottom: 12px;
-  padding: 0;
-}
+    /* ===== Khối tổng thể ===== */
+    .profile-hero {
+      position: relative;
+      width: calc(100% + 2px);
+      background: #fff;
+      border-radius: 12px;
+      overflow: visible;
+      padding-bottom: 12px;
+      padding: 0;
+    }
 
-/* ===== Background ===== */
-.profile-hero .background {
-  position: relative;
-  width: 420px;
-  left: -33px;
-  height: 160px;
-  overflow: hidden;
-  background: #e5e7eb;
-  z-index: 1;
-}
+    /* ===== Background ===== */
+    .profile-hero .background {
+      position: relative;
+      width: 420px;
+      left: -33px;
+      height: 160px;
+      overflow: hidden;
+      background: #e5e7eb;
+      z-index: 1;
+    }
 
-.profile-hero .background img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+    .profile-hero .background img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
 
-.profile-hero .bg-upload {
-  position: absolute;
-  right: 12px;
-  top: 12px;
-  background: rgba(0,0,0,0.6);
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  cursor: pointer;
-  user-select: none;
-  z-index: 3;
-}
+    .profile-hero .bg-upload {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+      z-index: 3;
+    }
 
-/* ===== Avatar ===== */
-.profile-hero .avatar {
-  position: absolute;
-  top: 100px;                /* đặt avatar đè lên phần dưới của background */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: #eee;
-  overflow: visible;         /* để nút chỉnh sửa không bị cắt */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 4;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-}
+    /* ===== Avatar ===== */
+    .profile-hero .avatar {
+      position: absolute;
+      top: 100px;
+      /* đặt avatar đè lên phần dưới của background */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #eee;
+      overflow: visible;
+      /* để nút chỉnh sửa không bị cắt */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
 
-.profile-hero .avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
+    .profile-hero .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
 
-/* ===== Nút đổi avatar ===== */
-.profile-hero .avatar-upload {
-  position: absolute;
-  right: -4px;
-  bottom: -4px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: gray;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  cursor: pointer;
-  z-index: 5;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
+    /* ===== Nút đổi avatar ===== */
+    .profile-hero .avatar-upload {
+      position: absolute;
+      right: -4px;
+      bottom: -4px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: gray;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 5;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
 
-/* ===== Tên người dùng ===== */
-.profile-hero .name {
-  display: block;
-  margin: 80px auto 8px auto;  /* cách background một khoảng hợp lý */
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-  border: none;
-  background: transparent;
-  color: #111827;
-  outline: none;
-}
+    /* ===== Tên người dùng ===== */
+    .profile-hero .name {
+      display: block;
+      margin: 80px auto 8px auto;
+      /* cách background một khoảng hợp lý */
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: #111827;
+      outline: none;
+    }
 
-/* Responsive nhỏ */
-@media (max-width: 480px) {
-  .profile-hero .avatar {
-    width: 96px;
-    height: 96px;
-    top: 90px;
-  }
+    /* Responsive nhỏ */
+    @media (max-width: 480px) {
+      .profile-hero .avatar {
+        width: 96px;
+        height: 96px;
+        top: 90px;
+      }
 
-  .profile-hero .avatar-upload {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
-  }
+      .profile-hero .avatar-upload {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+      }
 
-  .profile-hero .name {
-    margin-top: 60px;
-  }
-}
+      .profile-hero .name {
+        margin-top: 60px;
+      }
+    }
 
 
     #popupProfile .profile-form {
@@ -1385,14 +1388,22 @@
         <!-- account -->
         <div class="user-account" id="openProfile" title="Account" style="position: relative">
           <div style="position: relative">
-            <div style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;"></div>
-            <span style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;"></span>
+            <div
+              style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;">
+            </div>
+            <span
+              style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;"></span>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-start;">
-            <span style="font-weight: 700; font-size: 1.08rem; line-height: 1.1; color: var(--text);">Tên người dùng</span>
-            <span style="font-size: 0.97rem; color: var(--text-muted); line-height: 1.1;">@example.com</span>
+            <span style="font-weight: 700; font-size: 1.08rem; line-height: 1.1; color: var(--text);">
+              <%= user.name || 'Tên người dùng' %>
+            </span>
+            <span style="font-size: 0.97rem; color: var(--text-muted); line-height: 1.1;">
+              <%= user.email || 'example.com' %>
+            </span>
           </div>
-          <svg style="margin-left: 8px" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg style="margin-left: 8px" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
             <path d="M6 9l6 6 6-6" />
           </svg>
 
@@ -1445,6 +1456,24 @@
                 " id="Logout">
               Đăng xuất
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POPUP XÁC NHẬN ĐĂNG XUẤT -->
+    <div class="popup-overlay" id="popupLogout" aria-hidden="true">
+      <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="logout-title">
+        <div class="popup-header" style="display:flex;align-items:center;justify-content:space-between;">
+          <div id="logout-title" class="popup-title">Xác nhận</div>
+          <button class="close-btn" id="closeLogoutBtn" aria-label="Đóng">&times;</button>
+        </div>
+        <div style="margin-top:12px">
+          <p>Bạn chắc chắn muốn đăng xuất không?</p>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+            <button class="btn" id="logoutConfirmNo" type="button" style="background:#9e9e9e">Hủy</button>
+            <button class="btn" id="logoutConfirmYes" type="button" style="background:var(--secondary)">Đăng
+              xuất</button>
           </div>
         </div>
       </div>
@@ -1600,30 +1629,39 @@
       </div>
 
       <!-- POPUP THÔNG TIN TÀI KHOẢN -->
-      <div class="popup-overlay" id="popupProfile" style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); z-index: 1000;" aria-hidden="true">
-        <div class="popup-content" style="width: 420px; max-width: 95vw" role="dialog" aria-modal="true" aria-labelledby="profile-title">
-          <div class="popup-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+      <div class="popup-overlay" id="popupProfile"
+        style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); z-index: 1000;"
+        aria-hidden="true">
+        <div class="popup-content" style="width: 420px; max-width: 95vw" role="dialog" aria-modal="true"
+          aria-labelledby="profile-title">
+          <div class="popup-header"
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
             <div id="profile-title" class="popup-title" style="font-size: 23px">Thông tin tài khoản</div>
             <button class="close-btn" id="closeProfileBtn" style="font-size: 28px" aria-label="Đóng">&times;</button>
           </div>
 
           <!-- FORM -->
-          <form class="profile-form" id="profileForm" action="/info" method="POST" style=" display: flex; flex-direction: column; gap: 13px; margin-bottom: 22px;">
+          <form class="profile-form" id="profileForm" action="/info" method="POST"
+            style=" display: flex; flex-direction: column; gap: 13px; margin-bottom: 22px;">
             <!-- Background + Avatar upload -->
             <div class="profile-hero">
               <div class="background">
-                <img id="bgPreview" name="backgroundPath" alt="background" src="<%= user.backgroundPath || '/uploads/default-bg.png' %>" />
+                <img id="bgPreview" name="backgroundPath" alt="background"
+                  src="<%= user.backgroundPath || '/uploads/default-bg.png' %>" />
                 <label class="bg-upload">
                   Thay đổi
-                  <input type="file" id="backgroundInput" name="background" accept="image/*" style="display: none" onchange="previewImage(event, 'bgPreview')" />
+                  <input type="file" id="backgroundInput" name="background" accept="image/*" style="display: none"
+                    onchange="previewImage(event, 'bgPreview')" />
                 </label>
               </div>
 
               <div class="avatar">
-                <img id="avatarPreview" name="avatarPath" alt="avatar" src="<%= user.avatarPath || '/uploads/default-avatar.png' %>" />
+                <img id="avatarPreview" name="avatarPath" alt="avatar"
+                  src="<%= user.avatarPath || '/uploads/default-avatar.png' %>" />
                 <label class="avatar-upload">
                   ✎
-                  <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none" onchange="previewImage(event, 'avatarPreview')" />
+                  <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none"
+                    onchange="previewImage(event, 'avatarPreview')" />
                 </label>
               </div>
               <div>
@@ -1639,32 +1677,38 @@
             </div>
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
               <label class="form-label" for="email" style="width: 110px">Email</label>
-              <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email" style="flex: 1; padding: 10px 13px" />
+              <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email"
+                style="flex: 1; padding: 10px 13px" />
             </div>
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
               <label class="form-label" for="phone" style="width: 110px">Số điện thoại</label>
-              <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>" readonly id="phone" style="flex: 1; padding: 10px 13px" />
+              <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>" readonly
+                id="phone" style="flex: 1; padding: 10px 13px" />
             </div>
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
               <label class="form-label" for="dob" style="width: 110px">Ngày sinh</label>
-              <input class="form-input" name="dob" type="date" value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob" style="flex: 1; padding: 10px 13px" />
+              <input class="form-input" name="dob" type="date"
+                value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
+                style="flex: 1; padding: 10px 13px" />
             </div>
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
               <label class="form-label" for="gender" style="width: 110px">Giới tính</label>
               <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
                 <option value="">--Chọn--</option>
-                <option value="male" <%= user.gender==='male' ? 'selected' : '' %>>Nam</option>
-                <option value="female" <%= user.gender==='female' ? 'selected' : '' %>>Nữ</option>
-                <option value="other" <%= user.gender==='other' ? 'selected' : '' %>>Khác</option>
+                <option value="male" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
+                <option value="female" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
+                <option value="other" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
               </select>
             </div>
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
               <label class="form-label" for="address" style="width: 110px">Địa chỉ</label>
-              <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly id="address" style="flex: 1; padding: 10px 13px" />
+              <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly
+                id="address" style="flex: 1; padding: 10px 13px" />
             </div>
             <div class="form-actions" style="display: flex; justify-content: center; gap: 12px; margin-top: 6px;">
               <button class="btn" type="button" id="editProfileBtn" style="background: var(--secondary)">Sửa</button>
-              <button class="btn" type="submit" id="saveProfileBtn" style="display: none; background: var(--secondary)">Xác nhận</button>
+              <button class="btn" type="submit" id="saveProfileBtn"
+                style="display: none; background: var(--secondary)">Xác nhận</button>
               <!-- javascript sửa thông tin -->
               <script>
                 const popupProfile = document.getElementById("popupProfile"); // thẻ bao quanh cửa sổ thông tin
@@ -1697,38 +1741,33 @@
                   saveBtn.style.display = "none";
                 });
 
-                // allow form submit to proceed
-                saveBtn.addEventListener("click", () => {
-                  // Sau khi gửi biểu mẫu sẽ tải lại hoặc được xử lý bởi máy chủ; chúng ta vẫn chuyển giao diện người dùng trở lại
-                  disableEditing();
-                });
-
-                // Đóng cửa sổ (sử dụng hàm chung để đảm bảo trạng thái được reset)
+                // Đóng cửa sổ (dùng chung) — đảm bảo an toàn khi phần tử không tồn tại
                 function closeProfile() {
                   if (!popupProfile) return;
-                  popupProfile.style.display = "none";
-                  popupProfile.setAttribute("aria-hidden", "true");
-
-                  // Reset editing state
-                  disableEditing();
+                  popupProfile.style.display = 'none';
+                  popupProfile.setAttribute('aria-hidden', 'true');
+                }
+                closeProfileBtn && closeProfileBtn.addEventListener("click", closeProfile);
+                // Kiem tra duy try popup khi render lai trang
+                // document.addEventListener("DOMContentLoaded", () => {
+                //   <% if (keepProfileOpen) { %>
+                //     const popup = document.getElementById("popupProfile");
+                //     if (popup) popup.style.display = "flex"; 
+                //   <% } %>
+                // });
+                
+                // Đóng khi click ra ngoài popup-content
+                 if (popupProfile) {
+                  popupProfile.addEventListener('click', (e) => {
+                    if (e.target === popupProfile) closeProfile();
+                  });
                 }
 
-                // Gắn listener cho nút đóng
-                closeProfileBtn && closeProfileBtn.addEventListener("click", closeProfile);
-
-                // Đóng khi click ra ngoài popup-content
-                popupProfile && popupProfile.addEventListener("click", (e) => {
-                  // if clicked directly on overlay (not the dialog content), close
-                  if (e.target === popupProfile) closeProfile();
-                });
-
                 // Đóng khi nhấn Escape
-                document.addEventListener("keydown", (e) => {
-                  if (e.key === "Escape" && popupProfile && popupProfile.style.display !== "none") closeProfile();
+                document.addEventListener('keydown', (e) => {
+                  if (e.key === 'Escape' && popupProfile && popupProfile.style.display !== 'none') closeProfile();
                 });
-
-                // Kiem tra duy tri popup khi render lai trang (server side flag)
-                const keepProfileOpen = popupProfile && popupProfile.dataset.keepOpen === '1';
+                const keepProfileOpen = <%- JSON.stringify(keepProfileOpen || false) %>;
                 if (keepProfileOpen) {
                   const popup = document.getElementById("popupProfile");
                   if (popup) popup.style.display = "flex";
@@ -1736,11 +1775,15 @@
               </script>
             </div>
             <% if (error) { %>
-              <p class="error"><%= error %></p>
-            <% } %>
-            <% if (success) { %>
-              <p class="success"><%= success %></p>
-            <% } %>
+              <p class="error">
+                <%= error %>
+              </p>
+              <% } %>
+                <% if (success) { %>
+                  <p class="success">
+                    <%= success %>
+                  </p>
+                  <% } %>
           </form>
         </div>
       </div>
@@ -1991,7 +2034,7 @@
           closeGroup();
         } catch (err) {
           console.warn('Create group failed, falling back to local UI:', err);
-          // nguoi tao nhom se la truong nhom
+          // Fallback for preview: still add locally and mark creator as leader
           groups.push({ name, leader: "Bạn" });
           renderGroups();
           closeGroup();
@@ -2236,7 +2279,7 @@
           .getElementById("popupProfile")
           .setAttribute("aria-hidden", "false");
         userMenu.style.display = "none";
-      };   
+      };
 
       // ===== WORKHUB SETTINGS (mở/đóng) =====
       const whOverlay = document.getElementById("whSettings");
@@ -2285,11 +2328,58 @@
           btn.classList.add("wh-active");
         });
       });
+      //Đăng xuất với hộp thoại xác nhận
+      const logoutBtn = document.getElementById("Logout");
+      const logoutConfirm = document.getElementById("popupLogout");
+      const logoutConfirmYes = document.getElementById("logoutConfirmYes");
+      const logoutConfirmNo = document.getElementById("logoutConfirmNo");
 
-      //logout 
-      document.getElementById("Logout").addEventListener("click", () => {
+      logoutBtn && logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (logoutConfirm) {
+          logoutConfirm.classList.add("active");
+          logoutConfirm.setAttribute("aria-hidden", "false");
+        } else {
+          // chuyển hướng
+          window.location.href = "/auth/logout";
+        }
+        // ẩn user menu
+        if (userMenu) userMenu.style.display = "none";
+      });
+
+      // confirm
+      logoutConfirmYes && logoutConfirmYes.addEventListener("click", () => {
         window.location.href = "/auth/logout";
       });
+      logoutConfirmNo && logoutConfirmNo.addEventListener("click", () => {
+        if (logoutConfirm) {
+          logoutConfirm.classList.remove("active");
+          logoutConfirm.setAttribute("aria-hidden", "true");
+        }
+      });
+      const closeLogoutBtn = document.getElementById("closeLogoutBtn");
+      closeLogoutBtn && closeLogoutBtn.addEventListener("click", () => {
+        if (logoutConfirm) {
+          logoutConfirm.classList.remove("active");
+          logoutConfirm.setAttribute("aria-hidden", "true");
+        }
+      });
+
+      // Nhấn X hoặc click ra ngoài để thoát
+      if (logoutConfirm) {
+        logoutConfirm.addEventListener("click", (e) => {
+          if (e.target === logoutConfirm) {
+            logoutConfirm.classList.remove("active");
+            logoutConfirm.setAttribute("aria-hidden", "true");
+          }
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && logoutConfirm.classList.contains("active")) {
+            logoutConfirm.classList.remove("active");
+            logoutConfirm.setAttribute("aria-hidden", "true");
+          }
+        });
+      }
     </script>
   </div>
 </body>

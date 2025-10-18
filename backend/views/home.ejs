@@ -1346,6 +1346,43 @@
     .muted {
       color: var(--text-subtle) !important;
     }
+
+    .group-card {
+      background: var(--surface);
+      border-radius: 5px;
+      box-shadow: 0 2px 10px 0 rgba(60, 60, 60, 0.07);
+      border: 1.5px solid var(--border-color);
+      margin: 0px;
+      padding: 10px 18px 12px 10px;
+      transition: box-shadow 0.18s, border 0.18s, background 0.18s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .group-card:hover {
+      box-shadow: 0 4px 18px 0 rgba(76, 175, 80, 0.13);
+      border: 1.5px solid var(--primary);
+      background: rgba(76, 175, 80, 0.04);
+    }
+
+    .group-title {
+      font-size: 1.13rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+      letter-spacing: 0.2px;
+    }
+
+    .group-leader {
+      font-size: 0.98rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .group-leader span {
+      color: var(--text);
+      font-weight: 600;
+    }
   </style>
 </head>
 
@@ -1628,7 +1665,7 @@
               <script>
                 const popupGroup = document.getElementById('popupGroup');
                 // nút để mở popup (dòng 1500)
-                const btnAddGroup = document.getElementById('btnAddGroup'); 
+                const btnAddGroup = document.getElementById('btnAddGroup');
                 const closeGroupPopup = document.getElementById('closeGroupPopup'); // nút X
                 const cancelGroupBtn = document.getElementById('cancelGroupBtn'); // nút Huỷ
 
@@ -1660,6 +1697,60 @@
                     closeGroup();
                   }
                 });
+
+                // Load danh sách nhóm đã tham gia
+                async function loadGroups() {
+                  const groupList = document.getElementById('groupList');
+                  if (!groupList) return;
+                  groupList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Đang tải...</div>';
+                  try {
+                    const res = await fetch('/groups/my-groups', { credentials: 'same-origin' });
+                    if (!res.ok) throw new Error('Lỗi khi tải nhóm');
+                    const groups = await res.json();
+                    if (!Array.isArray(groups) || groups.length === 0) {
+                      groupList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Bạn chưa tham gia nhóm nào.</div>';
+                      return;
+                    }
+                    groupList.innerHTML = groups.map(g => {
+                      const leaderName = g.leaderName || 'Không rõ';
+                      return `
+                      <div class="group-card">
+                      <div class="group-title">${g.groupName}</div>
+                      <div class="group-leader">Nhóm trưởng: <span>${leaderName}</span></div>
+                      </div>
+                      `;
+                    }).join('');
+                  } catch (err) {
+                    groupList.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;">Lỗi khi tải danh sách nhóm.</div>';
+                  }
+                }
+                window.addEventListener('DOMContentLoaded', loadGroups);
+
+                // Xử lý submit tạo nhóm
+                const groupForm = document.getElementById('groupForm');
+                if (groupForm) {
+                  groupForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const groupName = document.getElementById('groupName').value.trim();
+                    if (!groupName) return alert('Vui lòng nhập tên nhóm');
+                    try {
+                      const res = await fetch('/groups', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ groupName }),
+                        credentials: 'same-origin'
+                      });
+                      const data = await res.json();
+                      if (!res.ok) throw new Error(data.error || 'Lỗi tạo nhóm');
+                      alert('Tạo nhóm thành công!');
+                      groupForm.reset();
+                      document.getElementById('popupGroup').style.display = 'none';
+                      loadGroups();
+                    } catch (err) {
+                      alert(err.message || 'Lỗi khi tạo nhóm');
+                    }
+                  });
+                }
               </script>
             </div>
           </div>
@@ -1683,7 +1774,7 @@
               const closeProfileBtn = document.getElementById('closeProfileBtn');
 
               // Khi bấm nút X thì ẩn popup
-              closeProfileBtn.addEventListener('click', function() {
+              closeProfileBtn.addEventListener('click', function () {
                 popupProfile.style.display = 'none';
               });
             </script>
@@ -1791,31 +1882,37 @@
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Tên hiển thị</div>
-                  <input class="form-input" type="text" name="name" value="<%= user.name || '' %>" readonly style="flex: 1; padding: 10px 13px">
+                  <input class="form-input" type="text" name="name" value="<%= user.name || '' %>" readonly
+                    style="flex: 1; padding: 10px 13px">
                 </div>
               </div>
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Tên đăng nhập</div>
-                  <input class="form-input" name="username" type="text" value="<%= user.username %>" readonly id="username" style="flex: 1; padding: 10px 13px" />
+                  <input class="form-input" name="username" type="text" value="<%= user.username %>" readonly
+                    id="username" style="flex: 1; padding: 10px 13px" />
                 </div>
               </div>
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Email</div>
-                  <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email" style="flex: 1; padding: 10px 13px" />
+                  <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email"
+                    style="flex: 1; padding: 10px 13px" />
                 </div>
               </div>
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Số Điện Thoại</div>
-                  <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>" readonly id="phone" style="flex: 1; padding: 10px 13px" />
+                  <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>"
+                    readonly id="phone" style="flex: 1; padding: 10px 13px" />
                 </div>
               </div>
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Ngày sinh</div>
-                  <input class="form-input" name="dob" type="date" value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob" style="flex: 1; padding: 10px 13px" />
+                  <input class="form-input" name="dob" type="date"
+                    value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
+                    style="flex: 1; padding: 10px 13px" />
                 </div>
               </div>
               <div class="wh-row">
@@ -1832,49 +1929,55 @@
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Địa chỉ</div>
-                  <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly id="address" style="flex: 1; padding: 10px 13px" />
+                  <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly
+                    id="address" style="flex: 1; padding: 10px 13px" />
                 </div>
               </div>
               <div class="wh-btnEditProfile" style="margin-top: 10px;">
                 <button class="btn" type="button" id="editProfileBtn" style="background: var(--secondary)">Sửa</button>
-                <button class="btn" type="submit" id="saveProfileBtn" style="display: none; background: var(--secondary)">Xác nhận</button>
+                <button class="btn" type="submit" id="saveProfileBtn"
+                  style="display: none; background: var(--secondary)">Xác nhận</button>
               </div>
               <% if (error) { %>
-                <p class="error"><%= error %></p>
-              <% } %>
-              <% if (success) { %>
-                <p class="success"><%= success %></p>
-              <% } %>
-              <!-- javascript sửa thông tin -->
-              <script>
-                const editBtn = document.getElementById("editProfileBtn");
-                const saveBtn = document.getElementById("saveProfileBtn");
-                
+                <p class="error">
+                  <%= error %>
+                </p>
+                <% } %>
+                  <% if (success) { %>
+                    <p class="success">
+                      <%= success %>
+                    </p>
+                    <% } %>
+                      <!-- javascript sửa thông tin -->
+                      <script>
+                        const editBtn = document.getElementById("editProfileBtn");
+                        const saveBtn = document.getElementById("saveProfileBtn");
 
-                editBtn.addEventListener("click", () => {
-                  // Ẩn nút "Sửa"
-                  editBtn.style.display = "none";
 
-                  // Hiện nút "Xác nhận"
-                  saveBtn.style.display = "inline-block";
+                        editBtn.addEventListener("click", () => {
+                          // Ẩn nút "Sửa"
+                          editBtn.style.display = "none";
 
-                  // Mở khóa các input (trừ username và email)
-                  document.querySelectorAll("input[readonly], select[disabled]").forEach(el => {
-                    const fieldName = el.getAttribute("name");
-                    if (fieldName !== "username" && fieldName !== "email") {
-                      el.removeAttribute("readonly");
-                      el.removeAttribute("disabled");
-                      el.style.background = "#fff";
-                    }
-                  });
-                });
+                          // Hiện nút "Xác nhận"
+                          saveBtn.style.display = "inline-block";
 
-                // Khi bấm "Xác nhận" thì đổi lại nút "Sửa"
-                saveBtn.addEventListener("click", () => {
-                  editBtn.style.display = "inline-block";
-                  saveBtn.style.display = "none";
-                });
-              </script>
+                          // Mở khóa các input (trừ username và email)
+                          document.querySelectorAll("input[readonly], select[disabled]").forEach(el => {
+                            const fieldName = el.getAttribute("name");
+                            if (fieldName !== "username" && fieldName !== "email") {
+                              el.removeAttribute("readonly");
+                              el.removeAttribute("disabled");
+                              el.style.background = "#fff";
+                            }
+                          });
+                        });
+
+                        // Khi bấm "Xác nhận" thì đổi lại nút "Sửa"
+                        saveBtn.addEventListener("click", () => {
+                          editBtn.style.display = "inline-block";
+                          saveBtn.style.display = "none";
+                        });
+                      </script>
             </form>
             <!-- ----------------------------------------------------------------------------------------- -->
             <div class="wh-tabs">

@@ -2,6 +2,9 @@ CREATE DATABASE team_task_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unico
 USE team_task_management;
 
 select * from user
+select * from `group`
+select * from group_user
+
 
 -- Bảng user
 CREATE TABLE user (

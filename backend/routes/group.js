@@ -35,7 +35,7 @@ router.post("/", ensureAuth, async (req, res) => {
   }
 });
 
-// Lấy danh sách nhóm đã tham gia
+// =============================== Lấy danh sách nhóm đã tham gia ===============================
 router.get("/my-groups", ensureAuth, async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -63,5 +63,66 @@ router.get("/my-groups", ensureAuth, async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// =============================== Vào trang nhóm (render group.ejs) ===============================
+router.get("/:id", ensureAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+
+    const sql = `
+      SELECT 
+        BIN_TO_UUID(g.id) AS id,
+        g.groupName,
+        g.memberCount,
+        g.taskCount,
+        BIN_TO_UUID(g.leaderId) AS leaderId,
+        u_leader.name AS leaderName,
+        g.createdAt,
+        g.updatedAt
+      FROM \`group\` g
+      LEFT JOIN user u_leader ON g.leaderId = u_leader.id
+      WHERE g.id = UUID_TO_BIN(?)
+    `;
+    const [rows] = await db.promise().query(sql, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).send("Không tìm thấy nhóm.");
+    }
+
+    const group = rows[0];
+    res.render("group", { user: req.session.user, group });
+  } catch (err) {
+    console.error("GET /groups/:id error:", err);
+    res.status(500).send("Lỗi server.");
+  }
+});
+
+// =============================== Lấy danh sách thành viên của nhóm ===============================
+router.get("/:id/members", ensureAuth, async (req, res) => {
+  try {
+    const { id } = req.params; // id nhóm
+    const sql = `
+      SELECT 
+        BIN_TO_UUID(u.id) AS userId,
+        u.name,
+        u.email,
+        u.avatarPath,
+        gu.roleInGroup,
+        gu.joinAt
+      FROM group_user gu
+      INNER JOIN user u ON gu.userId = u.id
+      WHERE gu.groupId = UUID_TO_BIN(?)
+      ORDER BY gu.roleInGroup = 'leader' DESC, u.name ASC
+    `;
+    const [rows] = await db.promise().query(sql, [id]);
+    res.json(rows);
+  } catch (err) {
+    console.error("GET /groups/:id/members error:", err);
+    res.status(500).json({ error: "Lỗi khi tải danh sách thành viên." });
+  }
+});
+
+
 
 export default router;

@@ -1219,11 +1219,11 @@
     .profile-hero {
       position: relative;
       width: calc(100% + 2px);
-      background: #fff;
       border-radius: 12px;
       overflow: visible;
       padding-bottom: 12px;
       padding: 0;
+      background: var(--surface);
     }
 
     /* ===== Background ===== */
@@ -1391,7 +1391,7 @@
     <!-- HEADER -->
     <div class="dashboard-header" style="margin-top: 0">
       <div class="logo-bar">
-        <span class="site-name" style="font-size: 35px; font-weight: 900; letter-spacing: 1.5px">WorkHub</span>
+        <a href="/" class="site-name" style="text-decoration: none; font-size: 35px; font-weight: 900; letter-spacing: 1.5px">WorkHub</a>
       </div>
       <div class="header-actions actions-cluster">
         <button class="icon-btn" title="Menu" aria-label="Menu">
@@ -1404,9 +1404,7 @@
         <button class="icon-btn" id="btnTheme" title="Chuyển chế độ sáng/tối" aria-pressed="false">
           <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <circle cx="12" cy="12" r="5" stroke-width="2" />
-            <path
-              d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-              stroke-width="2" />
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2" />
           </svg>
         </button>
         <button class="icon-btn" id="btnCalendar" title="Lịch" aria-label="Lịch">
@@ -1426,11 +1424,10 @@
         <!-- account -->
         <div class="user-account" id="openProfile" title="Account" style="position: relative">
           <div style="position: relative">
-            <div
-              style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;">
-            </div>
-            <span
-              style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;"></span>
+            <img id="avatarPreview" name="avatarPath" alt="avatar" src="<%= user.avatarPath || '/uploads/default-avatar.png' %>" 
+              style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;"/>
+            <span style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;">
+            </span>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-start;">
             <span style="font-weight: 700; font-size: 1.08rem; line-height: 1.1; color: var(--text);">
@@ -1697,7 +1694,7 @@
                     closeGroup();
                   }
                 });
-
+                // ---------------------------------------------------
                 // Load danh sách nhóm đã tham gia
                 async function loadGroups() {
                   const groupList = document.getElementById('groupList');
@@ -1714,12 +1711,20 @@
                     groupList.innerHTML = groups.map(g => {
                       const leaderName = g.leaderName || 'Không rõ';
                       return `
-                      <div class="group-card">
-                      <div class="group-title">${g.groupName}</div>
-                      <div class="group-leader">Nhóm trưởng: <span>${leaderName}</span></div>
+                      <div class="group-card" data-id="${g.id}" style="cursor:pointer; border:1px solid #ddd; border-radius:8px; padding:10px 12px; margin:6px 0;">
+                        <div class="group-title">${g.groupName}</div>
+                        <div class="group-leader">Nhóm trưởng: <span>${leaderName}</span></div>
                       </div>
                       `;
                     }).join('');
+
+                    // Thêm sự kiện click sau khi render
+                    document.querySelectorAll('.group-card').forEach(card => {
+                      card.addEventListener('click', () => {
+                        const groupId = card.getAttribute('data-id');
+                        window.location.href = `/groups/${groupId}`; // render group.ejs tương ứng
+                      });
+                    });
                   } catch (err) {
                     groupList.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;">Lỗi khi tải danh sách nhóm.</div>';
                   }
@@ -1761,10 +1766,8 @@
       <div class="popup-overlay" id="popupProfile"
         style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); z-index: 1000;"
         aria-hidden="true">
-        <div class="popup-content" style="width: 420px; max-width: 95vw" role="dialog" aria-modal="true"
-          aria-labelledby="profile-title">
-          <div class="popup-header"
-            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <div class="popup-content" style="width: 420px; max-width: 95vw" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+          <div class="popup-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
             <div id="profile-title" class="popup-title" style="font-size: 23px">Thông tin tài khoản</div>
             <button class="close-btn" id="closeProfileBtn" style="font-size: 28px" aria-label="Đóng">&times;</button>
             <!-- javascript đóng popup hiện thông tin -->
@@ -1781,34 +1784,30 @@
           </div>
 
           <!-- FORM -->
-          <form class="profile-form" id="profileForm" action="/info" method="POST"
+          <form class="profile-form" id="profileForm" action="/info" method="POST" enctype="multipart/form-data"
             style=" display: flex; flex-direction: column; gap: 13px; margin-bottom: 22px;">
             <!-- Background + Avatar upload -->
             <div class="profile-hero">
               <div class="background">
-                <img id="bgPreview" name="backgroundPath" alt="background"
-                  src="<%= user.backgroundPath || '/uploads/default-bg.png' %>" />
+                <img id="bgPreview" name="backgroundPath" alt="background" src="<%= user.backgroundPath || '/uploads/default-bg.png' %>" />
                 <label class="bg-upload">
                   Thay đổi
-                  <input type="file" id="backgroundInput" name="background" accept="image/*" style="display: none"
-                    onchange="previewImage(event, 'bgPreview')" />
+                  <input type="file" id="backgroundInput" name="background" accept="image/*" style="display: none" onchange="previewImage(event, 'bgPreview')" />
                 </label>
               </div>
-
               <div class="avatar">
-                <img id="avatarPreview" name="avatarPath" alt="avatar"
-                  src="<%= user.avatarPath || '/uploads/default-avatar.png' %>" />
+                <img id="avatarPreview" name="avatarPath" alt="avatar" src="<%= user.avatarPath || '/uploads/default-avatar.png' %>" />
                 <label class="avatar-upload">
                   ✎
-                  <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none"
-                    onchange="previewImage(event, 'avatarPreview')" />
+                  <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none" onchange="previewImage(event, 'avatarPreview')" />
                 </label>
               </div>
+              <!-- Thông tin tài  khoản -->
               <div>
                 <input class="name" type="text" name="name" value="<%= user.name || '' %>" readonly>
               </div>
             </div>
-            <!-- Thông tin tài  khoản -->
+
             <input type="hidden" name="csrf_token" value="" />
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
               <label class="form-label" for="username" style="width: 110px">Tên tài khoản</label>
@@ -1846,6 +1845,64 @@
                 id="address" style="flex: 1; padding: 10px 13px" />
             </div>
           </form>
+              <!------------------------------------------- POPUP XÁC NHẬN ------------------------------------------>
+              <div class="confirm-overlay" id="confirmOverlay" style="display:none; position: fixed; inset:0; background: rgba(0,0,0,0.3); align-items: center; justify-content: center; z-index: 1100;">
+                <div class="confirm-box" style="background:white; padding:20px 25px; border-radius:10px; text-align:center;">
+                  <p style="margin-bottom:15px; font-size:17px;">Bạn có chắc chắn không?</p>
+                  <div style="display:flex; justify-content:center; gap:10px;">
+                    <button id="confirmYes" class="btn" style="background:#4CAF50; color:white; padding:6px 14px;">Xác nhận</button>
+                    <button id="confirmNo" class="btn" style="background:#f44336; color:white; padding:6px 14px;">Hủy</button>
+                  </div>
+                </div>
+              </div>
+              <!------------------------------------------------------------------------------------------------------>
+              <!-- javascript thay đổi avatar và background -->
+              <script>
+  const profileForm = document.getElementById('profileForm');
+  const avatarInput = document.getElementById('avatarInput');
+  const backgroundInput = document.getElementById('backgroundInput');
+  const confirmOverlay = document.getElementById('confirmOverlay');
+  const confirmYes = document.getElementById('confirmYes');
+  const confirmNo = document.getElementById('confirmNo');
+  //const popupProfile = document.getElementById('popupProfile');
+
+  // Khi chọn ảnh mới -> hiện popup xác nhận
+  avatarInput.addEventListener('change', handleImageChange);
+  backgroundInput.addEventListener('change', handleImageChange);
+
+  function handleImageChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    previewImage(event, event.target.id === 'avatarInput' ? 'avatarPreview' : 'bgPreview');
+    confirmOverlay.style.display = 'flex';
+  }
+
+  // Hàm xem trước ảnh
+  function previewImage(event, previewId) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById(previewId).src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Khi bấm “Xác nhận” => submit form + đóng popup
+  confirmYes.addEventListener('click', () => {
+    confirmOverlay.style.display = 'none';
+    profileForm.submit(); // gửi form để backend lưu vào DB
+    popupProfile.style.display = 'none'; // đóng popup thông tin
+  });
+
+  // Khi bấm “Hủy” => đóng popup xác nhận
+  confirmNo.addEventListener('click', () => {
+    confirmOverlay.style.display = 'none';
+    avatarInput.value = "";
+    backgroundInput.value = "";
+  });
+</script>
+
         </div>
       </div>
 
@@ -1868,7 +1925,6 @@
               <!-- chưa nghĩ ra cài đặt gì khác -->
             </nav>
           </aside>
-
 
           <main class="wh-main">
             <header class="wh-topbar">
@@ -1938,46 +1994,35 @@
                 <button class="btn" type="submit" id="saveProfileBtn"
                   style="display: none; background: var(--secondary)">Xác nhận</button>
               </div>
-              <% if (error) { %>
-                <p class="error">
-                  <%= error %>
-                </p>
-                <% } %>
-                  <% if (success) { %>
-                    <p class="success">
-                      <%= success %>
-                    </p>
-                    <% } %>
-                      <!-- javascript sửa thông tin -->
-                      <script>
-                        const editBtn = document.getElementById("editProfileBtn");
-                        const saveBtn = document.getElementById("saveProfileBtn");
+              <!-- javascript sửa thông tin -->
+              <script>
+                const editBtn = document.getElementById("editProfileBtn");
+                const saveBtn = document.getElementById("saveProfileBtn");
 
+                editBtn.addEventListener("click", () => {
+                  // Ẩn nút "Sửa"
+                  editBtn.style.display = "none";
 
-                        editBtn.addEventListener("click", () => {
-                          // Ẩn nút "Sửa"
-                          editBtn.style.display = "none";
+                  // Hiện nút "Xác nhận"
+                  saveBtn.style.display = "inline-block";
 
-                          // Hiện nút "Xác nhận"
-                          saveBtn.style.display = "inline-block";
+                  // Mở khóa các input (trừ username và email)
+                  document.querySelectorAll("input[readonly], select[disabled]").forEach(el => {
+                    const fieldName = el.getAttribute("name");
+                    if (fieldName !== "username" && fieldName !== "email") {
+                      el.removeAttribute("readonly");
+                      el.removeAttribute("disabled");
+                      el.style.background = "#fff";
+                    }
+                  });
+                });
 
-                          // Mở khóa các input (trừ username và email)
-                          document.querySelectorAll("input[readonly], select[disabled]").forEach(el => {
-                            const fieldName = el.getAttribute("name");
-                            if (fieldName !== "username" && fieldName !== "email") {
-                              el.removeAttribute("readonly");
-                              el.removeAttribute("disabled");
-                              el.style.background = "#fff";
-                            }
-                          });
-                        });
-
-                        // Khi bấm "Xác nhận" thì đổi lại nút "Sửa"
-                        saveBtn.addEventListener("click", () => {
-                          editBtn.style.display = "inline-block";
-                          saveBtn.style.display = "none";
-                        });
-                      </script>
+                // Khi bấm "Xác nhận" thì đổi lại nút "Sửa"
+                saveBtn.addEventListener("click", () => {
+                  editBtn.style.display = "inline-block";
+                  saveBtn.style.display = "none";
+                });
+              </script>
             </form>
             <!-- ----------------------------------------------------------------------------------------- -->
             <div class="wh-tabs">
@@ -2051,107 +2096,6 @@
     </div>
 
     <script>
-      // ===== CONFIG =====
-      const USE_FETCH = true;
-      const API = {
-        createGroup: "/groups",
-        updateProfile: "/api/profile/update",
-      };
-
-      // Xem trước hình (background/avatar)
-      function previewImage(evt, targetId) {
-        const file = evt.target.files?.[0];
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        const img = document.getElementById(targetId);
-        if (img) {
-          img.src = url;
-        }
-      }
-
-      // // ------------------------------------------------------- TẠO NHÓM POPUP ------------------------------------------------
-      // const btnAddGroup = document.getElementById("btnAddGroup");
-      // const popupGroup = document.getElementById("popupGroup");
-      // const closeGroupPopup = document.getElementById("closeGroupPopup");
-      // const cancelGroupBtn = document.getElementById("cancelGroupBtn");
-      // const groupForm = document.getElementById("groupForm");
-      // const groupList = document.getElementById("groupList");
-      // const groupSearchInput = document.querySelector(
-      //   ".sidebar-search input"
-      // );
-
-      // let groups = [
-      //   { name: "Nhóm A", leader: "Nguyễn Văn A" },
-      //   { name: "Nhóm B", leader: "Trần Thị B" },
-      // ];
-
-      // function renderGroups(filter = "") {
-      //   const filtered = groups.filter((g) =>
-      //     g.name.toLowerCase().includes(filter.trim().toLowerCase())
-      //   );
-      //   groupList.innerHTML =
-      //     filtered
-      //       .map(
-      //         (g) => `
-      //     <div style="padding:10px 14px;border-bottom:1px solid var(--border-color);cursor:pointer;">
-      //       <div style="font-weight:600;color:var(--text)">${g.name}</div>
-      //       <div style="font-size:13px;color:var(--text-muted);opacity:.95;">Nhóm trưởng: ${g.leader || ""
-      //           }</div>
-      //     </div>
-      //   `
-      //       )
-      //       .join("") ||
-      //     `<div style="padding:12px 14px;color:var(--text-muted)">Không có nhóm phù hợp</div>`;
-      // }
-      // renderGroups();
-      // groupSearchInput.addEventListener("input", (e) =>
-      //   renderGroups(e.target.value)
-      // );
-
-      // btnAddGroup.onclick = () => {
-      //   popupGroup.classList.add("active");
-      //   popupGroup.setAttribute("aria-hidden", "false");
-      //   groupForm.reset();
-      //   setTimeout(() => document.getElementById("groupName").focus(), 0);
-      // };
-      // function closeGroup() {
-      //   popupGroup.classList.remove("active");
-      //   popupGroup.setAttribute("aria-hidden", "true");
-      // }
-      // closeGroupPopup && (closeGroupPopup.onclick = closeGroup);
-      // cancelGroupBtn && (cancelGroupBtn.onclick = closeGroup);
-      // popupGroup.onclick = (e) => {
-      //   if (e.target === popupGroup) closeGroup();
-      // };
-
-      // groupForm.addEventListener("submit", async (e) => {
-      //   if (USE_FETCH) e.preventDefault();
-      //   const name = groupForm.groupName.value.trim();
-      //   if (!name) {
-      //     groupForm.groupName.focus();
-      //     return;
-      //   }
-      //   if (!USE_FETCH) return;
-      //   try {
-      //     const res = await fetch(API.createGroup, {
-      //       method: "POST",
-      //       headers: { "Content-Type": "application/json" },
-      //       body: JSON.stringify({ groupName: name }),
-      //     });
-      //     if (!res.ok) throw new Error("Tạo nhóm thất bại");
-      //     const created = await res.json().catch(() => ({ leader: "Bạn" }));
-      //     groups.push({ name, leader: created.leader || "Bạn" });
-      //     renderGroups();
-      //     closeGroup();
-      //   } catch (err) {
-      //     console.warn('Create group failed, falling back to local UI:', err);
-      //     // Fallback for preview: still add locally and mark creator as leader
-      //     groups.push({ name, leader: "Bạn" });
-      //     renderGroups();
-      //     closeGroup();
-      //   }
-      // });
-
       // ===== Theme =====
       const THEME_KEY = "workhub-theme";
       const themeBtn = document.getElementById("btnTheme");
@@ -2430,15 +2374,6 @@
         });
       });
 
-      // Sidebar highlight
-      // document.querySelectorAll(".wh-nav-item").forEach((btn) => {
-      //   btn.addEventListener("click", () => {
-      //     document
-      //       .querySelectorAll(".wh-nav-item")
-      //       .forEach((b) => b.classList.remove("wh-active"));
-      //     btn.classList.add("wh-active");
-      //   });
-      // });
       //Đăng xuất với hộp thoại xác nhận
       const logoutBtn = document.getElementById("Logout");
       const logoutConfirm = document.getElementById("popupLogout");

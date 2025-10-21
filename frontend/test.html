@@ -5,1348 +5,7 @@
   <meta charset="UTF-8" />
   <title>WorkHub Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    /* ================================================================
-         WORKHUB THEME — LIGHT / DARK (áp theo guideline + góp ý)
-      ================================================================== */
-
-    /* ========= THEME TOKENS (Light) ========= */
-    :root {
-      /* Palette (Light) */
-      --primary: #4caf50;
-      /* logo green (Primary Color) */
-      --primary-hover: #43a047;
-      --secondary: #2e7d32;
-      /* Secondary Color (emphasis) */
-
-      --bg: #f5f5f5;
-      /* App background */
-      --surface: #ffffff;
-      /* Surfaces: header, sidebar, cards */
-      --text: #212121;
-      /* Main text */
-      --text-muted: #9e9e9e;
-      /* Secondary text */
-      --text-subtle: #6b6b6b;
-      /* Long paragraphs, soft */
-      --border: #e0e0e0;
-      /* Subtle borders */
-
-      /* Logo */
-      --logo-color: #4caf50;
-
-      /* Tabs (idle state) */
-      --tab-idle-bg: #f1f1f1;
-      --tab-idle-text: #424242;
-
-      /* Mappings để tương thích với code cũ */
-      --primary-bg: var(--bg);
-      --card-bg: var(--surface);
-      --input-bg: var(--surface);
-      --primary-text: var(--text);
-      --border-color: var(--border);
-      --accent: var(--primary);
-      --accent-hover: var(--primary-hover);
-
-      /* Extras */
-      --on-primary: #ffffff;
-      --shadow-soft: 0 2px 16px rgba(0, 0, 0, 0.06);
-      --radius: 8px;
-    }
-
-    /* ========= THEME TOKENS (Dark) ========= */
-    [data-theme="dark"] {
-      --primary: #66bb6a;
-      /* bright accent on dark */
-      --primary-hover: #81c784;
-      --secondary: #37474f;
-      /* navy/charcoal for side elements */
-
-      --bg: #121212;
-      /* Background */
-      --surface: #1a1a1a;
-      /* Surfaces */
-      --text: #e0e0e0;
-      /* Soft white (less glare) */
-      --text-muted: #bdbdbd;
-      --text-subtle: #9aa0a6;
-      /* Long paragraphs */
-      --border: #424242;
-
-      /* Logo sáng/đồng bộ */
-      --logo-color: #81c784;
-
-      /* Tabs (idle) */
-      --tab-idle-bg: #263238;
-      --tab-idle-text: #d6d6d6;
-
-      --primary-bg: var(--bg);
-      --card-bg: var(--surface);
-      --input-bg: var(--surface);
-      --primary-text: var(--text);
-      --border-color: var(--border);
-      --accent: var(--primary);
-      --accent-hover: var(--primary-hover);
-
-      --on-primary: #0b0b0b;
-      --shadow-soft: 0 2px 16px rgba(0, 0, 0, 0.35);
-    }
-
-    /* ========= Base ========= */
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      min-height: 100vh;
-      height: 100vh;
-      width: 100vw;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: var(--primary-bg);
-      color: var(--primary-text);
-      overflow: hidden;
-      position: relative;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .dashboard-frame {
-      position: absolute;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      margin: 0;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: none;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      z-index: 1;
-      animation: fadeInDash 0.7s;
-    }
-
-    @keyframes fadeInDash {
-      from {
-        opacity: 0;
-        transform: scale(1.03);
-      }
-
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    /* HEADER */
-    .dashboard-header {
-      display: grid;
-      grid-template-columns: 180px auto;
-      gap: 12px;
-      align-items: center;
-      padding: 16px 32px 12px 32px;
-      border-bottom: 1px solid var(--border-color);
-      background: var(--surface);
-      box-shadow: var(--shadow-soft);
-      position: relative;
-      z-index: 10;
-      border-radius: 5px;
-      margin: 10px;
-      transition: background 0.3s, color 0.3s, border-color 0.3s;
-    }
-
-    .logo-bar {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      min-width: 140px;
-    }
-
-    .site-name {
-      font-size: 1.45rem;
-      font-weight: 900;
-      color: var(--logo-color);
-      letter-spacing: 1.5px;
-      text-shadow: none;
-      transition: color 0.3s;
-    }
-
-    .header-actions {
-      justify-self: end;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .icon-btn {
-      background: var(--primary);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      padding: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-      transition: background 0.2s, color 0.2s, transform 0.05s;
-    }
-
-    .icon-btn:hover {
-      background: var(--primary-hover);
-    }
-
-    .icon-btn:active {
-      transform: translateY(1px);
-    }
-
-    .icon-btn svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .user-account {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      font-weight: 700;
-      margin-left: 10px;
-      margin-right: -15px;
-      font-size: 1.05rem;
-      color: var(--text);
-      padding: 4px 18px 4px 8px;
-      border-radius: 16px;
-      background: var(--surface);
-      border: 1px solid var(--border-color);
-    }
-
-    .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #c7d2fe;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      color: #2563eb;
-      font-weight: 700;
-      border: 2px solid #2563eb33;
-      box-shadow: 0 2px 8px #2563eb22;
-    }
-
-    /* BODY */
-    .dashboard-body {
-      flex: 1;
-      display: flex;
-      min-height: 0;
-      height: 0;
-      background: transparent;
-    }
-
-    /* SIDEBAR */
-    .sidebar {
-      width: 240px;
-      border-right: 1px solid var(--border-color);
-      border-radius: 5px;
-      background: var(--surface);
-      display: flex;
-      flex-direction: column;
-      padding: 24px 0 56px;
-      position: relative;
-      box-shadow: var(--shadow-soft);
-      z-index: 1;
-      margin: 5px 0 10px 10px;
-      height: 97%;
-      min-height: 0;
-      transition: background 0.3s;
-    }
-
-    .sidebar-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .sidebar-section label {
-      display: none;
-    }
-
-    .sidebar-search {
-      margin: -15px 16px 14px 24px;
-      border-radius: var(--radius);
-      overflow: hidden;
-      background: var(--surface);
-      border: 1px solid var(--border-color);
-    }
-
-    .mini-pill {
-      height: 36px;
-      border-radius: var(--radius);
-      display: flex;
-      align-items: center;
-      padding: 0 14px;
-      gap: 8px;
-    }
-
-    .mini-pill svg {
-      width: 18px;
-      height: 18px;
-      opacity: 0.7;
-      stroke: var(--text-muted);
-    }
-
-    .mini-pill input {
-      border: 0;
-      outline: 0;
-      background: transparent;
-      width: 100%;
-      color: inherit;
-      font-size: 1rem;
-    }
-
-    .sidebar-list {
-      flex: 1;
-      min-height: 0;
-      margin: 0 16px 0 20px;
-      max-height: 450px;
-      overflow-y: auto;
-      background: var(--surface);
-      border-radius: var(--radius);
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-soft);
-      padding: 0;
-    }
-
-    .sidebar-list::-webkit-scrollbar {
-      width: 8px;
-      background: transparent;
-      border-radius: 5px;
-    }
-
-    .sidebar-list::-webkit-scrollbar-thumb {
-      background: #cfd8dc;
-      border-radius: 5px;
-    }
-
-    [data-theme="dark"] .sidebar-list::-webkit-scrollbar-thumb {
-      background: #455a64;
-    }
-
-    /* MAIN */
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      background: transparent;
-    }
-
-    .main-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 5px 10px 0 10px;
-      padding: 16px 18px;
-      border: 1px solid var(--border-color);
-      background: var(--surface);
-      color: var(--text);
-      border-radius: 12px;
-      box-shadow: var(--shadow-soft);
-      margin-bottom: 18px;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .task-tabs {
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      display: flex;
-      gap: 6px;
-      padding: 2px;
-      background: transparent;
-    }
-
-    .tab-btn {
-      padding: 8px 22px;
-      border: none;
-      background: var(--tab-idle-bg);
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 1rem;
-      color: var(--tab-idle-text);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      border-radius: 6px;
-      min-width: 90px;
-      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-    }
-
-    .tab-btn.active {
-      background: var(--primary);
-      color: var(--on-primary);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .tab-btn:not(.active):hover {
-      background: rgba(76, 175, 80, 0.12);
-      color: var(--text);
-    }
-
-    .tab-btn svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-      stroke-width: 2;
-      fill: none;
-    }
-
-    .search-pill {
-      flex: 1;
-      height: 44px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background: var(--surface);
-      display: flex;
-      align-items: center;
-      padding: 0 18px;
-      gap: 12px;
-      margin-left: 18px;
-    }
-
-    .search-pill svg {
-      width: 20px;
-      height: 20px;
-      opacity: 0.9;
-      stroke: var(--text-muted);
-    }
-
-    .search-pill input {
-      width: 100%;
-      border: 0;
-      outline: 0;
-      background: transparent;
-      font-size: 1.05rem;
-      color: inherit;
-    }
-
-    .task-menu {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      background: var(--surface);
-      border: 1px solid var(--border-color);
-      display: inline-block;
-      border-radius: 10px;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .task-menu>li {
-      position: relative;
-    }
-
-    .task-menu>li>a {
-      display: block;
-      padding: 12px 18px;
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 600;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-
-    .task-menu>li>a::after {
-      content: "▼";
-      font-size: 0.6rem;
-      margin-left: 6px;
-      transition: transform 0.3s;
-    }
-
-    .task-menu>li:hover>a {
-      background: rgba(76, 175, 80, 0.08);
-    }
-
-    .task-menu>li:hover>a::after {
-      transform: rotate(180deg);
-    }
-
-    .task-sub {
-      position: absolute;
-      left: 0;
-      top: 100%;
-      list-style: none;
-      margin: 0;
-      padding: 5px 0;
-      background: var(--surface);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      box-shadow: var(--shadow-soft);
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(5px);
-      transition: all 0.25s ease;
-      min-width: 180px;
-      z-index: 10;
-    }
-
-    .task-menu>li:hover .task-sub {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-
-    .task-sub li a {
-      display: block;
-      padding: 10px 16px;
-      color: var(--text);
-      text-decoration: none;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-
-    .task-sub li a:hover {
-      background: rgba(76, 175, 80, 0.08);
-    }
-
-    /* CONTENT — giấy kẻ ngang như hình */
-    .content-task {
-      flex: 1;
-      overflow-y: auto;
-      margin: -5px 10px 12px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      min-height: 300px;
-      box-shadow: var(--shadow-soft);
-      color: var(--text);
-      background-color: var(--surface);
-      padding: 16px 20px;
-
-      /* giấy kẻ ngang */
-      background-image: linear-gradient(#ffffff 1.1rem, #e0e0e0 1.2rem);
-      background-size: 100% 1.2rem;
-    }
-
-    [data-theme="dark"] .content-task {
-      background-image: linear-gradient(#1a1a1a 1.1rem, #2a2a2a 1.2rem);
-      background-size: 100% 1.2rem;
-    }
-
-    /* RIGHT PANEL STACK */
-    .right-panel-stack {
-      position: fixed;
-      top: 84px;
-      right: 0;
-      height: calc(100vh - 84px);
-      width: 420px;
-      max-width: 100vw;
-      z-index: 20;
-      display: flex;
-      flex-direction: column;
-      pointer-events: none;
-    }
-
-    .right-panel.half {
-      width: 100%;
-      height: 0;
-      background: var(--surface);
-      border-left: 1px solid var(--border-color);
-      border-radius: 5px;
-      overflow: hidden;
-      opacity: 0;
-      pointer-events: none;
-      transition: height 0.4s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.3s,
-        transform 0.45s cubic-bezier(0.7, 0, 0.3, 1);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      transform: translateX(100%);
-      box-shadow: var(--shadow-soft);
-    }
-
-    .right-panel.half.show {
-      height: 50%;
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateX(0);
-    }
-
-    .right-panel.half.top {
-      z-index: 2;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .right-panel.half.bottom {
-      z-index: 1;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .panel-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border-color);
-      padding: 13px 18px 11px 18px;
-      font-size: 1.08rem;
-      font-weight: 700;
-      color: var(--primary);
-      letter-spacing: 0.5px;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .panel-title {
-      display: flex;
-      align-items: center;
-      font-size: 1.08rem;
-      font-weight: 700;
-      color: var(--primary);
-      letter-spacing: 0.5px;
-      gap: 4px;
-    }
-
-    .panel-title svg {
-      stroke: var(--primary);
-    }
-
-    .close-panel {
-      background: none;
-      border: 1px solid var(--border-color);
-      font-size: 24px;
-      color: var(--text);
-      cursor: pointer;
-      border-radius: 8px;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.18s, color 0.18s;
-    }
-
-    .close-panel:hover {
-      background: rgba(76, 175, 80, 0.08);
-      color: #ef4444;
-    }
-
-    .right-section {
-      flex: 1;
-      overflow-y: auto;
-      background: var(--surface);
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .notif-list {
-      padding: 12px;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .notif-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 13px 18px;
-      background: var(--surface);
-      border-radius: var(--radius);
-      margin: 0 6px;
-      box-shadow: var(--shadow-soft);
-      min-height: 48px;
-      position: relative;
-      font-size: 1.02rem;
-      font-weight: 600;
-      color: var(--text);
-      border: 1px solid var(--border-color);
-    }
-
-    .notif-item:hover {
-      background: rgba(76, 175, 80, 0.08);
-    }
-
-    .notif-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: var(--primary);
-      box-shadow: 0 0 0 2px var(--surface) inset;
-      flex-shrink: 0;
-    }
-
-    /* Calendar mini */
-    .calendar-card {
-      background: var(--surface);
-    }
-
-    .calendar-head {
-      padding: 10px 16px 6px 16px;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--surface);
-    }
-
-    .calendar-title {
-      font-weight: 800;
-      color: var(--primary);
-      font-size: 1.02rem;
-      letter-spacing: 0.5px;
-    }
-
-    .calendar-sub {
-      font-size: 12px;
-      color: var(--text-muted);
-      letter-spacing: 1px;
-    }
-
-    .calendar-head .btn {
-      min-width: 32px;
-      height: 32px;
-      padding: 0;
-      font-size: 1.1rem;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background: var(--surface);
-      color: var(--text);
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 2px;
-      padding: 8px 8px 10px 8px;
-      background: var(--surface);
-    }
-
-    .calendar-grid .dow {
-      height: 22px;
-      border: 0;
-      background: transparent;
-      font-weight: 700;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.93rem;
-    }
-
-    .calendar-grid .cell {
-      height: 28px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--border-color);
-      background: var(--surface);
-      color: var(--text);
-      font-size: 0.93rem;
-      font-weight: 500;
-      transition: background 0.18s, color 0.18s;
-      cursor: pointer;
-    }
-
-    .calendar-grid .cell.faded {
-      opacity: 0.45;
-      color: var(--text-muted);
-    }
-
-    .calendar-grid .cell.today {
-      outline: 2px solid var(--primary);
-      outline-offset: -2px;
-      font-weight: 700;
-      background: rgba(76, 175, 80, 0.08);
-      color: var(--text);
-    }
-
-    .calendar-grid .cell:hover:not(.faded) {
-      background: rgba(76, 175, 80, 0.08);
-      color: var(--text);
-    }
-
-    /* POPUP chung */
-    .popup-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.15);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(2px);
-    }
-
-    .popup-overlay.active {
-      display: flex;
-    }
-
-    .popup-content {
-      width: 420px;
-      background: var(--surface);
-      border-radius: 12px;
-      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.18);
-      padding: 36px 32px 28px 32px;
-      position: relative;
-      animation: fadeInUp 0.35s;
-      border: 1px solid var(--border-color);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      color: var(--text);
-    }
-
-    .popup-content::before {
-      content: "";
-      position: absolute;
-      top: -60px;
-      right: -60px;
-      width: 140px;
-      height: 140px;
-      background: radial-gradient(circle,
-          rgba(102, 187, 106, 0.25) 60%,
-          transparent 100%);
-      z-index: 0;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .close-btn {
-      background: none;
-      border: none;
-      font-size: 28px;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: color 0.2s, transform 0.2s;
-      position: absolute;
-      top: 16px;
-      right: 22px;
-      z-index: 2;
-    }
-
-    .close-btn:hover {
-      color: #ef4444;
-      transform: rotate(90deg) scale(1.15);
-    }
-
-    .popup-title {
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: var(--primary);
-      letter-spacing: 0.5px;
-    }
-
-    .btn {
-      background: var(--primary);
-      color: var(--on-primary);
-      border: none;
-      border-radius: 8px;
-      font-weight: 700;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.11);
-      transition: background 0.2s, color 0.2s, transform 0.05s;
-      padding: 8px 12px;
-    }
-
-    .btn:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn:active {
-      transform: translateY(1px);
-    }
-
-    #editProfileBtn,
-    #saveProfileBtn {
-      background: var(--secondary);
-      color: #fff;
-      border-radius: 8px;
-      border: none;
-      min-width: 90px;
-      font-size: 15px;
-      padding: 8px 12px;
-    }
-
-    #editProfileBtn:hover,
-    #saveProfileBtn:hover {
-      filter: brightness(1.05);
-    }
-
-    .form-label {
-      color: var(--text) !important;
-    }
-
-    .form-input,
-    select.form-input {
-      background: var(--input-bg);
-      color: var(--text);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 15px;
-      transition: background 0.2s, color 0.2s, border-color 0.2s;
-    }
-
-    /* ===== NÚT UIVERSE: TẠO NHÓM ===== */
-    .cssbuttons-io-button {
-      background: var(--primary);
-      color: var(--on-primary);
-      font-family: inherit;
-      padding: 0.35em 1.2em;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: 12px;
-      border: none;
-      letter-spacing: 0.02em;
-      display: flex;
-      align-items: center;
-      box-shadow: inset 0 0 1.6em -0.6em rgba(0, 0, 0, 0.12);
-      overflow: hidden;
-      position: absolute;
-      left: 18px;
-      right: 18px;
-      bottom: 18px;
-      height: 48px;
-      padding-right: 3.3em;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    .cssbuttons-io-button:hover {
-      background: var(--primary-hover);
-    }
-
-    .cssbuttons-io-button .icon {
-      background: var(--surface);
-      margin-left: 1em;
-      position: absolute;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 2.2em;
-      width: 2.2em;
-      border-radius: 10px;
-      box-shadow: 0.1em 0.1em 0.6em 0.2em rgba(0, 0, 0, 0.12);
-      right: 0.3em;
-      transition: all 0.3s;
-    }
-
-    .cssbuttons-io-button:hover .icon {
-      width: calc(100% - 0.6em);
-    }
-
-    .cssbuttons-io-button .icon svg {
-      width: 1.1em;
-      transition: transform 0.3s;
-      color: var(--secondary);
-    }
-
-    .cssbuttons-io-button:hover .icon svg {
-      transform: rotate(90deg) scale(1.1);
-    }
-
-    .cssbuttons-io-button:active .icon {
-      transform: scale(0.95);
-    }
-
-    /* ====== WORKHUB SETTINGS (namespaced .wh-*) ====== */
-    .wh-settings {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      color: var(--text);
-      z-index: 9999;
-      overflow: hidden;
-      display: none;
-    }
-
-    .wh-wrap {
-      display: flex;
-      height: 100%;
-    }
-
-    .wh-side {
-      width: 260px;
-      background: var(--surface);
-      padding: 16px 0;
-      overflow-y: auto;
-      border-right: 1px solid var(--border-color);
-    }
-
-    .wh-search {
-      padding: 0 16px 10px;
-    }
-
-    .wh-search input {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      outline: none;
-      background: var(--surface);
-      color: var(--text);
-    }
-
-    .wh-group {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      padding: 8px 16px 4px;
-    }
-
-    .wh-nav {
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* .wh-nav-item {
-      background: none;
-      border: none;
-      color: var(--text);
-      text-align: left;
-      padding: 10px 16px;
-      font-size: 0.95rem;
-      cursor: pointer;
-      border-left: 3px solid transparent;
-      transition: 0.2s;
-    } */
-
-    /* .wh-nav-item:hover {
-      background: rgba(76, 175, 80, 0.08);
-    } */
-
-    /* .wh-nav-item.wh-active {
-      background: rgba(76, 175, 80, 0.12);
-      border-left: 3px solid var(--primary);
-      color: var(--text);
-    } */
-
-    .wh-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      background: var(--bg);
-    }
-
-    .wh-topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 24px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .wh-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .wh-card {
-      background: var(--surface);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      margin: 16px 24px;
-      padding: 16px 20px;
-      color: var(--text);
-    }
-
-    .wh-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border-color);
-      padding: 10px 0;
-    }
-
-    .wh-row:last-child {
-      border: none;
-    }
-
-    .wh-label {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-
-    .wh-value {
-      font-weight: 600;
-    }
-
-    /* nút chỉnh sửa thông tin */
-    .wh-mini {
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 6px 10px;
-      cursor: pointer;
-    }
-
-    .wh-mini:hover {
-      background: rgba(76, 175, 80, 0.08);
-    }
-
-    .wh-btn {
-      border: none;
-      border-radius: 8px;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .wh-primary {
-      background: var(--primary);
-      color: var(--on-primary);
-    }
-
-    .wh-primary:hover {
-      background: var(--primary-hover);
-    }
-
-    .wh-secondary {
-      background: var(--secondary);
-      color: #fff;
-    }
-
-    .wh-secondary:hover {
-      filter: brightness(1.05);
-    }
-
-    .wh-danger {
-      background: #ef4444;
-      color: #fff;
-    }
-
-    .wh-outline {
-      background: none;
-      border: 1px solid #ef4444;
-      color: #ef4444;
-    }
-
-    .wh-outline:hover {
-      background: #ef4444;
-      color: #fff;
-    }
-
-    .wh-link {
-      color: var(--primary);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 6px;
-    }
-
-    .wh-link:hover {
-      text-decoration: underline;
-    }
-
-    .wh-danger-zone {
-      border: 1px solid #ef4444;
-    }
-
-    .wh-tabs {
-      display: flex;
-      gap: 10px;
-      padding: 0 24px;
-      margin-top: 10px;
-    }
-
-    .wh-tab {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      padding: 10px 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .wh-tab.wh-active {
-      color: var(--text);
-      border-bottom: 2px solid var(--primary);
-    }
-
-    .wh-panel {
-      display: none;
-      padding: 0 24px 24px;
-    }
-
-    .wh-panel.wh-show {
-      display: block;
-    }
-
-    .wh-section {
-      font-size: 1.1rem;
-      color: var(--text);
-      margin: 12px 0;
-    }
-
-    .wh-t {
-      font-weight: 600;
-    }
-
-    .wh-sub {
-      color: var(--text-muted);
-    }
-
-    .wh-between {
-      justify-content: space-between;
-    }
-
-    .wh-pill-ok {
-      background: #16a34a;
-      color: #fff;
-      padding: 4px 8px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-    }
-
-    /* ===== Khối tổng thể ===== */
-    .profile-hero {
-      position: relative;
-      width: calc(100% + 2px);
-      background: #fff;
-      border-radius: 12px;
-      overflow: visible;
-      padding-bottom: 12px;
-      padding: 0;
-    }
-
-    /* ===== Background ===== */
-    .profile-hero .background {
-      position: relative;
-      width: 420px;
-      left: -33px;
-      height: 160px;
-      overflow: hidden;
-      background: #e5e7eb;
-      z-index: 1;
-    }
-
-    .profile-hero .background img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .profile-hero .bg-upload {
-      position: absolute;
-      right: 12px;
-      top: 12px;
-      background: rgba(0, 0, 0, 0.6);
-      color: #fff;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      cursor: pointer;
-      user-select: none;
-      z-index: 3;
-    }
-
-    /* ===== Avatar ===== */
-    .profile-hero .avatar {
-      position: absolute;
-      top: 100px;
-      /* đặt avatar đè lên phần dưới của background */
-      left: 50%;
-      transform: translateX(-50%);
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: #eee;
-      overflow: visible;
-      /* để nút chỉnh sửa không bị cắt */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 4;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-    }
-
-    .profile-hero .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 50%;
-    }
-
-    /* ===== Nút đổi avatar ===== */
-    .profile-hero .avatar-upload {
-      position: absolute;
-      right: -4px;
-      bottom: -4px;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: gray;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      cursor: pointer;
-      z-index: 5;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    }
-
-    /* ===== Tên người dùng ===== */
-    .profile-hero .name {
-      display: block;
-      margin: 80px auto 8px auto;
-      /* cách background một khoảng hợp lý */
-      text-align: center;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      background: transparent;
-      color: #111827;
-      outline: none;
-    }
-
-    /* Responsive nhỏ */
-    @media (max-width: 480px) {
-      .profile-hero .avatar {
-        width: 96px;
-        height: 96px;
-        top: 90px;
-      }
-
-      .profile-hero .avatar-upload {
-        width: 28px;
-        height: 28px;
-        font-size: 12px;
-      }
-
-      .profile-hero .name {
-        margin-top: 60px;
-      }
-    }
-
-
-    #popupProfile .profile-form {
-      margin-top: 30px;
-    }
-
-    /* helper */
-    .muted {
-      color: var(--text-subtle) !important;
-    }
-  </style>
+  <link rel="stylesheet" href="/frontend/style.css">
 </head>
 
 <body>
@@ -1354,7 +13,7 @@
     <!-- HEADER -->
     <div class="dashboard-header" style="margin-top: 0">
       <div class="logo-bar">
-        <span class="site-name" style="font-size: 35px; font-weight: 900; letter-spacing: 1.5px">WorkHub</span>
+        <a href="/" class="site-name">WorkHub</a>
       </div>
       <div class="header-actions actions-cluster">
         <button class="icon-btn" title="Menu" aria-label="Menu">
@@ -1389,18 +48,19 @@
         <!-- account -->
         <div class="user-account" id="openProfile" title="Account" style="position: relative">
           <div style="position: relative">
-            <div
-              style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;">
-            </div>
+            <img id="avatarPreview" name="avatarPath" alt="avatar"
+              src="<%= user.avatarPath || '/uploads/default-avatar.png' %>"
+              style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;" />
             <span
-              style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;"></span>
+              style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;">
+            </span>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-start;">
             <span style="font-weight: 700; font-size: 1.08rem; line-height: 1.1; color: var(--text);">
               <%= user.name || 'Tên người dùng' %>
             </span>
             <span style="font-size: 0.97rem; color: var(--text-muted); line-height: 1.1;">
-              <%= user.email || 'example.com' %>
+              <%= user.email || '@example.com' %>
             </span>
           </div>
           <svg style="margin-left: 8px" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
@@ -1465,7 +125,7 @@
     <!-- POPUP XÁC NHẬN ĐĂNG XUẤT -->
     <div class="popup-overlay" id="popupLogout" aria-hidden="true">
       <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="logout-title">
-        <div class="popup-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="popup-header" >
           <div id="logout-title" class="popup-title">Xác nhận</div>
           <button class="close-btn" id="closeLogoutBtn" aria-label="Đóng">&times;</button>
         </div>
@@ -1510,49 +170,298 @@
 
       <!-- MAIN -->
       <div class="main-content" id="mainContent">
-        <div class="main-toolbar">
-          <div class="task-tabs">
-            <button class="tab-btn active" tabindex="0">
-              <svg viewBox="0 0 20 20">
-                <path d="M4 10l4 4 8-8" />
-              </svg>
-              Đã giao
+        <!-- POPUP TẠO NHÓM -->
+        <div class="popup-overlay" id="popupGroup" aria-hidden="true">
+          <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
+            <button class="close-btn" id="closeGroupPopup" aria-label="Đóng">
+              &times;
             </button>
-            <button class="tab-btn" tabindex="0">
-              <svg viewBox="0 0 20 20">
-                <circle cx="9" cy="9" r="7" />
-                <path d="M13 13l4 4" />
-              </svg>
-              Được giao
-            </button>
-          </div>
+            <div class="popup-inner-content" style="flex-direction: column; width: 100%">
+              <div>
+                <div id="create-group-title" class="popup-title">
+                  Tạo nhóm mới
+                </div>
+                <form id="groupForm" action="/groups" method="POST" style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 18px;
+                    min-width: 260px;
+                  ">
+                  <input type="hidden" name="csrf_token" value="" />
+                  <div style="display: flex; flex-direction: column; gap: 6px">
+                    <label for="groupName" class="form-label" style="font-weight: 600">Tên nhóm</label>
+                    <input id="groupName" name="groupName" type="text" required placeholder="Nhập tên nhóm"
+                      class="form-input" style="padding: 10px 13px" />
+                  </div>
+                  <div style="display: flex; justify-content: flex-end; gap: 12px">
+                    <button type="button" class="btn" id="cancelGroupBtn" style="background: #9e9e9e">
+                      Huỷ
+                    </button>
+                    <button type="submit" class="btn" id="createGroupBtn">
+                      Tạo nhóm
+                    </button>
+                  </div>
+                </form>
+                <!-- javascript hiện cửa sổ tạo nhóm -->
+                <script>
+                  const popupGroup = document.getElementById('popupGroup');
+                  // nút để mở popup (dòng 1500)
+                  const btnAddGroup = document.getElementById('btnAddGroup');
+                  const closeGroupPopup = document.getElementById('closeGroupPopup'); // nút X
+                  const cancelGroupBtn = document.getElementById('cancelGroupBtn'); // nút Huỷ
 
-          <div class="search-pill">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"></line>
-            </svg>
-            <input type="text" placeholder="Search" />
-          </div>
+                  // Hàm mở popup
+                  function openGroupPopup() {
+                    popupGroup.style.display = 'flex';
+                    popupGroup.style.alignItems = 'center';
+                    popupGroup.style.justifyContent = 'center';
+                    popupGroup.style.backdropFilter = 'blur(2px)';
+                  }
 
-          <div class="">
-            <ul class="task-menu">
-              <li>
-                <a href="javascript:void(0)">Bộ lọc công việc</a>
-                <ul class="task-sub">
-                  <li><a href="javascript:void(0)">Tất cả</a></li>
-                  <li><a href="javascript:void(0)">Đã hoàn thành</a></li>
-                  <li><a href="javascript:void(0)">Đang làm</a></li>
-                  <li><a href="javascript:void(0)">Chưa nhận</a></li>
-                </ul>
-              </li>
-            </ul>
+                  // Hàm đóng popup
+                  function closeGroup() {
+                    popupGroup.style.display = 'none';
+                  }
+
+                  // Sự kiện mở popup 
+                  if (btnAddGroup) {
+                    btnAddGroup.addEventListener('click', openGroupPopup);
+                  }
+
+                  // Sự kiện đóng popup khi bấm nút X hoặc Huỷ
+                  closeGroupPopup.addEventListener('click', closeGroup);
+                  cancelGroupBtn.addEventListener('click', closeGroup);
+
+                  // Đóng popup khi click ra ngoài phần nội dung
+                  popupGroup.addEventListener('click', function (e) {
+                    if (e.target === popupGroup) {
+                      closeGroup();
+                    }
+                  });
+                  // ---------------------------------------------------
+                  // Load danh sách nhóm đã tham gia
+                  async function loadGroups() {
+                    const groupList = document.getElementById('groupList');
+                    if (!groupList) return;
+                    groupList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Đang tải...</div>';
+                    try {
+                      const res = await fetch('/groups/my-groups', { credentials: 'same-origin' });
+                      if (!res.ok) throw new Error('Lỗi khi tải nhóm');
+                      const groups = await res.json();
+                      if (!Array.isArray(groups) || groups.length === 0) {
+                        groupList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Bạn chưa tham gia nhóm nào.</div>';
+                        return;
+                      }
+                      groupList.innerHTML = groups.map(g => {
+                        const leaderName = g.leaderName || 'Không rõ';
+                        return `
+                      <div class="group-card" data-id="${g.id}" >
+                        <div class="group-title">${g.groupName}</div>
+                        <div class="group-leader">Nhóm trưởng: <span>${leaderName}</span></div>
+                      </div>
+                      `;
+                      }).join('');
+
+                      // Thêm sự kiện click sau khi render
+                      document.querySelectorAll('.group-card').forEach(card => {
+                        card.addEventListener('click', () => {
+                          const groupId = card.getAttribute('data-id');
+                          window.location.href = `/groups/${groupId}`; // render group.ejs tương ứng
+                        });
+                      });
+                    } catch (err) {
+                      groupList.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;">Lỗi khi tải danh sách nhóm.</div>';
+                    }
+                  }
+                  window.addEventListener('DOMContentLoaded', loadGroups);
+
+                  // Xử lý submit tạo nhóm
+                  const groupForm = document.getElementById('groupForm');
+                  if (groupForm) {
+                    groupForm.addEventListener('submit', async function (e) {
+                      e.preventDefault();
+                      const groupName = document.getElementById('groupName').value.trim();
+                      if (!groupName) return alert('Vui lòng nhập tên nhóm');
+                      try {
+                        const res = await fetch('/groups', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ groupName }),
+                          credentials: 'same-origin'
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || 'Lỗi tạo nhóm');
+                        alert('Tạo nhóm thành công!');
+                        groupForm.reset();
+                        document.getElementById('popupGroup').style.display = 'none';
+                        loadGroups();
+                      } catch (err) {
+                        alert(err.message || 'Lỗi khi tạo nhóm');
+                      }
+                    });
+                  }
+                </script>
+              </div>
+            </div>
           </div>
         </div>
+        <!-- Trang nhóm -->
+        <div class="content-task" id="paperArea">
+          <div class="chat-wrapper" style="display:flex;flex-direction:column;height:100%">
+            <div class="chat-header-bar"
+              style="display:flex;justify-content:space-between;align-items:center;padding:12px 28px;border-bottom:1px solid var(--border-color);background:var(--surface);box-shadow:var(--shadow-soft);border-radius:8px 8px 0 0;margin-bottom:8px;width:calc(100% + 56px);box-sizing:border-box;margin-left:-28px;margin-right:-28px">
+              <div style="display:flex;flex-direction:column">
+                <div style="font-weight:800;color:var(--text)">
+                  <%= group.groupName %>
+                </div>
+                <div style="font-size:0.9rem;color:var(--text-muted)">
+                  <%= group.memberCount %> thành viên
+                </div>
+              </div>
+              <div style="display:flex;gap:12px">
+                <button id="addMemberBtnSmall"
+                  style="background:linear-gradient(180deg,var(--primary) 0%,var(--primary-hover) 100%);color:var(--on-primary);border:none;padding:10px 16px;border-radius:10px;font-weight:700;box-shadow:0 6px 18px rgba(76,175,80,0.18);cursor:pointer">
+                  + Thêm thành viên
+                </button>
+                <button id="createTaskBtnSmall"
+                  style="background:linear-gradient(180deg,#2ecc71 0%,#2fbf5a 100%);color:var(--on-primary);border:none;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer">
+                  Tạo công việc
+                </button>
+              </div>
+            </div>
+            <div id="chatMessages" class="chat-messages" style="flex:1;overflow:auto;padding:12px;overflow-x:hidden;">
+              <!-- message 
+              <div class="msg-row" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
+                <div class="avatar" style="width:44px;height:44px;border-radius:50%;background:#e6f7ed;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary);">A</div>
+                <div class="bubble" style="background:#f6fff6;padding:10px 12px;border-radius:10px;max-width:70%;">
+                  <strong>A</strong>
+                  <div>Xin chào!</div>
+                </div>
+              </div>
 
-        <!-- Nội dung dạng "giấy kẻ ngang" -->
-        <div class="content-task" id="paperArea">WorkHub</div>
+              
+              <div class="msg-row" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
+                <div class="avatar" style="width:44px;height:44px;border-radius:50%;background:#e6f7ed;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary);">B</div>
+                <div class="bubble" style="background:#f6fff6;padding:10px 12px;border-radius:10px;max-width:70%;">
+                  <strong>B</strong>
+                  <div>Chào bạn!</div>
+                </div>
+              </div> -->
+            </div>
+
+            <!-- input row -->
+            <div class="chat-input-row"
+              style="padding:12px;border-top:1px solid var(--border-color);background:transparent">
+              <label for="fileInputCenter" class="attach-circle" title="Đính kèm" style="margin-right:8px">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 01-7.78 0 5.5 5.5 0 010-7.78l8.49-8.49a3.5 3.5 0 014.95 4.95l-8.49 8.49a1.5 1.5 0 01-2.12-2.12l7.07-7.07"
+                    fill="currentColor" />
+                </svg>
+              </label>
+              <input id="fileInputCenter" type="file" style="display:none" />
+              <input id="chatInputCenter" placeholder="Nhập tin nhắn..."
+                style="padding:10px 14px;border-radius:20px;border:1px solid var(--border-color);width:calc(100% - 150px);margin-right:8px;vertical-align:middle" />
+              <button id="sendBtnCenter"
+                style="background:var(--primary);color:var(--on-primary);border:none;padding:10px 16px;border-radius:12px;cursor:pointer">Gửi</button>
+            </div>
+          </div>
+
+          <!-- <script>
+            (function(){
+              var send = document.getElementById('sendBtnCenter');
+              var input = document.getElementById('chatInputCenter');
+              var fileInput = document.getElementById('fileInputCenter');
+              var messages = document.getElementById('chatMessages');
+
+              function appendMessage(label, text){
+                var row = document.createElement('div');
+                row.className = 'msg-row';
+                row.style.display = 'flex'; row.style.gap='12px'; row.style.alignItems='flex-start'; row.style.marginBottom='12px';
+                var av = document.createElement('div'); av.style.width='44px'; av.style.height='44px'; av.style.borderRadius='50%'; av.style.background='#e6f7ed'; av.style.display='flex'; av.style.alignItems='center'; av.style.justifyContent='center'; av.style.fontWeight='700'; av.style.color='var(--primary)'; av.textContent = label;
+                var bubble = document.createElement('div'); bubble.style.background='#f6fff6'; bubble.style.padding='10px 12px'; bubble.style.borderRadius='10px'; bubble.style.maxWidth='70%';
+                bubble.innerHTML = '<strong>'+label+'</strong><div>'+text+'</div>';
+                row.appendChild(av); row.appendChild(bubble); messages.appendChild(row); messages.scrollTop = messages.scrollHeight;
+              }
+
+              if(send && input){
+                send.addEventListener('click', function(){
+                  var v = input.value.trim(); if(!v) return; appendMessage('Bạn', v); input.value = '';
+                });
+                input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); send.click(); } });
+              }
+
+              if(fileInput){
+                document.querySelector('label[for="fileInputCenter"]').addEventListener('click', function(){ fileInput.click(); });
+                fileInput.addEventListener('change', function(){ if(fileInput.files[0]){ appendMessage('Bạn', 'Đã gửi tệp: '+fileInput.files[0].name); } });
+              }
+            })();
+          </script> -->
+        </div>
       </div>
+
+      <!-- RIGHT COLUMN: members list -->
+      <div class="right-column">
+        <div class="right-panel">
+          <div class="search-members">
+            <input id="memberSearchRight" placeholder="Tìm kiếm thành viên..."
+              style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--surface)">
+          </div>
+          <div id="membersWrapRight" class="member-list"></div>
+          <div id="memberCountRight" style="padding:12px 8px;color:var(--text-muted)"></div>
+        </div>
+      </div>
+
+      <!-- member context menu -->
+      <div id="memberMenu" class="member-menu" role="menu" aria-hidden="true">
+        <div class="menu-item" data-action="view">👁️ Xem thông tin</div>
+        <div class="menu-item" data-action="message">💬 Nhắn tin</div>
+        <div class="menu-item" data-action="remove" style="color:#d32f2f">🗑️ Xóa thành viên</div>
+      </div>
+
+      <!-- javascript load thành viên -->
+      <script>
+        async function loadMembers() {
+          const membersWrap = document.getElementById("membersWrapRight");
+          const memberCountRight = document.getElementById("memberCountRight");
+          const groupId = "<%= group.id %>";
+
+          membersWrap.innerHTML = '<div style="padding:10px;color:var(--text-muted);text-align:center">Đang tải...</div>';
+          try {
+            const res = await fetch(`/groups/${groupId}/members`, { credentials: "same-origin" });
+            if (!res.ok) throw new Error("Lỗi khi tải danh sách thành viên");
+            const members = await res.json();
+            if (members.length === 0) {
+              membersWrap.innerHTML = '<div style="padding:10px;color:var(--text-muted);text-align:center">Chưa có thành viên nào.</div>';
+              memberCountRight.textContent = "0 thành viên";
+              return;
+            }
+
+            membersWrap.innerHTML = members
+              .map(
+                (m) => `
+          <div class="member-item">
+            <div class="avatar">
+              ${m.avatarPath ? `<img src="${m.avatarPath}" style="width: 32px; height: 32px;object-fit:cover;border-radius:50%;">` : m.name.charAt(0).toUpperCase()}
+            </div>
+            <div style="flex:1">
+              <div style="font-weight:600;color:var(--text)">${m.name}</div>
+              <div style="font-size:0.9rem;color:var(--text-muted)">${m.roleInGroup === 'leader' ? '👑 Trưởng nhóm' : '👤 Thành viên'}</div>
+            </div>
+          </div>`
+              )
+              .join("");
+
+            memberCountRight.textContent = `${members.length} thành viên`;
+          } catch (err) {
+            console.error(err);
+            membersWrap.innerHTML = '<div style="padding:10px;color:#ef4444;text-align:center">Không thể tải danh sách thành viên.</div>';
+          }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadMembers);
+      </script>
+
 
       <!-- RIGHT PANEL STACK -->
       <div class="right-panel-stack" id="rightPanelStack">
@@ -1592,80 +501,6 @@
         </div>
       </div>
 
-      <!-- POPUP TẠO NHÓM -->
-      <div class="popup-overlay" id="popupGroup" aria-hidden="true">
-        <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
-          <button class="close-btn" id="closeGroupPopup" aria-label="Đóng">
-            &times;
-          </button>
-          <div class="popup-inner-content" style="flex-direction: column; width: 100%">
-            <div>
-              <div id="create-group-title" class="popup-title">
-                Tạo nhóm mới
-              </div>
-              <form id="groupForm" action="/groups" method="POST" style="
-                    display: flex;
-                    flex-direction: column;
-                    gap: 18px;
-                    min-width: 260px;
-                  ">
-                <input type="hidden" name="csrf_token" value="" />
-                <div style="display: flex; flex-direction: column; gap: 6px">
-                  <label for="groupName" class="form-label" style="font-weight: 600">Tên nhóm</label>
-                  <input id="groupName" name="groupName" type="text" required placeholder="Nhập tên nhóm"
-                    class="form-input" style="padding: 10px 13px" />
-                </div>
-                <div style="display: flex; justify-content: flex-end; gap: 12px">
-                  <button type="button" class="btn" id="cancelGroupBtn" style="background: #9e9e9e">
-                    Huỷ
-                  </button>
-                  <button type="submit" class="btn" id="createGroupBtn">
-                    Tạo nhóm
-                  </button>
-                </div>
-              </form>
-              <!-- javascript hiện cửa sổ tạo nhóm -->
-              <script>
-                const popupGroup = document.getElementById('popupGroup');
-                // nút để mở popup (dòng 1500)
-                const btnAddGroup = document.getElementById('btnAddGroup'); 
-                const closeGroupPopup = document.getElementById('closeGroupPopup'); // nút X
-                const cancelGroupBtn = document.getElementById('cancelGroupBtn'); // nút Huỷ
-
-                // Hàm mở popup
-                function openGroupPopup() {
-                  popupGroup.style.display = 'flex';
-                  popupGroup.style.alignItems = 'center';
-                  popupGroup.style.justifyContent = 'center';
-                  popupGroup.style.backdropFilter = 'blur(2px)';
-                }
-
-                // Hàm đóng popup
-                function closeGroup() {
-                  popupGroup.style.display = 'none';
-                }
-
-                // Sự kiện mở popup 
-                if (btnAddGroup) {
-                  btnAddGroup.addEventListener('click', openGroupPopup);
-                }
-
-                // Sự kiện đóng popup khi bấm nút X hoặc Huỷ
-                closeGroupPopup.addEventListener('click', closeGroup);
-                cancelGroupBtn.addEventListener('click', closeGroup);
-
-                // Đóng popup khi click ra ngoài phần nội dung
-                popupGroup.addEventListener('click', function (e) {
-                  if (e.target === popupGroup) {
-                    closeGroup();
-                  }
-                });
-              </script>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- POPUP THÔNG TIN TÀI KHOẢN -->
       <div class="popup-overlay" id="popupProfile"
         style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); z-index: 1000;"
@@ -1683,14 +518,14 @@
               const closeProfileBtn = document.getElementById('closeProfileBtn');
 
               // Khi bấm nút X thì ẩn popup
-              closeProfileBtn.addEventListener('click', function() {
+              closeProfileBtn.addEventListener('click', function () {
                 popupProfile.style.display = 'none';
               });
             </script>
           </div>
 
           <!-- FORM -->
-          <form class="profile-form" id="profileForm" action="/info" method="POST"
+          <form class="profile-form" id="profileForm" action="/info" method="POST" enctype="multipart/form-data"
             style=" display: flex; flex-direction: column; gap: 13px; margin-bottom: 22px;">
             <!-- Background + Avatar upload -->
             <div class="profile-hero">
@@ -1703,7 +538,6 @@
                     onchange="previewImage(event, 'bgPreview')" />
                 </label>
               </div>
-
               <div class="avatar">
                 <img id="avatarPreview" name="avatarPath" alt="avatar"
                   src="<%= user.avatarPath || '/uploads/default-avatar.png' %>" />
@@ -1713,11 +547,24 @@
                     onchange="previewImage(event, 'avatarPreview')" />
                 </label>
               </div>
+
+              <!-- javascript thay đổi avatar và background -->
+              <script>
+                // Xem trước ảnh
+                function previewImage(event, previewId) {
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    document.getElementById(previewId).src = reader.result;
+                  };
+                  reader.readAsDataURL(event.target.files[0]);
+                }
+              </script>
+              <!-- Thông tin tài  khoản -->
               <div>
                 <input class="name" type="text" name="name" value="<%= user.name || '' %>" readonly>
               </div>
             </div>
-            <!-- Thông tin tài  khoản -->
+
             <input type="hidden" name="csrf_token" value="" />
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
               <label class="form-label" for="username" style="width: 110px">Tên tài khoản</label>
@@ -1755,6 +602,67 @@
                 id="address" style="flex: 1; padding: 10px 13px" />
             </div>
           </form>
+          <!------------------------------------------- POPUP XÁC NHẬN ------------------------------------------>
+          <div class="confirm-overlay" id="confirmOverlay"
+            style="display:none; position: fixed; inset:0; background: rgba(0,0,0,0.3); align-items: center; justify-content: center; z-index: 1100;">
+            <div class="confirm-box"
+              style="background:white; padding:20px 25px; border-radius:10px; text-align:center;">
+              <p style="margin-bottom:15px; font-size:17px;">Bạn có chắc chắn không?</p>
+              <div style="display:flex; justify-content:center; gap:10px;">
+                <button id="confirmYes" class="btn" style="background:#4CAF50; color:white; padding:6px 14px;">Xác
+                  nhận</button>
+                <button id="confirmNo" class="btn"
+                  style="background:#f44336; color:white; padding:6px 14px;">Hủy</button>
+              </div>
+            </div>
+          </div>
+          <!------------------------------------------------------------------------------------------------------>
+          <script>
+            const profileForm = document.getElementById('profileForm');
+            const avatarInput = document.getElementById('avatarInput');
+            const backgroundInput = document.getElementById('backgroundInput');
+            const confirmOverlay = document.getElementById('confirmOverlay');
+            const confirmYes = document.getElementById('confirmYes');
+            const confirmNo = document.getElementById('confirmNo');
+            //const popupProfile = document.getElementById('popupProfile');
+
+            // Khi chọn ảnh mới -> hiện popup xác nhận
+            avatarInput.addEventListener('change', handleImageChange);
+            backgroundInput.addEventListener('change', handleImageChange);
+
+            function handleImageChange(event) {
+              const file = event.target.files[0];
+              if (!file) return;
+              previewImage(event, event.target.id === 'avatarInput' ? 'avatarPreview' : 'bgPreview');
+              confirmOverlay.style.display = 'flex';
+            }
+
+            // Hàm xem trước ảnh
+            function previewImage(event, previewId) {
+              const file = event.target.files[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                document.getElementById(previewId).src = e.target.result;
+              };
+              reader.readAsDataURL(file);
+            }
+
+            // Khi bấm “Xác nhận” => submit form + đóng popup
+            confirmYes.addEventListener('click', () => {
+              confirmOverlay.style.display = 'none';
+              profileForm.submit(); // gửi form để backend lưu vào DB
+              popupProfile.style.display = 'none'; // đóng popup thông tin
+            });
+
+            // Khi bấm “Hủy” => đóng popup xác nhận
+            confirmNo.addEventListener('click', () => {
+              confirmOverlay.style.display = 'none';
+              avatarInput.value = "";
+              backgroundInput.value = "";
+            });
+          </script>
+
         </div>
       </div>
 
@@ -1778,7 +686,6 @@
             </nav>
           </aside>
 
-
           <main class="wh-main">
             <header class="wh-topbar">
               <div class="wh-title">Tài Khoản Của Tôi</div>
@@ -1791,31 +698,37 @@
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Tên hiển thị</div>
-                  <input class="form-input" type="text" name="name" value="<%= user.name || '' %>" readonly style="flex: 1; padding: 10px 13px">
+                  <input class="form-input" type="text" name="name" value="<%= user.name || '' %>" readonly
+                    style="flex: 1; padding: 10px 13px">
                 </div>
               </div>
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Tên đăng nhập</div>
-                  <input class="form-input" name="username" type="text" value="<%= user.username %>" readonly id="username" style="flex: 1; padding: 10px 13px" />
+                  <input class="form-input" name="username" type="text" value="<%= user.username %>" readonly
+                    id="username" style="flex: 1; padding: 10px 13px" />
                 </div>
               </div>
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Email</div>
-                  <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email" style="flex: 1; padding: 10px 13px" />
+                  <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email"
+                    style="flex: 1; padding: 10px 13px" />
                 </div>
               </div>
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Số Điện Thoại</div>
-                  <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>" readonly id="phone" style="flex: 1; padding: 10px 13px" />
+                  <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>"
+                    readonly id="phone" style="flex: 1; padding: 10px 13px" />
                 </div>
               </div>
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Ngày sinh</div>
-                  <input class="form-input" name="dob" type="date" value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob" style="flex: 1; padding: 10px 13px" />
+                  <input class="form-input" name="dob" type="date"
+                    value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
+                    style="flex: 1; padding: 10px 13px" />
                 </div>
               </div>
               <div class="wh-row">
@@ -1832,24 +745,19 @@
               <div class="wh-row">
                 <div>
                   <div class="wh-label">Địa chỉ</div>
-                  <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly id="address" style="flex: 1; padding: 10px 13px" />
+                  <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly
+                    id="address" style="flex: 1; padding: 10px 13px" />
                 </div>
               </div>
               <div class="wh-btnEditProfile" style="margin-top: 10px;">
                 <button class="btn" type="button" id="editProfileBtn" style="background: var(--secondary)">Sửa</button>
-                <button class="btn" type="submit" id="saveProfileBtn" style="display: none; background: var(--secondary)">Xác nhận</button>
+                <button class="btn" type="submit" id="saveProfileBtn"
+                  style="display: none; background: var(--secondary)">Xác nhận</button>
               </div>
-              <% if (error) { %>
-                <p class="error"><%= error %></p>
-              <% } %>
-              <% if (success) { %>
-                <p class="success"><%= success %></p>
-              <% } %>
               <!-- javascript sửa thông tin -->
               <script>
                 const editBtn = document.getElementById("editProfileBtn");
                 const saveBtn = document.getElementById("saveProfileBtn");
-                
 
                 editBtn.addEventListener("click", () => {
                   // Ẩn nút "Sửa"
@@ -1966,88 +874,7 @@
         }
       }
 
-      // // ------------------------------------------------------- TẠO NHÓM POPUP ------------------------------------------------
-      // const btnAddGroup = document.getElementById("btnAddGroup");
-      // const popupGroup = document.getElementById("popupGroup");
-      // const closeGroupPopup = document.getElementById("closeGroupPopup");
-      // const cancelGroupBtn = document.getElementById("cancelGroupBtn");
-      // const groupForm = document.getElementById("groupForm");
-      // const groupList = document.getElementById("groupList");
-      // const groupSearchInput = document.querySelector(
-      //   ".sidebar-search input"
-      // );
-
-      // let groups = [
-      //   { name: "Nhóm A", leader: "Nguyễn Văn A" },
-      //   { name: "Nhóm B", leader: "Trần Thị B" },
-      // ];
-
-      // function renderGroups(filter = "") {
-      //   const filtered = groups.filter((g) =>
-      //     g.name.toLowerCase().includes(filter.trim().toLowerCase())
-      //   );
-      //   groupList.innerHTML =
-      //     filtered
-      //       .map(
-      //         (g) => `
-      //     <div style="padding:10px 14px;border-bottom:1px solid var(--border-color);cursor:pointer;">
-      //       <div style="font-weight:600;color:var(--text)">${g.name}</div>
-      //       <div style="font-size:13px;color:var(--text-muted);opacity:.95;">Nhóm trưởng: ${g.leader || ""
-      //           }</div>
-      //     </div>
-      //   `
-      //       )
-      //       .join("") ||
-      //     `<div style="padding:12px 14px;color:var(--text-muted)">Không có nhóm phù hợp</div>`;
-      // }
-      // renderGroups();
-      // groupSearchInput.addEventListener("input", (e) =>
-      //   renderGroups(e.target.value)
-      // );
-
-      // btnAddGroup.onclick = () => {
-      //   popupGroup.classList.add("active");
-      //   popupGroup.setAttribute("aria-hidden", "false");
-      //   groupForm.reset();
-      //   setTimeout(() => document.getElementById("groupName").focus(), 0);
-      // };
-      // function closeGroup() {
-      //   popupGroup.classList.remove("active");
-      //   popupGroup.setAttribute("aria-hidden", "true");
-      // }
-      // closeGroupPopup && (closeGroupPopup.onclick = closeGroup);
-      // cancelGroupBtn && (cancelGroupBtn.onclick = closeGroup);
-      // popupGroup.onclick = (e) => {
-      //   if (e.target === popupGroup) closeGroup();
-      // };
-
-      // groupForm.addEventListener("submit", async (e) => {
-      //   if (USE_FETCH) e.preventDefault();
-      //   const name = groupForm.groupName.value.trim();
-      //   if (!name) {
-      //     groupForm.groupName.focus();
-      //     return;
-      //   }
-      //   if (!USE_FETCH) return;
-      //   try {
-      //     const res = await fetch(API.createGroup, {
-      //       method: "POST",
-      //       headers: { "Content-Type": "application/json" },
-      //       body: JSON.stringify({ groupName: name }),
-      //     });
-      //     if (!res.ok) throw new Error("Tạo nhóm thất bại");
-      //     const created = await res.json().catch(() => ({ leader: "Bạn" }));
-      //     groups.push({ name, leader: created.leader || "Bạn" });
-      //     renderGroups();
-      //     closeGroup();
-      //   } catch (err) {
-      //     console.warn('Create group failed, falling back to local UI:', err);
-      //     // Fallback for preview: still add locally and mark creator as leader
-      //     groups.push({ name, leader: "Bạn" });
-      //     renderGroups();
-      //     closeGroup();
-      //   }
-      // });
+      // Create-group UI removed. The sidebar button opens addmembers.html in a new tab.
 
       // ===== Theme =====
       const THEME_KEY = "workhub-theme";
@@ -2328,14 +1155,14 @@
       });
 
       // Sidebar highlight
-      // document.querySelectorAll(".wh-nav-item").forEach((btn) => {
-      //   btn.addEventListener("click", () => {
-      //     document
-      //       .querySelectorAll(".wh-nav-item")
-      //       .forEach((b) => b.classList.remove("wh-active"));
-      //     btn.classList.add("wh-active");
-      //   });
-      // });
+      document.querySelectorAll(".wh-nav-item").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".wh-nav-item")
+            .forEach((b) => b.classList.remove("wh-active"));
+          btn.classList.add("wh-active");
+        });
+      });
       //Đăng xuất với hộp thoại xác nhận
       const logoutBtn = document.getElementById("Logout");
       const logoutConfirm = document.getElementById("popupLogout");
@@ -2389,6 +1216,7 @@
         });
       }
     </script>
+
   </div>
 </body>
 

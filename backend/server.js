@@ -19,7 +19,6 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -39,7 +38,7 @@ app.use(
   })
 );
 
-//----------------------------------------------------------------------------
+
 // Sử dụng routes
 app.use("/auth", authRoutes);
 app.use("/info", infoRoutes);

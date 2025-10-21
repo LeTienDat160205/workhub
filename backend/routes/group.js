@@ -123,6 +123,31 @@ router.get("/:id/members", ensureAuth, async (req, res) => {
   }
 });
 
+// ========================== XÓA NHÓM ==========================
+router.delete("/:id/delete", ensureAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
 
+    // Kiểm tra người dùng có phải leader của nhóm không
+    const [checkLeader] = await db.promise().query(
+      `SELECT 1 FROM \`group\` WHERE id = UUID_TO_BIN(?) AND leaderId = UUID_TO_BIN(?)`,
+      [id, userId]
+    );
+
+    if (checkLeader.length === 0) {
+      return res.status(403).json({ error: "Bạn không có quyền xóa nhóm này." });
+    }
+
+    // Xóa nhóm + liên kết thành viên
+    await db.promise().query(`DELETE FROM group_user WHERE groupId = UUID_TO_BIN(?)`, [id]);
+    await db.promise().query(`DELETE FROM \`group\` WHERE id = UUID_TO_BIN(?)`, [id]);
+
+    res.json({ success: true, message: "Đã xóa nhóm thành công." });
+  } catch (err) {
+    console.error("DELETE /groups/:id/delete error:", err);
+    res.status(500).json({ error: "Lỗi khi xóa nhóm." });
+  }
+});
 
 export default router;

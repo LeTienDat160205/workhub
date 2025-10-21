@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <title>WorkHub Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/frontend/style1.css">
+  <link rel="stylesheet" href="/frontend/style.css">
 </head>
 
 <body>
@@ -13,7 +13,8 @@
     <!-- HEADER -->
     <div class="dashboard-header" style="margin-top: 0">
       <div class="logo-bar">
-        <a href="/" class="site-name" style="text-decoration: none; font-size: 35px; font-weight: 900; letter-spacing: 1.5px">WorkHub</a>
+        <a href="/" class="site-name"
+          style="text-decoration: none; font-size: 35px; font-weight: 900; letter-spacing: 1.5px">WorkHub</a>
       </div>
       <div class="header-actions actions-cluster">
         <button class="icon-btn" title="Menu" aria-label="Menu">
@@ -409,9 +410,45 @@
           </div>
           <div id="membersWrapRight" class="member-list"></div>
           <div id="memberCountRight" style="padding:12px 8px;color:var(--text-muted)"></div>
+          <div class="deleteGroup">
+            <button type="button" value="Xóa" style="width: 100%; color: red;">Xóa nhóm</button>
+          </div>
+          <script>
+            document.addEventListener("DOMContentLoaded", () => {
+              const deleteBtn = document.querySelector(".deleteGroup button");
+              const groupId = "<%= group.id %>";
+
+              if (deleteBtn) {
+                deleteBtn.addEventListener("click", async () => {
+                  const confirmDelete = confirm("Bạn có chắc chắn muốn xóa nhóm này không?");
+                  if (!confirmDelete) return;
+
+                  try {
+                    const res = await fetch(`/groups/${groupId}/delete`, {
+                      method: "DELETE",
+                      credentials: "same-origin"
+                    });
+
+                    const result = await res.json();
+
+                    if (res.ok && result.success) {
+                      alert("Nhóm đã được xóa thành công!");
+                      window.location.href = "/"; // quay lại trang chủ
+                    } else {
+                      alert((result.error || "Không thể xóa nhóm."));
+                    }
+                  } catch (err) {
+                    console.error(err);
+                    alert("Lỗi khi gửi yêu cầu xóa nhóm.");
+                  }
+                });
+              }
+            });
+          </script>
+
         </div>
       </div>
-      
+
       <!-- member context menu -->
       <div id="memberMenu" class="member-menu" role="menu" aria-hidden="true">
         <div class="menu-item" data-action="view">👁️ Xem thông tin</div>

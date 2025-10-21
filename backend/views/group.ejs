@@ -60,7 +60,7 @@
               <%= user.name || 'Tên người dùng' %>
             </span>
             <span style="font-size: 0.97rem; color: var(--text-muted); line-height: 1.1;">
-              <%= user.email || '@example.com' %>
+              <%= user.email || 'example.com' %>
             </span>
           </div>
           <svg style="margin-left: 8px" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
@@ -255,7 +255,7 @@
                       groupList.innerHTML = groups.map(g => {
                         const leaderName = g.leaderName || 'Không rõ';
                         return `
-                      <div class="group-card" data-id="${g.id}" >
+                      <div class="group-card" data-id="${g.id}" style="cursor:pointer; border:1px solid #ddd; border-radius:8px; padding:10px 12px; margin:6px 0;">
                         <div class="group-title">${g.groupName}</div>
                         <div class="group-leader">Nhóm trưởng: <span>${leaderName}</span></div>
                       </div>
@@ -402,8 +402,45 @@
           </div>
           <div id="membersWrapRight" class="member-list"></div>
           <div id="memberCountRight" style="padding:12px 8px;color:var(--text-muted)"></div>
+          <div class="deleteGroup">
+            <button type="button" value="Xóa" style="width: 100%; color: red;">Xóa nhóm</button>
+          </div>
+          <script>
+            document.addEventListener("DOMContentLoaded", () => {
+              const deleteBtn = document.querySelector(".deleteGroup button");
+              const groupId = "<%= group.id %>";
+
+              if (deleteBtn) {
+                deleteBtn.addEventListener("click", async () => {
+                  const confirmDelete = confirm("Bạn có chắc chắn muốn xóa nhóm này không?");
+                  if (!confirmDelete) return;
+
+                  try {
+                    const res = await fetch(`/groups/${groupId}/delete`, {
+                      method: "DELETE",
+                      credentials: "same-origin"
+                    });
+
+                    const result = await res.json();
+
+                    if (res.ok && result.success) {
+                      alert("Nhóm đã được xóa thành công!");
+                      window.location.href = "/"; // quay lại trang chủ
+                    } else {
+                      alert((result.error || "Không thể xóa nhóm."));
+                    }
+                  } catch (err) {
+                    console.error(err);
+                    alert("Lỗi khi gửi yêu cầu xóa nhóm.");
+                  }
+                });
+              }
+            });
+          </script>
+
         </div>
       </div>
+
 
       <!-- member context menu -->
       <div id="memberMenu" class="member-menu" role="menu" aria-hidden="true">
@@ -1207,7 +1244,6 @@
         });
       }
     </script>
-
   </div>
 </body>
 

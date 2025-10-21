@@ -19,6 +19,7 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -27,6 +28,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Cấu hình EJS
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+app.use("/frontend", express.static(path.join(__dirname, "..", "frontend")));
 
 // Cấu hình session
 app.use(

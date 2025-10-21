@@ -1,6 +1,7 @@
 import express from "express";
 import db from "../config/db.js";
 import { v7 as uuidv7 } from "uuid";
+import { randomUUID } from "crypto";
 
 const router = express.Router();
 
@@ -149,5 +150,61 @@ router.delete("/:id/delete", ensureAuth, async (req, res) => {
     res.status(500).json({ error: "Lỗi khi xóa nhóm." });
   }
 });
+
+// =========================== THÊM THÀNH VIÊN VÀO NHÓM ===========================
+router.post("/:id/add-member", ensureAuth, async (req, res) => {
+  try {
+    const { id } = req.params; // groupId
+    const { memberName } = req.body;
+    const userId = req.session.user.id;
+
+    if (!memberName || memberName.trim() === "") {
+      return res.status(400).json({ error: "Vui lòng nhập tên tài khoản hoặc email." });
+    }
+
+    // Kiểm tra quyền leader
+    const [checkLeader] = await db.promise().query(
+      `SELECT 1 FROM \`group\` WHERE id = UUID_TO_BIN(?) AND leaderId = UUID_TO_BIN(?)`,
+      [id, userId]
+    );
+    if (checkLeader.length === 0) {
+      return res.status(403).json({ error: "Chỉ trưởng nhóm mới có quyền thêm thành viên." });
+    }
+
+    // Tìm người dùng theo username hoặc email
+    const [userRows] = await db.promise().query(
+      `SELECT id FROM user WHERE username = ? OR email = ?`,
+      [memberName, memberName]
+    );
+    if (userRows.length === 0) {
+      return res.status(404).json({ error: "Không tìm thấy tài khoản hoặc email này." });
+    }
+    const newUserId = userRows[0].id;
+
+    // Kiểm tra đã là thành viên chưa
+    const [exists] = await db.promise().query(
+      `SELECT 1 FROM group_user WHERE groupId = UUID_TO_BIN(?) AND userId = ?`,
+      [id, newUserId]
+    );
+    if (exists.length > 0) {
+      return res.status(409).json({ error: "Người này đã là thành viên của nhóm." });
+    }
+
+    // Thêm thành viên
+    const newGroupUserId = randomUUID({ version: 'v7' });// cách này ổn hơn với id = uuidv7()
+
+await db.promise().query(
+  `INSERT INTO group_user (id, groupId, userId, roleInGroup, joinAt)
+   VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, 'member', NOW())`,
+  [newGroupUserId, id, newUserId]
+);
+
+    res.json({ success: true, message: "Đã thêm thành viên thành công." });
+  } catch (err) {
+    console.error("POST /groups/:id/add-member error:", err);
+    res.status(500).json({ error: "Lỗi khi thêm thành viên." });
+  }
+});
+
 
 export default router;

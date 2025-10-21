@@ -206,7 +206,6 @@
                 <!-- javascript hiện cửa sổ tạo nhóm -->
                 <script>
                   const popupGroup = document.getElementById('popupGroup');
-                  // nút để mở popup (dòng 1500)
                   const btnAddGroup = document.getElementById('btnAddGroup');
                   const closeGroupPopup = document.getElementById('closeGroupPopup'); // nút X
                   const cancelGroupBtn = document.getElementById('cancelGroupBtn'); // nút Huỷ
@@ -328,6 +327,112 @@
                   style="background:linear-gradient(180deg,#2ecc71 0%,#2fbf5a 100%);color:var(--on-primary);border:none;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer">
                   Tạo công việc
                 </button>
+                <!-- Thêm thành viên -->
+                <div class="popup-overlay" id="popupMember" aria-hidden="true">
+                  <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
+                    <button class="close-btn" id="closeMemberPopup" aria-label="Đóng">
+                      &times;
+                    </button>
+                    <div class="popup-inner-content" style="flex-direction: column; width: 100%">
+                      <div>
+                        <div id="create-group-title" class="popup-title">
+                          Thêm thành viên
+                        </div>
+                        <form id="memberForm" action="/groups" method="POST"
+                          style="display: flex; flex-direction: column; gap: 18px; min-width: 260px;">
+                          <input type="hidden" name="csrf_token" value="" />
+                          <div style="display: flex; flex-direction: column; gap: 6px">
+                            <label for="memberName" class="form-label" style="font-weight: 600">Tên tài
+                              khoản/Email</label>
+                            <input id="memberName" name="memberName" type="text" required
+                              placeholder="Nhập tên tài khoản hoặc Email" class="form-input"
+                              style="padding: 10px 13px" />
+                          </div>
+                          <div style="display: flex; justify-content: flex-end; gap: 12px">
+                            <button type="button" class="btn" id="cancelMenberBtn"
+                              style="background: #9e9e9e">Huỷ</button>
+                            <button type="submit" class="btn" id="createGroupBtn">Thêm</button>
+                          </div>
+                        </form>
+                        <!-- javascript hiện cửa sổ thêm thàn viên -->
+                        <script>
+                          const popupMember = document.getElementById('popupMember');
+                          const addMemberBtnSmall = document.getElementById('addMemberBtnSmall');
+                          const closeMemberPopup = document.getElementById('closeMemberPopup'); // nút X
+                          const cancelMenberBtn = document.getElementById('cancelMenberBtn'); // nút Huỷ
+
+                          // Hàm mở popup
+                          function openMemberPopup() {
+                            popupMember.style.display = 'flex';
+                            popupMember.style.alignItems = 'center';
+                            popupMember.style.justifyContent = 'center';
+                            popupMember.style.backdropFilter = 'blur(2px)';
+                          }
+
+                          // Hàm đóng popup
+                          function closeMember() {
+                            popupMember.style.display = 'none';
+                          }
+
+                          // Sự kiện mở popup 
+                          if (addMemberBtnSmall) {
+                            addMemberBtnSmall.addEventListener('click', openMemberPopup);
+                          }
+
+                          // Sự kiện đóng popup khi bấm nút X hoặc Huỷ
+                          closeMemberPopup.addEventListener('click', closeMember);
+                          cancelMenberBtn.addEventListener('click', closeMember);
+
+                          // Đóng popup khi click ra ngoài phần nội dung
+                          popupMember.addEventListener('click', function (e) {
+                            if (e.target === popupMember) {
+                              closeMember();
+                            }
+                          });
+                          // Xủa lý thêm thành viên
+                          const memberForm = document.getElementById("memberForm");
+                          const memberNameInput = document.getElementById("memberName");
+                          const groupId = "<%= group.id %>";
+
+                          memberForm.addEventListener("submit", async (e) => {
+                            e.preventDefault();
+                            const memberName = memberNameInput.value.trim();
+                            if (!memberName) {
+                              alert("Vui lòng nhập tên tài khoản hoặc email!");
+                              return;
+                            }
+
+                            try {
+                              const res = await fetch(`/groups/${groupId}/add-member`, {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                },
+                                credentials: "same-origin",
+                                body: JSON.stringify({ memberName }),
+                              });
+
+                              const result = await res.json();
+
+                              if (res.ok && result.success) {
+                                alert(result.message);
+                                closeMember(); // đóng popup
+                                memberNameInput.value = "";
+                                loadMembers(); // gọi lại hàm loadMembers để cập nhật danh sách
+                              } else {
+                                alert((result.error || "Thêm thành viên thất bại"));
+                              }
+                            } catch (err) {
+                              console.error(err);
+                              alert("Lỗi khi gửi yêu cầu.");
+                            }
+                          });
+
+                        </script>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div id="chatMessages" class="chat-messages" style="flex:1;overflow:auto;padding:12px;overflow-x:hidden;">

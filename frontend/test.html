@@ -125,15 +125,16 @@
     <!-- POPUP XÁC NHẬN ĐĂNG XUẤT -->
     <div class="popup-overlay" id="popupLogout" aria-hidden="true">
       <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="logout-title">
-        <div class="popup-header" >
-          <div id="logout-title" class="popup-title">Xác nhận</div>
+        <div class="popup-header">
+          <div id="logout-title" class="popup-title" style="color: red;">Đăng xuất</div>
           <button class="close-btn" id="closeLogoutBtn" aria-label="Đóng">&times;</button>
         </div>
         <div style="margin-top:12px">
           <p>Bạn chắc chắn muốn đăng xuất không?</p>
           <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
             <button class="btn" id="logoutConfirmNo" type="button" style="background:#9e9e9e">Hủy</button>
-            <button class="btn" id="logoutConfirmYes" type="button" style="background:var(--secondary)">Đăng
+            <button class="btn" id="logoutConfirmYes" type="button"
+              style="background:var(--secondary); background-color: red">Đăng
               xuất</button>
           </div>
         </div>
@@ -255,7 +256,7 @@
                       groupList.innerHTML = groups.map(g => {
                         const leaderName = g.leaderName || 'Không rõ';
                         return `
-                      <div class="group-card" data-id="${g.id}" >
+                      <div class="group-card" data-id="${g.id}" style="cursor:pointer; border:1px solid #ddd; border-radius:8px; padding:10px 12px; margin:6px 0;">
                         <div class="group-title">${g.groupName}</div>
                         <div class="group-leader">Nhóm trưởng: <span>${leaderName}</span></div>
                       </div>
@@ -305,11 +306,11 @@
             </div>
           </div>
         </div>
+        
         <!-- Trang nhóm -->
         <div class="content-task" id="paperArea">
-          <div class="chat-wrapper" style="display:flex;flex-direction:column;height:100%">
-            <div class="chat-header-bar"
-              style="display:flex;justify-content:space-between;align-items:center;padding:12px 28px;border-bottom:1px solid var(--border-color);background:var(--surface);box-shadow:var(--shadow-soft);border-radius:8px 8px 0 0;margin-bottom:8px;width:calc(100% + 56px);box-sizing:border-box;margin-left:-28px;margin-right:-28px">
+          <div class="chat-wrapper" style="display:flex;flex-direction:column">
+            <div class="chat-header-bar">
               <div style="display:flex;flex-direction:column">
                 <div style="font-weight:800;color:var(--text)">
                   <%= group.groupName %>
@@ -319,17 +320,15 @@
                 </div>
               </div>
               <div style="display:flex;gap:12px">
-                <button id="addMemberBtnSmall"
-                  style="background:linear-gradient(180deg,var(--primary) 0%,var(--primary-hover) 100%);color:var(--on-primary);border:none;padding:10px 16px;border-radius:10px;font-weight:700;box-shadow:0 6px 18px rgba(76,175,80,0.18);cursor:pointer">
+                <button id="addMemberBtnSmall">
                   + Thêm thành viên
                 </button>
-                <button id="createTaskBtnSmall"
-                  style="background:linear-gradient(180deg,#2ecc71 0%,#2fbf5a 100%);color:var(--on-primary);border:none;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer">
+                <button id="createTaskBtnSmall">
                   Tạo công việc
                 </button>
               </div>
             </div>
-            <div id="chatMessages" class="chat-messages" style="flex:1;overflow:auto;padding:12px;overflow-x:hidden;">
+            <div id="chatMessages" class="chat-messages">
               <!-- message 
               <div class="msg-row" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
                 <div class="avatar" style="width:44px;height:44px;border-radius:50%;background:#e6f7ed;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary);">A</div>
@@ -350,8 +349,7 @@
             </div>
 
             <!-- input row -->
-            <div class="chat-input-row"
-              style="padding:12px;border-top:1px solid var(--border-color);background:transparent">
+            <div class="chat-input-row">
               <label for="fileInputCenter" class="attach-circle" title="Đính kèm" style="margin-right:8px">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path
@@ -360,10 +358,8 @@
                 </svg>
               </label>
               <input id="fileInputCenter" type="file" style="display:none" />
-              <input id="chatInputCenter" placeholder="Nhập tin nhắn..."
-                style="padding:10px 14px;border-radius:20px;border:1px solid var(--border-color);width:calc(100% - 150px);margin-right:8px;vertical-align:middle" />
-              <button id="sendBtnCenter"
-                style="background:var(--primary);color:var(--on-primary);border:none;padding:10px 16px;border-radius:12px;cursor:pointer">Gửi</button>
+              <input id="chatInputCenter" placeholder="Nhập tin nhắn...">
+              <button id="sendBtnCenter">Gửi</button>
             </div>
           </div>
 
@@ -404,13 +400,98 @@
       <div class="right-column">
         <div class="right-panel">
           <div class="search-members">
-            <input id="memberSearchRight" placeholder="Tìm kiếm thành viên..."
-              style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--surface)">
+            <input id="memberSearchRight" placeholder="Tìm kiếm thành viên...">
           </div>
           <div id="membersWrapRight" class="member-list"></div>
           <div id="memberCountRight" style="padding:12px 8px;color:var(--text-muted)"></div>
+
+          <!-- POPUP XÁC NHẬN XÓA NHÓM -->
+          <div class="popup-overlay" id="popupDeleteGroup" aria-hidden="true">
+            <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="delete-group-title">
+              <button class="close-btn" id="closeDeletePopup" aria-label="Đóng">&times;</button>
+              <div class="popup-inner-content" style="flex-direction: column; width: 100%; text-align: left;">
+                <div id="delete-group-title" class="popup-title" style="color: red; font-weight: 700;">
+                  Xóa nhóm
+                </div>
+                <p style="margin: 15px 0 25px;">Bạn có chắc chắn muốn xóa nhóm này không?</p>
+                <div style="display: flex; justify-content: right; gap: 12px;">
+                  <button type="button" class="btn" id="cancelDeleteBtn" style="background: #9e9e9e;">Huỷ</button>
+                  <button type="button" class="btn" id="confirmDeleteBtn" style="background: red;">Xóa</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nút Xóa nhóm -->
+          <div class="deleteGroup">
+            <button type="button" style="width: 100%; color: red;" id="openDeletePopup">Xóa nhóm</button>
+          </div>
+
+          <!-- javascript của xóa nhóm -->
+          <script>
+            document.addEventListener("DOMContentLoaded", () => {
+              // Lấy phần tử popup và các nút
+              const popupDeleteGroup = document.getElementById("popupDeleteGroup");
+              const openDeletePopup = document.getElementById("openDeletePopup");
+              const closeDeletePopup = document.getElementById("closeDeletePopup");
+              const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+              const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+              const groupId = "<%= group.id %>";
+
+              // ====== Hàm mở popup ======
+              function openPopupDelete() {
+                popupDeleteGroup.style.display = "flex";
+                popupDeleteGroup.style.alignItems = "center";
+                popupDeleteGroup.style.justifyContent = "center";
+                popupDeleteGroup.style.backdropFilter = "blur(2px)";
+              }
+
+              // ====== Hàm đóng popup ======
+              function closePopupDelete() {
+                popupDeleteGroup.style.display = "none";
+              }
+
+              // ====== Gắn sự kiện ======
+              openDeletePopup.addEventListener("click", openPopupDelete);
+              closeDeletePopup.addEventListener("click", closePopupDelete);
+              cancelDeleteBtn.addEventListener("click", closePopupDelete);
+
+              // Đóng popup khi click ra ngoài
+              popupDeleteGroup.addEventListener("click", (e) => {
+                if (e.target === popupDeleteGroup) {
+                  closePopupDelete();
+                }
+              });
+
+              // ====== Khi xác nhận xóa nhóm ======
+              confirmDeleteBtn.addEventListener("click", async () => {
+                closePopupDelete(); // đóng popup ngay
+
+                try {
+                  const res = await fetch(`/groups/${groupId}/delete`, {
+                    method: "DELETE",
+                    credentials: "same-origin"
+                  });
+
+                  const result = await res.json();
+
+                  if (res.ok && result.success) {
+                    alert("✅ Nhóm đã được xóa thành công!");
+                    window.location.href = "/";
+                  } else {
+                    alert(`❌ ${result.error || "Không thể xóa nhóm."}`);
+                  }
+                } catch (err) {
+                  console.error(err);
+                  alert("⚠️ Lỗi khi gửi yêu cầu xóa nhóm.");
+                }
+              });
+            });
+          </script>
+
         </div>
       </div>
+
 
       <!-- member context menu -->
       <div id="memberMenu" class="member-menu" role="menu" aria-hidden="true">
@@ -502,9 +583,7 @@
       </div>
 
       <!-- POPUP THÔNG TIN TÀI KHOẢN -->
-      <div class="popup-overlay" id="popupProfile"
-        style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); z-index: 1000;"
-        aria-hidden="true">
+      <div class="popup-overlay" id="popupProfile" aria-hidden="true">
         <div class="popup-content" style="width: 420px; max-width: 95vw" role="dialog" aria-modal="true"
           aria-labelledby="profile-title">
           <div class="popup-header"
@@ -1216,7 +1295,6 @@
         });
       }
     </script>
-
   </div>
 </body>
 

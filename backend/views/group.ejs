@@ -315,7 +315,7 @@
                 <div style="font-weight:800;color:var(--text)">
                   <%= group.groupName %>
                 </div>
-                <div style="font-size:0.9rem;color:var(--text-muted)">
+                <div id="memberCountRight" style="font-size:0.9rem;color:var(--text-muted)">
                   <%= group.memberCount %> thành viên
                 </div>
               </div>
@@ -355,6 +355,7 @@
                             <button type="submit" class="btn" id="createGroupBtn">Thêm</button>
                           </div>
                         </form>
+
                         <!-- javascript hiện cửa sổ thêm thàn viên -->
                         <script>
                           const popupMember = document.getElementById('popupMember');
@@ -513,7 +514,6 @@
               style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--surface)">
           </div>
           <div id="membersWrapRight" class="member-list"></div>
-          <div id="memberCountRight" style="padding:12px 8px;color:var(--text-muted)"></div>
 
           <!-- POPUP XÁC NHẬN XÓA NHÓM -->
           <div class="popup-overlay" id="popupDeleteGroup" aria-hidden="true">
@@ -605,12 +605,12 @@
 
       <!-- member context menu -->
       <div id="memberMenu" class="member-menu" role="menu" aria-hidden="true">
-        <button type="button" class="menu-item" data-action="view">👁️ Xem thông tin</button>
-        <button type="button" class="menu-item" data-action="message">💬 Nhắn tin</button>
+        <button type="button" class="menu-item" data-action="view">Xem thông tin</button>
+        <button type="button" class="menu-item" data-action="message">Nhắn tin</button>
         <button type="button" class="menu-item" data-action="remove"
-          style="color:#d32f2f; display:<%= user.id === group.leaderId ? 'block' : 'none' %>">🗑️ Xóa thành
-          viên</button>
+          style="color:#d32f2f; display:<%= user.id === group.leaderId ? 'block' : 'none' %>">Xóa thành viên</button>
       </div>
+
       <!-- POPUP XEM THÔNG TIN THÀNH VIÊN -->
       <div class="popup-overlay" id="popupMemberInfo"
         style="display:none; align-items:center; justify-content:center; backdrop-filter:blur(2px); z-index:1000;">
@@ -636,32 +636,57 @@
 
             <div class="form-row" style="display:flex; align-items:center; gap:10px">
               <label style="width:110px">Tên tài khoản</label>
-              <input id="memberUsername" type="text" readonly style="flex:1; padding:10px 13px" />
+              <input id="memberUsername" type="text" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
             </div>
             <div class="form-row" style="display:flex; align-items:center; gap:10px">
               <label style="width:110px">Email</label>
-              <input id="memberEmail" type="email" readonly style="flex:1; padding:10px 13px" />
+              <input id="memberEmail" type="email" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
             </div>
             <div class="form-row" style="display:flex; align-items:center; gap:10px">
               <label style="width:110px">Số điện thoại</label>
-              <input id="memberPhone" type="text" readonly style="flex:1; padding:10px 13px" />
+              <input id="memberPhone" type="text" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
             </div>
             <div class="form-row" style="display:flex; align-items:center; gap:10px">
               <label style="width:110px">Ngày sinh</label>
-              <input id="memberDob" type="date" readonly style="flex:1; padding:10px 13px" />
+              <input id="memberDob" type="date" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
             </div>
             <div class="form-row" style="display:flex; align-items:center; gap:10px">
               <label style="width:110px">Giới tính</label>
-              <input id="memberGender" type="text" readonly style="flex:1; padding:10px 13px" />
+              <input id="memberGender" type="text" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
             </div>
             <div class="form-row" style="display:flex; align-items:center; gap:10px">
               <label style="width:110px">Địa chỉ</label>
-              <input id="memberAddress" type="text" readonly style="flex:1; padding:10px 13px" />
+              <input id="memberAddress" type="text" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
             </div>
           </form>
         </div>
       </div>
 
+      <!-- POPUP XÓA THÀNH VIÊN -->
+      <div class="popup-overlay" id="popupRemoveMember" aria-hidden="true">
+        <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="remove-title">
+          <div class="popup-header">
+            <div id="remove-title" class="popup-title" style="color: red;">Xóa thành viên</div>
+            <button class="close-btn" id="closeRemoveBtn" aria-label="Đóng">&times;</button>
+          </div>
+          <div style="margin-top:12px">
+            <p>Bạn có chắc chắn muốn xóa thành viên này khỏi nhóm không?</p>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+              <button class="btn" id="removeConfirmNo" type="button" style="background:#9e9e9e">Hủy</button>
+              <button class="btn" id="removeConfirmYes" type="button"
+                style="background:var(--secondary); background-color: red">
+                Xóa thành viên
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- javascript load thành viên -->
       <script>
@@ -798,29 +823,89 @@
             // Bạn có thể redirect sang trang chat hoặc mở khung chat
           }
 
-          // Xóa thành viên
-          if (action === "remove") {
-            const confirmDelete = confirm("Bạn có chắc muốn xóa thành viên này?");
-            if (!confirmDelete) return;
+          // --- Popup XÓA THÀNH VIÊN ---
+          const popupRemove = document.getElementById("popupRemoveMember");
+          const removeConfirmYes = document.getElementById("removeConfirmYes");
+          const removeConfirmNo = document.getElementById("removeConfirmNo");
+          const closeRemoveBtn = document.getElementById("closeRemoveBtn");
+          let memberToRemove = null; // biến tạm lưu id thành viên cần xóa
 
-            try {
-              const groupId = "<%= group.id %>";
-              const res = await fetch(`/groups/${groupId}/remove-member`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: currentMember }),
-              });
-              const result = await res.json();
-              if (res.ok && result.success) {
-                alert("🗑️ Đã xóa thành viên!");
-                loadMembers(); // cập nhật lại danh sách
-              } else {
-                alert(result.error || "Không thể xóa thành viên");
-              }
-            } catch (err) {
-              console.error(err);
-              alert("Lỗi khi xóa thành viên.");
+          // Hiển thị popup xác nhận
+          async function showRemovePopup(memberId) {
+            memberToRemove = memberId;
+            if (popupRemove) {
+              popupRemove.classList.add("active");
+              popupRemove.setAttribute("aria-hidden", "false");
             }
+
+            const memberMenu = document.querySelector(".member-menu");
+            if (memberMenu) memberMenu.classList.remove("show");
+          }
+
+          // Xử lý xác nhận XÓA
+          removeConfirmYes &&
+            removeConfirmYes.addEventListener("click", async () => {
+              if (!memberToRemove) return;
+
+              try {
+                const groupId = "<%= group.id %>";
+                const res = await fetch(`/groups/${groupId}/remove-member`, {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ userId: memberToRemove }),
+                });
+
+                const result = await res.json();
+                if (res.ok && result.success) {
+                  alert("🗑️ Đã xóa thành viên!");
+                  loadMembers(); // cập nhật danh sách
+                } else {
+                  alert(result.error || "Không thể xóa thành viên");
+                }
+              } catch (err) {
+                console.error(err);
+                alert("Lỗi khi xóa thành viên.");
+              } finally {
+                popupRemove.classList.remove("active");
+                popupRemove.setAttribute("aria-hidden", "true");
+                memberToRemove = null;
+              }
+            });
+
+          // Nút "Hủy"
+          removeConfirmNo &&
+            removeConfirmNo.addEventListener("click", () => {
+              popupRemove.classList.remove("active");
+              popupRemove.setAttribute("aria-hidden", "true");
+            });
+
+          // Nút ❌
+          closeRemoveBtn &&
+            closeRemoveBtn.addEventListener("click", () => {
+              popupRemove.classList.remove("active");
+              popupRemove.setAttribute("aria-hidden", "true");
+            });
+
+          // Click ra ngoài popup
+          popupRemove &&
+            popupRemove.addEventListener("click", (e) => {
+              if (e.target === popupRemove) {
+                popupRemove.classList.remove("active");
+                popupRemove.setAttribute("aria-hidden", "true");
+              }
+            });
+
+          // ESC để đóng
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && popupRemove.classList.contains("active")) {
+              popupRemove.classList.remove("active");
+              popupRemove.setAttribute("aria-hidden", "true");
+            }
+          });
+
+          // ================== KHI CLICK XÓA ==================
+          if (action === "remove") {
+            showRemovePopup(currentMember);
           }
         });
       </script>
@@ -970,14 +1055,10 @@
                 value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
                 style="flex: 1; padding: 10px 13px" />
             </div>
-            <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+            <div class="form-row" style="display: flex; align-items:center; gap:10px">
               <label class="form-label" for="gender" style="width: 110px">Giới tính</label>
-              <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
-                <option value="">--Chọn--</option>
-                <option value="male" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
-                <option value="female" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
-                <option value="other" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
-              </select>
+              <input class="form-input" name="gender" type="text" value="<%=user.gender || '' %>" readonly id="gender"
+                style="flex: 1; padding: 10px 13px" />
             </div>
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
               <label class="form-label" for="address" style="width: 110px">Địa chỉ</label>

@@ -621,33 +621,87 @@ body {
 }
 
 /* contextual menu for members */
+/* ===== MENU thành viên ===== */
 .member-menu {
   position: absolute;
-  background: var(--surface);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
-  border-radius: 5px;
-  padding: 10px 8px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border-color, #e0e0e0);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 6px 0;
   display: none;
-  min-width: 180px;
+  min-width: 150px;
   z-index: 1200;
+  animation: fadeIn 0.15s ease-in-out;
 }
 
 .member-menu.show {
-  display: block
+  display: block;
 }
 
 .member-menu .menu-item {
-  padding: 8px 12px;
+  padding: 10px 14px;
   cursor: pointer;
   display: flex;
-  gap: 8px;
   align-items: center;
-  border-radius: 5px
+  gap: 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-color, #333);
+  font-size: 14px;
+  transition: background 0.15s, transform 0.1s;
 }
 
 .member-menu .menu-item:hover {
-  background: rgba(76, 175, 80, 0.04)
+  background: var(--hover-bg, rgba(76, 175, 80, 0.08));
+  transform: translateX(2px);
+}
+
+/* Nút xóa */
+.member-menu .menu-item[data-action="remove"] {
+  color: var(--danger-color, #d32f2f);
+  font-weight: 500;
+}
+
+.member-menu .menu-item[data-action="remove"]:hover {
+  background: var(--danger-hover, rgba(211, 47, 47, 0.08));
+}
+
+/* Hiệu ứng xuất hiện */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== DARK MODE ===== */
+[data-theme="dark"] .member-menu {
+  background: var(--surface-dark, #1e1f22);
+  border-color: var(--border-dark, #3a3b3f);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .member-menu .menu-item {
+  color: var(--text-dark, #eaeaea);
+}
+
+[data-theme="dark"] .member-menu .menu-item:hover {
+  background: var(--hover-bg-dark, rgba(255, 255, 255, 0.08));
+}
+
+[data-theme="dark"] .member-menu .menu-item[data-action="remove"] {
+  color: var(--danger-dark, #ff6b6b);
+}
+
+[data-theme="dark"] .member-menu .menu-item[data-action="remove"]:hover {
+  background: var(--danger-hover-dark, rgba(255, 107, 107, 0.1));
 }
 
 .right-panel.half {
@@ -1330,7 +1384,8 @@ select.form-input {
   left: -33px;
   height: 160px;
   overflow: hidden;
-  background: #e5e7eb;
+  /* background: #e5e7eb; */
+  background: var(--profile-bg, #e5e7eb);
   z-index: 1;
 }
 
@@ -1365,7 +1420,8 @@ select.form-input {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: #eee;
+  /* background: #eee; */
+  background: var(--avatar-bg, #f0f0f0);
   overflow: visible;
   /* để nút chỉnh sửa không bị cắt */
   display: flex;
@@ -1625,4 +1681,63 @@ select.form-input {
 .btn-danger:active {
   background-color: #cc393a;
   transform: translateY(0);
+}
+
+/* xem thông tin thành viên */
+.profile-hero .name {
+  text-align: center;
+  margin-top: 70px;
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--text-color, #222);
+  background: transparent;
+  border: none;
+}
+
+/* ===== FORM ROW ===== */
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.form-row label {
+  width: 110px;
+  color: var(--label-color, #333);
+  font-weight: 500;
+}
+
+.form-row input {
+  flex: 1;
+  padding: 10px 13px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #ccc);
+  background: var(--input-bg, #fff);
+  color: var(--input-text, #222);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.form-row input:focus {
+  border-color: var(--accent-color, #4caf50);
+}
+
+/* giao diện tối của xem thông tin */
+[data-theme="dark"] .profile-hero .name {
+  color: var(--text-dark, #2e2f33);
+}
+
+[data-theme="dark"] .form-row label {
+  color: var(--label-dark, #ddd);
+}
+
+[data-theme="dark"] .form-row input {
+  background: var(--input-bg-dark, #2e2f33);
+  color: var(--input-text-dark, #f1f1f1);
+  border-color: var(--border-dark, #3d3f43);
+}
+
+[data-theme="dark"] .form-row input:focus {
+  border-color: var(--accent-dark, #81c784);
 }

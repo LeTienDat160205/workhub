@@ -133,7 +133,8 @@
           <p>Bạn chắc chắn muốn đăng xuất không?</p>
           <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
             <button class="btn" id="logoutConfirmNo" type="button" style="background:#9e9e9e">Hủy</button>
-            <button class="btn" id="logoutConfirmYes" type="button" style="background:var(--secondary); background-color: red">Đăng
+            <button class="btn" id="logoutConfirmYes" type="button"
+              style="background:var(--secondary); background-color: red">Đăng
               xuất</button>
           </div>
         </div>
@@ -461,14 +462,10 @@
                 value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
                 style="flex: 1; padding: 10px 13px" />
             </div>
-            <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+            <div class="form-row" style="display: flex; align-items:center; gap:10px">
               <label class="form-label" for="gender" style="width: 110px">Giới tính</label>
-              <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
-                <option value="">--Chọn--</option>
-                <option value="male" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
-                <option value="female" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
-                <option value="other" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
-              </select>
+              <input class="form-input" name="gender" type="text" value="<%=user.gender || '' %>" readonly id="gender"
+                style="flex: 1; padding: 10px 13px" />
             </div>
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
               <label class="form-label" for="address" style="width: 110px">Địa chỉ</label>

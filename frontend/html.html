@@ -8,136 +8,108 @@
 </head>
 
 <body>
-    <!-- Thêm thành viên -->
-    <div class="popup-overlay" id="popupGroup" aria-hidden="true">
-        <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
-            <button class="close-btn" id="closeGroupPopup" aria-label="Đóng">
-                &times;
-            </button>
-            <div class="popup-inner-content" style="flex-direction: column; width: 100%">
-                <div>
-                    <div id="create-group-title" class="popup-title">
-                        Thêm thành viên
+    <!-- POPUP THÔNG TIN TÀI KHOẢN -->
+    <div class="popup-overlay" id="popupProfile"
+        style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); z-index: 1000;"
+        aria-hidden="true">
+        <div class="popup-content" style="width: 420px; max-width: 95vw" role="dialog" aria-modal="true"
+            aria-labelledby="profile-title">
+            <div class="popup-header"
+                style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                <div id="profile-title" class="popup-title" style="font-size: 23px">Thông tin tài khoản</div>
+                <button class="close-btn" id="closeProfileBtn" style="font-size: 28px"
+                    aria-label="Đóng">&times;</button>
+                <!-- javascript đóng popup hiện thông tin -->
+                <script>
+                    // Lấy phần tử popup và nút đóng
+                    const popupProfile = document.getElementById('popupProfile');
+                    const closeProfileBtn = document.getElementById('closeProfileBtn');
+
+                    // Khi bấm nút X thì ẩn popup
+                    closeProfileBtn.addEventListener('click', function () {
+                        popupProfile.style.display = 'none';
+                    });
+                </script>
+            </div>
+
+            <!-- FORM -->
+            <form class="profile-form" id="profileForm" action="/info" method="POST" enctype="multipart/form-data"
+                style=" display: flex; flex-direction: column; gap: 13px; margin-bottom: 22px;">
+                <!-- Background + Avatar upload -->
+                <div class="profile-hero">
+                    <div class="background">
+                        <img id="bgPreview" name="backgroundPath" alt="background"
+                            src="<%= user.backgroundPath || '/uploads/default-bg.png' %>" />
+                        <label class="bg-upload">
+                            Thay đổi
+                            <input type="file" id="backgroundInput" name="background" accept="image/*"
+                                style="display: none" onchange="previewImage(event, 'bgPreview')" />
+                        </label>
                     </div>
-                    <form id="groupForm" action="/groups" method="POST"
-                        style="display: flex; flex-direction: column; gap: 18px; min-width: 260px;">
-                        <input type="hidden" name="csrf_token" value="" />
-                        <div style="display: flex; flex-direction: column; gap: 6px">
-                            <label for="groupName" class="form-label" style="font-weight: 600">Tên tài
-                                khoản/Email</label>
-                            <input id="groupName" name="groupName" type="text" required
-                                placeholder="Nhập tên tài khoản hoặc Email" class="form-input"
-                                style="padding: 10px 13px" />
-                        </div>
-                        <div style="display: flex; justify-content: flex-end; gap: 12px">
-                            <button type="button" class="btn" id="cancelGroupBtn"
-                                style="background: #9e9e9e">Huỷ</button>
-                            <button type="submit" class="btn" id="createGroupBtn">Thêm</button>
-                        </div>
-                    </form>
-                    <!-- javascript hiện cửa sổ tạo nhóm -->
+                    <div class="avatar">
+                        <img id="avatarPreview" name="avatarPath" alt="avatar"
+                            src="<%= user.avatarPath || '/uploads/default-avatar.png' %>" />
+                        <label class="avatar-upload">
+                            ✎
+                            <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none"
+                                onchange="previewImage(event, 'avatarPreview')" />
+                        </label>
+                    </div>
+
+                    <!-- javascript xem trước avatar và background -->
                     <script>
-                        const popupGroup = document.getElementById('popupGroup');
-                        // nút để mở popup (dòng 1500)
-                        const btnAddGroup = document.getElementById('btnAddGroup');
-                        const closeGroupPopup = document.getElementById('closeGroupPopup'); // nút X
-                        const cancelGroupBtn = document.getElementById('cancelGroupBtn'); // nút Huỷ
-
-                        // Hàm mở popup
-                        function openGroupPopup() {
-                            popupGroup.style.display = 'flex';
-                            popupGroup.style.alignItems = 'center';
-                            popupGroup.style.justifyContent = 'center';
-                            popupGroup.style.backdropFilter = 'blur(2px)';
-                        }
-
-                        // Hàm đóng popup
-                        function closeGroup() {
-                            popupGroup.style.display = 'none';
-                        }
-
-                        // Sự kiện mở popup 
-                        if (btnAddGroup) {
-                            btnAddGroup.addEventListener('click', openGroupPopup);
-                        }
-
-                        // Sự kiện đóng popup khi bấm nút X hoặc Huỷ
-                        closeGroupPopup.addEventListener('click', closeGroup);
-                        cancelGroupBtn.addEventListener('click', closeGroup);
-
-                        // Đóng popup khi click ra ngoài phần nội dung
-                        popupGroup.addEventListener('click', function (e) {
-                            if (e.target === popupGroup) {
-                                closeGroup();
-                            }
-                        });
-                        // ---------------------------------------------------
-                        // Load danh sách nhóm đã tham gia
-                        async function loadGroups() {
-                            const groupList = document.getElementById('groupList');
-                            if (!groupList) return;
-                            groupList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Đang tải...</div>';
-                            try {
-                                const res = await fetch('/groups/my-groups', { credentials: 'same-origin' });
-                                if (!res.ok) throw new Error('Lỗi khi tải nhóm');
-                                const groups = await res.json();
-                                if (!Array.isArray(groups) || groups.length === 0) {
-                                    groupList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Bạn chưa tham gia nhóm nào.</div>';
-                                    return;
-                                }
-                                groupList.innerHTML = groups.map(g => {
-                                    const leaderName = g.leaderName || 'Không rõ';
-                                    return `
-                      <div class="group-card" data-id="${g.id}" style="cursor:pointer; border:1px solid #ddd; border-radius:8px; padding:10px 12px; margin:6px 0;">
-                        <div class="group-title">${g.groupName}</div>
-                        <div class="group-leader">Nhóm trưởng: <span>${leaderName}</span></div>
-                      </div>
-                      `;
-                                }).join('');
-
-                                // Thêm sự kiện click sau khi render
-                                document.querySelectorAll('.group-card').forEach(card => {
-                                    card.addEventListener('click', () => {
-                                        const groupId = card.getAttribute('data-id');
-                                        window.location.href = `/groups/${groupId}`; // render group.ejs tương ứng
-                                    });
-                                });
-                            } catch (err) {
-                                groupList.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;">Lỗi khi tải danh sách nhóm.</div>';
-                            }
-                        }
-                        window.addEventListener('DOMContentLoaded', loadGroups);
-
-                        // Xử lý submit tạo nhóm
-                        const groupForm = document.getElementById('groupForm');
-                        if (groupForm) {
-                            groupForm.addEventListener('submit', async function (e) {
-                                e.preventDefault();
-                                const groupName = document.getElementById('groupName').value.trim();
-                                if (!groupName) return alert('Vui lòng nhập tên nhóm');
-                                try {
-                                    const res = await fetch('/groups', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ groupName }),
-                                        credentials: 'same-origin'
-                                    });
-                                    const data = await res.json();
-                                    if (!res.ok) throw new Error(data.error || 'Lỗi tạo nhóm');
-                                    alert('Tạo nhóm thành công!');
-                                    groupForm.reset();
-                                    document.getElementById('popupGroup').style.display = 'none';
-                                    loadGroups();
-                                } catch (err) {
-                                    alert(err.message || 'Lỗi khi tạo nhóm');
-                                }
-                            });
+                        // Xem trước ảnh
+                        function previewImage(event, previewId) {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                document.getElementById(previewId).src = reader.result;
+                            };
+                            reader.readAsDataURL(event.target.files[0]);
                         }
                     </script>
+                    <!-- Thông tin tài  khoản -->
+                    <div>
+                        <input class="name" type="text" name="name" value="<%= user.name || '' %>" readonly>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
+
+                <input type="hidden" name="csrf_token" value="" />
+                <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+                    <label class="form-label" for="username" style="width: 110px">Tên tài khoản</label>
+                    <input class="form-input" name="username" type="text" value="<%= user.username %>" readonly
+                        id="username" style="flex: 1; padding: 10px 13px" />
+                </div>
+                <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+                    <label class="form-label" for="email" style="width: 110px">Email</label>
+                    <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email"
+                        style="flex: 1; padding: 10px 13px" />
+                </div>
+                <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+                    <label class="form-label" for="phone" style="width: 110px">Số điện thoại</label>
+                    <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>"
+                        readonly id="phone" style="flex: 1; padding: 10px 13px" />
+                </div>
+                <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+                    <label class="form-label" for="dob" style="width: 110px">Ngày sinh</label>
+                    <input class="form-input" name="dob" type="date"
+                        value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
+                        style="flex: 1; padding: 10px 13px" />
+                </div>
+                <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+                    <label class="form-label" for="gender" style="width: 110px">Giới tính</label>
+                    <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
+                        <option value="">--Chọn--</option>
+                        <option value="male" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
+                        <option value="female" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
+                        <option value="other" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
+                    </select>
+                </div>
+                <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+                    <label class="form-label" for="address" style="width: 110px">Địa chỉ</label>
+                    <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly
+                        id="address" style="flex: 1; padding: 10px 13px" />
+                </div>
+            </form>
 </body>
 
 </html>

@@ -206,5 +206,81 @@ await db.promise().query(
   }
 });
 
+// =========================== XÓA THÀNH VIÊN KHỎI NHÓM ===========================
+router.delete("/:id/remove-member", ensureAuth, async (req, res) => {
+  try {
+    const { id } = req.params; // groupId
+    const { userId: removeUserId } = req.body; // user cần xoá
+    const currentUserId = req.session.user.id; // user hiện tại
+
+    if (!removeUserId) {
+      return res.status(400).json({ error: "Thiếu ID thành viên cần xoá." });
+    }
+
+    // Kiểm tra quyền leader
+    const [leaderCheck] = await db.promise().query(
+      `SELECT 1 FROM \`group\` WHERE id = UUID_TO_BIN(?) AND leaderId = UUID_TO_BIN(?)`,
+      [id, currentUserId]
+    );
+    if (leaderCheck.length === 0) {
+      return res.status(403).json({ error: "Chỉ trưởng nhóm mới có quyền xoá thành viên." });
+    }
+
+    // Kiểm tra người cần xoá có trong nhóm không
+    const [memberCheck] = await db.promise().query(
+      `SELECT 1 FROM group_user WHERE groupId = UUID_TO_BIN(?) AND userId = UUID_TO_BIN(?)`,
+    [id, removeUserId]
+    );
+    if (memberCheck.length === 0) {
+      return res.status(404).json({ error: "Không tìm thấy thành viên trong nhóm." });
+    }
+
+    if (removeUserId === currentUserId) {
+      return res.status(400).json({ error: "Trưởng nhóm không thể tự xoá chính mình." });
+    }
+
+    // Xoá thành viên
+    await db.promise().query(
+      `DELETE FROM group_user WHERE groupId = UUID_TO_BIN(?) AND userId = UUID_TO_BIN(?)`,
+      [id, removeUserId]
+    );
+
+    // Cập nhật lại memberCount
+    await db.promise().query(
+      `UPDATE \`group\` 
+       SET memberCount = (SELECT COUNT(*) FROM group_user WHERE groupId = UUID_TO_BIN(?)) 
+       WHERE id = UUID_TO_BIN(?)`,
+      [id, id]
+    );
+
+    res.json({ success: true, message: "Đã xoá thành viên khỏi nhóm." });
+  } catch (err) {
+    console.error("DELETE /groups/:id/remove-member error:", err);
+    res.status(500).json({ error: "Lỗi khi xoá thành viên." });
+  }
+});
+
+// =========================== LẤY THÔNG TIN THÀNH VIÊN ===========================
+router.get("/users/:id/info", ensureAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await db.promise().query(
+      `SELECT BIN_TO_UUID(id) AS id, username, email, name, dob, gender, phoneNumber, address, avatarPath, backgroundPath
+       FROM user
+       WHERE id = UUID_TO_BIN(?)`,
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Không tìm thấy người dùng." });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("GET /users/:id/info error:", err);
+    res.status(500).json({ error: "Lỗi khi tải thông tin người dùng." });
+  }
+});
+
 
 export default router;

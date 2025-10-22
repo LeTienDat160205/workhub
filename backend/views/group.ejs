@@ -605,10 +605,63 @@
 
       <!-- member context menu -->
       <div id="memberMenu" class="member-menu" role="menu" aria-hidden="true">
-        <div class="menu-item" data-action="view">👁️ Xem thông tin</div>
-        <div class="menu-item" data-action="message">💬 Nhắn tin</div>
-        <div class="menu-item" data-action="remove" style="color:#d32f2f">🗑️ Xóa thành viên</div>
+        <button type="button" class="menu-item" data-action="view">👁️ Xem thông tin</button>
+        <button type="button" class="menu-item" data-action="message">💬 Nhắn tin</button>
+        <button type="button" class="menu-item" data-action="remove"
+          style="color:#d32f2f; display:<%= user.id === group.leaderId ? 'block' : 'none' %>">🗑️ Xóa thành
+          viên</button>
       </div>
+      <!-- POPUP XEM THÔNG TIN THÀNH VIÊN -->
+      <div class="popup-overlay" id="popupMemberInfo"
+        style="display:none; align-items:center; justify-content:center; backdrop-filter:blur(2px); z-index:1000;">
+        <div class="popup-content" style="width:420px; max-width:95vw" role="dialog" aria-modal="true">
+          <div class="popup-header"
+            style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <div class="popup-title" style="font-size:23px">Thông tin thành viên</div>
+            <button class="close-btn" id="closeMemberInfo" style="font-size:28px" aria-label="Đóng">&times;</button>
+          </div>
+
+          <form id="memberInfoForm" style="display:flex; flex-direction:column; gap:13px; margin-bottom:22px;">
+            <div class="profile-hero">
+              <div class="background">
+                <img id="bgPreviewMember" alt="background" src="/uploads/default-bg.png" />
+              </div>
+              <div class="avatar">
+                <img id="avatarPreviewMember" alt="avatar" src="/uploads/default-avatar.png" />
+              </div>
+              <div>
+                <input class="name" type="text" id="memberName" value="" readonly>
+              </div>
+            </div>
+
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Tên tài khoản</label>
+              <input id="memberUsername" type="text" readonly style="flex:1; padding:10px 13px" />
+            </div>
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Email</label>
+              <input id="memberEmail" type="email" readonly style="flex:1; padding:10px 13px" />
+            </div>
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Số điện thoại</label>
+              <input id="memberPhone" type="text" readonly style="flex:1; padding:10px 13px" />
+            </div>
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Ngày sinh</label>
+              <input id="memberDob" type="date" readonly style="flex:1; padding:10px 13px" />
+            </div>
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Giới tính</label>
+              <input id="memberGender" type="text" readonly style="flex:1; padding:10px 13px" />
+            </div>
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Địa chỉ</label>
+              <input id="memberAddress" type="text" readonly style="flex:1; padding:10px 13px" />
+            </div>
+          </form>
+        </div>
+      </div>
+
 
       <!-- javascript load thành viên -->
       <script>
@@ -631,7 +684,7 @@
             membersWrap.innerHTML = members
               .map(
                 (m) => `
-          <div class="member-item">
+          <div class="member-item" data-userid="${m.userId}">
             <div class="avatar">
               ${m.avatarPath ? `<img src="${m.avatarPath}" style="width: 32px; height: 32px;object-fit:cover;border-radius:50%;">` : m.name.charAt(0).toUpperCase()}
             </div>
@@ -653,6 +706,124 @@
         document.addEventListener("DOMContentLoaded", loadMembers);
       </script>
 
+      <!-- javascript xem, nhắn tin, xóa thành viên -->
+      <script>
+        const memberMenu = document.getElementById("memberMenu");
+        let currentMember = null;
+
+        // Khi click vào 1 thành viên → hiển thị menu
+        document.addEventListener("click", (e) => {
+          const memberItem = e.target.closest(".member-item");
+
+          // Nếu click vào 1 thành viên
+          if (memberItem && memberItem.dataset.userid) {
+            e.preventDefault();
+            currentMember = memberItem.dataset.userid;
+
+            // Lấy vị trí click
+            const rect = memberItem.getBoundingClientRect();
+            memberMenu.style.display = "block";
+            memberMenu.style.left = `${e.pageX}px`;
+            memberMenu.style.top = `${e.pageY}px`;
+            memberMenu.setAttribute("aria-hidden", "false");
+            return;
+          }
+
+          // Nếu click ra ngoài menu thì ẩn menu
+          if (!e.target.closest("#memberMenu")) {
+            memberMenu.style.display = "none";
+            memberMenu.setAttribute("aria-hidden", "true");
+          }
+        });
+
+        // Xử lý hành động trong menu
+        memberMenu.addEventListener("click", async (e) => {
+          const action = e.target.dataset.action;
+          if (!action || !currentMember) return;
+
+          memberMenu.style.display = "none"; // ẩn menu sau khi chọn
+
+          // Xem thông tin thành viên
+          if (action === "view") {
+            const popupMemberInfo = document.getElementById("popupMemberInfo");
+            const closeMemberInfo = document.getElementById("closeMemberInfo");
+
+            // Đóng popup
+            closeMemberInfo.addEventListener("click", () => {
+              popupMemberInfo.style.display = "none";
+            });
+
+            // Hàm mở popup
+            function openMemberInfo(member) {
+              document.getElementById("memberName").value = member.name || "";
+              document.getElementById("memberUsername").value = member.username || "";
+              document.getElementById("memberEmail").value = member.email || "";
+              document.getElementById("memberPhone").value = member.phoneNumber || "";
+              document.getElementById("memberDob").value = member.dob
+                ? new Date(member.dob).toISOString().split("T")[0]
+                : "";
+              document.getElementById("memberGender").value = member.gender || "";
+              document.getElementById("memberAddress").value = member.address || "";
+              document.getElementById("avatarPreviewMember").src =
+                member.avatarPath || "/uploads/default-avatar.png";
+              document.getElementById("bgPreviewMember").src =
+                member.backgroundPath || "/uploads/default-bg.png";
+
+              popupMemberInfo.style.display = "flex";
+            }
+
+            // Khi chọn “Xem thông tin”
+            memberMenu.addEventListener("click", async (e) => {
+              const action = e.target.dataset.action;
+              if (action === "view" && currentMember) {
+                try {
+                  const res = await fetch(`/groups/users/${currentMember}/info`);
+                  const member = await res.json();
+                  if (res.ok) {
+                    openMemberInfo(member);
+                  } else {
+                    alert(member.error || "Không thể tải thông tin thành viên");
+                  }
+                } catch (err) {
+                  console.error(err);
+                  alert("Lỗi khi tải thông tin thành viên.");
+                }
+              }
+            });
+          }
+
+          // Gửi tin nhắn
+          if (action === "message") {
+            alert(`💬 Gửi tin nhắn cho: ${currentMember}`);
+            // Bạn có thể redirect sang trang chat hoặc mở khung chat
+          }
+
+          // Xóa thành viên
+          if (action === "remove") {
+            const confirmDelete = confirm("Bạn có chắc muốn xóa thành viên này?");
+            if (!confirmDelete) return;
+
+            try {
+              const groupId = "<%= group.id %>";
+              const res = await fetch(`/groups/${groupId}/remove-member`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: currentMember }),
+              });
+              const result = await res.json();
+              if (res.ok && result.success) {
+                alert("🗑️ Đã xóa thành viên!");
+                loadMembers(); // cập nhật lại danh sách
+              } else {
+                alert(result.error || "Không thể xóa thành viên");
+              }
+            } catch (err) {
+              console.error(err);
+              alert("Lỗi khi xóa thành viên.");
+            }
+          }
+        });
+      </script>
 
       <!-- RIGHT PANEL STACK -->
       <div class="right-panel-stack" id="rightPanelStack">
@@ -708,6 +879,27 @@
               const popupProfile = document.getElementById('popupProfile');
               const closeProfileBtn = document.getElementById('closeProfileBtn');
 
+              // ===== Account menu & profile popup =====
+              const openProfile = document.getElementById("openProfile");
+              const userMenu = document.getElementById("userMenu");
+              openProfile.addEventListener("click", function (e) {
+                e.stopPropagation();
+                userMenu.style.display =
+                  userMenu.style.display === "block" ? "none" : "block";
+              });
+              document.addEventListener("mousedown", function (e) {
+                if (!openProfile.contains(e.target)) {
+                  userMenu.style.display = "none";
+                }
+              });
+              document.getElementById("Profile").onclick = function () {
+                document.getElementById("popupProfile").style.display = "flex";
+                document
+                  .getElementById("popupProfile")
+                  .setAttribute("aria-hidden", "false");
+                userMenu.style.display = "none";
+              };
+
               // Khi bấm nút X thì ẩn popup
               closeProfileBtn.addEventListener('click', function () {
                 popupProfile.style.display = 'none';
@@ -739,7 +931,7 @@
                 </label>
               </div>
 
-              <!-- javascript thay đổi avatar và background -->
+              <!-- javascript xem trước avatar và background -->
               <script>
                 // Xem trước ảnh
                 function previewImage(event, previewId) {
@@ -945,6 +1137,7 @@
                 <button class="btn" type="submit" id="saveProfileBtn"
                   style="display: none; background: var(--secondary)">Xác nhận</button>
               </div>
+
               <!-- javascript sửa thông tin -->
               <script>
                 const editBtn = document.getElementById("editProfileBtn");
@@ -1044,6 +1237,55 @@
         </div>
       </div>
       <!-- ========== /WORKHUB SETTINGS OVERLAY ========== -->
+      <!-- javascript mở trang cài đặt -->
+      <script>
+        const whOverlay = document.getElementById("whSettings");
+        const whBtnOpen = document.getElementById("OpenSettings");
+        const whBtnClose = document.getElementById("whClose");
+
+        if (whBtnOpen) {
+          whBtnOpen.addEventListener("click", () => {
+            whOverlay.style.display = "block";
+            if (userMenu) userMenu.style.display = "none";
+          });
+        }
+        if (whBtnClose) {
+          whBtnClose.addEventListener("click", () => {
+            whOverlay.style.display = "none";
+          });
+        }
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && whOverlay.style.display === "block") {
+            whOverlay.style.display = "none";
+          }
+        });
+
+        // Tabs trong trang cài đặt
+        document.querySelectorAll(".wh-tab").forEach((tab) => {
+          tab.addEventListener("click", () => {
+            document
+              .querySelectorAll(".wh-tab")
+              .forEach((t) => t.classList.remove("wh-active"));
+            document
+              .querySelectorAll(".wh-panel")
+              .forEach((p) => p.classList.remove("wh-show"));
+            tab.classList.add("wh-active");
+            document
+              .querySelector(`.wh-panel[data-tab="${tab.dataset.tab}"]`)
+              ?.classList.add("wh-show");
+          });
+        });
+
+        // Sidebar highlight
+        document.querySelectorAll(".wh-nav-item").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document
+              .querySelectorAll(".wh-nav-item")
+              .forEach((b) => b.classList.remove("wh-active"));
+            btn.classList.add("wh-active");
+          });
+        });
+      </script>
     </div>
 
     <script>
@@ -1286,74 +1528,10 @@
         buildCalendar(view);
       }
 
-      // ===== Account menu & profile popup =====
-      const openProfile = document.getElementById("openProfile");
-      const userMenu = document.getElementById("userMenu");
-      openProfile.addEventListener("click", function (e) {
-        e.stopPropagation();
-        userMenu.style.display =
-          userMenu.style.display === "block" ? "none" : "block";
-      });
-      document.addEventListener("mousedown", function (e) {
-        if (!openProfile.contains(e.target)) {
-          userMenu.style.display = "none";
-        }
-      });
-      document.getElementById("Profile").onclick = function () {
-        document.getElementById("popupProfile").style.display = "flex";
-        document
-          .getElementById("popupProfile")
-          .setAttribute("aria-hidden", "false");
-        userMenu.style.display = "none";
-      };
+
 
       // ===== WORKHUB SETTINGS (mở/đóng) =====
-      const whOverlay = document.getElementById("whSettings");
-      const whBtnOpen = document.getElementById("OpenSettings");
-      const whBtnClose = document.getElementById("whClose");
 
-      if (whBtnOpen) {
-        whBtnOpen.addEventListener("click", () => {
-          whOverlay.style.display = "block";
-          if (userMenu) userMenu.style.display = "none";
-        });
-      }
-      if (whBtnClose) {
-        whBtnClose.addEventListener("click", () => {
-          whOverlay.style.display = "none";
-        });
-      }
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && whOverlay.style.display === "block") {
-          whOverlay.style.display = "none";
-        }
-      });
-
-      // Tabs trong trang cài đặt
-      document.querySelectorAll(".wh-tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-          document
-            .querySelectorAll(".wh-tab")
-            .forEach((t) => t.classList.remove("wh-active"));
-          document
-            .querySelectorAll(".wh-panel")
-            .forEach((p) => p.classList.remove("wh-show"));
-          tab.classList.add("wh-active");
-          document
-            .querySelector(`.wh-panel[data-tab="${tab.dataset.tab}"]`)
-            ?.classList.add("wh-show");
-        });
-      });
-
-      // Sidebar highlight
-      document.querySelectorAll(".wh-nav-item").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".wh-nav-item")
-            .forEach((b) => b.classList.remove("wh-active"));
-          btn.classList.add("wh-active");
-        });
-      });
       //Đăng xuất với hộp thoại xác nhận
       const logoutBtn = document.getElementById("Logout");
       const logoutConfirm = document.getElementById("popupLogout");

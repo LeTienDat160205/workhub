@@ -544,6 +544,10 @@ body {
   /* giấy kẻ ngang */
   background-image: linear-gradient(#ffffff 1.1rem, #e0e0e0 1.2rem);
   background-size: 100% 1.2rem;
+
+   display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 [data-theme="dark"] .content-task {
@@ -1624,10 +1628,18 @@ select.form-input {
   overflow-x: hidden;
 }
 
-.chat-input-row {
+/* .chat-input-row {
   padding: 12px;
   border-top: 1px solid var(--border-color);
-  background: transparent
+  background: var(--input-bg);
+} */
+ .chat-input-row {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-top: 1px solid var(--border-color);
+  background: var(--input-bg);
+  z-index: 10;
 }
 
 #chatInputCenter {

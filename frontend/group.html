@@ -315,7 +315,7 @@
                 <div style="font-weight:800;color:var(--text)">
                   <%= group.groupName %>
                 </div>
-                <div style="font-size:0.9rem;color:var(--text-muted)">
+                <div id="memberCountRight" style="font-size:0.9rem;color:var(--text-muted)">
                   <%= group.memberCount %> thành viên
                 </div>
               </div>
@@ -355,6 +355,7 @@
                             <button type="submit" class="btn" id="createGroupBtn">Thêm</button>
                           </div>
                         </form>
+
                         <!-- javascript hiện cửa sổ thêm thàn viên -->
                         <script>
                           const popupMember = document.getElementById('popupMember');
@@ -436,22 +437,9 @@
                 </div>
               </div>
             </div>
+            <!-- khungg chat mess -->
             <div id="chatMessages" class="chat-messages" style="flex:1;overflow:auto;padding:12px;overflow-x:hidden;">
-              <!-- message 
-              <div class="msg-row" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
-                <div class="avatar" style="width:44px;height:44px;border-radius:50%;background:#e6f7ed;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary);">A</div>
-                <div class="bubble" style="background:#f6fff6;padding:10px 12px;border-radius:10px;max-width:70%;">
-                  <strong>A</strong>
-                  <div>Xin chào!</div>
-                </div>
-              </div>
-              <div class="msg-row" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
-                <div class="avatar" style="width:44px;height:44px;border-radius:50%;background:#e6f7ed;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary);">B</div>
-                <div class="bubble" style="background:#f6fff6;padding:10px 12px;border-radius:10px;max-width:70%;">
-                  <strong>B</strong>
-                  <div>Chào bạn!</div>
-                </div>
-              </div> -->
+              
             </div>
 
             <!-- input row -->
@@ -471,37 +459,6 @@
                 style="background:var(--primary);color:var(--on-primary);border:none;padding:10px 16px;border-radius:12px;cursor:pointer">Gửi</button>
             </div>
           </div>
-
-          <!-- <script>
-            (function(){
-              var send = document.getElementById('sendBtnCenter');
-              var input = document.getElementById('chatInputCenter');
-              var fileInput = document.getElementById('fileInputCenter');
-              var messages = document.getElementById('chatMessages');
-
-              function appendMessage(label, text){
-                var row = document.createElement('div');
-                row.className = 'msg-row';
-                row.style.display = 'flex'; row.style.gap='12px'; row.style.alignItems='flex-start'; row.style.marginBottom='12px';
-                var av = document.createElement('div'); av.style.width='44px'; av.style.height='44px'; av.style.borderRadius='50%'; av.style.background='#e6f7ed'; av.style.display='flex'; av.style.alignItems='center'; av.style.justifyContent='center'; av.style.fontWeight='700'; av.style.color='var(--primary)'; av.textContent = label;
-                var bubble = document.createElement('div'); bubble.style.background='#f6fff6'; bubble.style.padding='10px 12px'; bubble.style.borderRadius='10px'; bubble.style.maxWidth='70%';
-                bubble.innerHTML = '<strong>'+label+'</strong><div>'+text+'</div>';
-                row.appendChild(av); row.appendChild(bubble); messages.appendChild(row); messages.scrollTop = messages.scrollHeight;
-              }
-
-              if(send && input){
-                send.addEventListener('click', function(){
-                  var v = input.value.trim(); if(!v) return; appendMessage('Bạn', v); input.value = '';
-                });
-                input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); send.click(); } });
-              }
-
-              if(fileInput){
-                document.querySelector('label[for="fileInputCenter"]').addEventListener('click', function(){ fileInput.click(); });
-                fileInput.addEventListener('change', function(){ if(fileInput.files[0]){ appendMessage('Bạn', 'Đã gửi tệp: '+fileInput.files[0].name); } });
-              }
-            })();
-          </script> -->
         </div>
       </div>
 
@@ -513,7 +470,6 @@
               style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--surface)">
           </div>
           <div id="membersWrapRight" class="member-list"></div>
-          <div id="memberCountRight" style="padding:12px 8px;color:var(--text-muted)"></div>
 
           <!-- POPUP XÁC NHẬN XÓA NHÓM -->
           <div class="popup-overlay" id="popupDeleteGroup" aria-hidden="true">
@@ -587,14 +543,14 @@
                   const result = await res.json();
 
                   if (res.ok && result.success) {
-                    alert("✅ Nhóm đã được xóa thành công!");
+                    alert("Nhóm đã được xóa thành công!");
                     window.location.href = "/";
                   } else {
-                    alert(`❌ ${result.error || "Không thể xóa nhóm."}`);
+                    alert(`${result.error || "Không thể xóa nhóm."}`);
                   }
                 } catch (err) {
                   console.error(err);
-                  alert("⚠️ Lỗi khi gửi yêu cầu xóa nhóm.");
+                  alert("Lỗi khi gửi yêu cầu xóa nhóm.");
                 }
               });
             });
@@ -605,9 +561,87 @@
 
       <!-- member context menu -->
       <div id="memberMenu" class="member-menu" role="menu" aria-hidden="true">
-        <div class="menu-item" data-action="view">👁️ Xem thông tin</div>
-        <div class="menu-item" data-action="message">💬 Nhắn tin</div>
-        <div class="menu-item" data-action="remove" style="color:#d32f2f">🗑️ Xóa thành viên</div>
+        <button type="button" class="menu-item" data-action="view">Xem thông tin</button>
+        <button type="button" class="menu-item" data-action="message">Nhắn tin</button>
+        <button type="button" class="menu-item" data-action="remove"
+          style="color:#d32f2f; display:<%= user.id === group.leaderId ? 'block' : 'none' %>">Xóa thành viên</button>
+      </div>
+
+      <!-- POPUP XEM THÔNG TIN THÀNH VIÊN -->
+      <div class="popup-overlay" id="popupMemberInfo"
+        style="display:none; align-items:center; justify-content:center; backdrop-filter:blur(2px); z-index:1000;">
+        <div class="popup-content" style="width:420px; max-width:95vw" role="dialog" aria-modal="true">
+          <div class="popup-header"
+            style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <div class="popup-title" style="font-size:23px">Thông tin thành viên</div>
+            <button class="close-btn" id="closeMemberInfo" style="font-size:28px" aria-label="Đóng">&times;</button>
+          </div>
+
+          <form id="memberInfoForm" style="display:flex; flex-direction:column; gap:13px; margin-bottom:22px;">
+            <div class="profile-hero">
+              <div class="background">
+                <img id="bgPreviewMember" alt="background" src="/uploads/default-bg.png" />
+              </div>
+              <div class="avatar">
+                <img id="avatarPreviewMember" alt="avatar" src="/uploads/default-avatar.png" />
+              </div>
+              <div>
+                <input class="name" type="text" id="memberName" value="" readonly>
+              </div>
+            </div>
+
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Tên tài khoản</label>
+              <input id="memberUsername" type="text" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
+            </div>
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Email</label>
+              <input id="memberEmail" type="email" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
+            </div>
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Số điện thoại</label>
+              <input id="memberPhone" type="text" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
+            </div>
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Ngày sinh</label>
+              <input id="memberDob" type="date" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
+            </div>
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Giới tính</label>
+              <input id="memberGender" type="text" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
+            </div>
+            <div class="form-row" style="display:flex; align-items:center; gap:10px">
+              <label style="width:110px">Địa chỉ</label>
+              <input id="memberAddress" type="text" readonly
+                style="flex:1; padding:10px 13px; border-radius: 5px; border: 1px solid var(--border-color);" />
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- POPUP XÓA THÀNH VIÊN -->
+      <div class="popup-overlay" id="popupRemoveMember" aria-hidden="true">
+        <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="remove-title">
+          <div class="popup-header">
+            <div id="remove-title" class="popup-title" style="color: red;">Xóa thành viên</div>
+            <button class="close-btn" id="closeRemoveBtn" aria-label="Đóng">&times;</button>
+          </div>
+          <div style="margin-top:12px">
+            <p>Bạn có chắc chắn muốn xóa thành viên này khỏi nhóm không?</p>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+              <button class="btn" id="removeConfirmNo" type="button" style="background:#9e9e9e">Hủy</button>
+              <button class="btn" id="removeConfirmYes" type="button"
+                style="background:var(--secondary); background-color: red">
+                Xóa thành viên
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- javascript load thành viên -->
@@ -631,7 +665,7 @@
             membersWrap.innerHTML = members
               .map(
                 (m) => `
-          <div class="member-item">
+          <div class="member-item" data-userid="${m.userId}">
             <div class="avatar">
               ${m.avatarPath ? `<img src="${m.avatarPath}" style="width: 32px; height: 32px;object-fit:cover;border-radius:50%;">` : m.name.charAt(0).toUpperCase()}
             </div>
@@ -653,6 +687,184 @@
         document.addEventListener("DOMContentLoaded", loadMembers);
       </script>
 
+      <!-- javascript xem, nhắn tin, xóa thành viên -->
+      <script>
+        const memberMenu = document.getElementById("memberMenu");
+        let currentMember = null;
+
+        // Khi click vào 1 thành viên → hiển thị menu
+        document.addEventListener("click", (e) => {
+          const memberItem = e.target.closest(".member-item");
+
+          // Nếu click vào 1 thành viên
+          if (memberItem && memberItem.dataset.userid) {
+            e.preventDefault();
+            currentMember = memberItem.dataset.userid;
+
+            // Lấy vị trí click
+            const rect = memberItem.getBoundingClientRect();
+            memberMenu.style.display = "block";
+            memberMenu.style.left = `${e.pageX}px`;
+            memberMenu.style.top = `${e.pageY}px`;
+            memberMenu.setAttribute("aria-hidden", "false");
+            return;
+          }
+
+          // Nếu click ra ngoài menu thì ẩn menu
+          if (!e.target.closest("#memberMenu")) {
+            memberMenu.style.display = "none";
+            memberMenu.setAttribute("aria-hidden", "true");
+          }
+        });
+
+        // Xử lý hành động trong menu
+        memberMenu.addEventListener("click", async (e) => {
+          const action = e.target.dataset.action;
+          if (!action || !currentMember) return;
+
+          memberMenu.style.display = "none"; // ẩn menu sau khi chọn
+
+          // Xem thông tin thành viên
+          if (action === "view") {
+            const popupMemberInfo = document.getElementById("popupMemberInfo");
+            const closeMemberInfo = document.getElementById("closeMemberInfo");
+
+            // Đóng popup
+            closeMemberInfo.addEventListener("click", () => {
+              popupMemberInfo.style.display = "none";
+            });
+
+            // Hàm mở popup
+            function openMemberInfo(member) {
+              document.getElementById("memberName").value = member.name || "";
+              document.getElementById("memberUsername").value = member.username || "";
+              document.getElementById("memberEmail").value = member.email || "";
+              document.getElementById("memberPhone").value = member.phoneNumber || "";
+              document.getElementById("memberDob").value = member.dob
+                ? new Date(member.dob).toISOString().split("T")[0]
+                : "";
+              document.getElementById("memberGender").value = member.gender || "";
+              document.getElementById("memberAddress").value = member.address || "";
+              document.getElementById("avatarPreviewMember").src =
+                member.avatarPath || "/uploads/default-avatar.png";
+              document.getElementById("bgPreviewMember").src =
+                member.backgroundPath || "/uploads/default-bg.png";
+
+              popupMemberInfo.style.display = "flex";
+            }
+
+            // Khi chọn “Xem thông tin”
+            memberMenu.addEventListener("click", async (e) => {
+              const action = e.target.dataset.action;
+              if (action === "view" && currentMember) {
+                try {
+                  const res = await fetch(`/groups/users/${currentMember}/info`);
+                  const member = await res.json();
+                  if (res.ok) {
+                    openMemberInfo(member);
+                  } else {
+                    alert(member.error || "Không thể tải thông tin thành viên");
+                  }
+                } catch (err) {
+                  console.error(err);
+                  alert("Lỗi khi tải thông tin thành viên.");
+                }
+              }
+            });
+          }
+
+          // Gửi tin nhắn
+          if (action === "message") {
+            alert(`💬 Gửi tin nhắn cho: ${currentMember}`);
+            // Bạn có thể redirect sang trang chat hoặc mở khung chat
+          }
+
+          // --- Popup XÓA THÀNH VIÊN ---
+          const popupRemove = document.getElementById("popupRemoveMember");
+          const removeConfirmYes = document.getElementById("removeConfirmYes");
+          const removeConfirmNo = document.getElementById("removeConfirmNo");
+          const closeRemoveBtn = document.getElementById("closeRemoveBtn");
+          let memberToRemove = null; // biến tạm lưu id thành viên cần xóa
+
+          // Hiển thị popup xác nhận
+          async function showRemovePopup(memberId) {
+            memberToRemove = memberId;
+            if (popupRemove) {
+              popupRemove.classList.add("active");
+              popupRemove.setAttribute("aria-hidden", "false");
+            }
+
+            const memberMenu = document.querySelector(".member-menu");
+            if (memberMenu) memberMenu.classList.remove("show");
+          }
+
+          // Xử lý xác nhận XÓA
+          removeConfirmYes &&
+            removeConfirmYes.addEventListener("click", async () => {
+              if (!memberToRemove) return;
+
+              try {
+                const groupId = "<%= group.id %>";
+                const res = await fetch(`/groups/${groupId}/remove-member`, {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ userId: memberToRemove }),
+                });
+
+                const result = await res.json();
+                if (res.ok && result.success) {
+                  alert("🗑️ Đã xóa thành viên!");
+                  loadMembers(); // cập nhật danh sách
+                } else {
+                  alert(result.error || "Không thể xóa thành viên");
+                }
+              } catch (err) {
+                console.error(err);
+                alert("Lỗi khi xóa thành viên.");
+              } finally {
+                popupRemove.classList.remove("active");
+                popupRemove.setAttribute("aria-hidden", "true");
+                memberToRemove = null;
+              }
+            });
+
+          // Nút "Hủy"
+          removeConfirmNo &&
+            removeConfirmNo.addEventListener("click", () => {
+              popupRemove.classList.remove("active");
+              popupRemove.setAttribute("aria-hidden", "true");
+            });
+
+          // Nút x
+          closeRemoveBtn &&
+            closeRemoveBtn.addEventListener("click", () => {
+              popupRemove.classList.remove("active");
+              popupRemove.setAttribute("aria-hidden", "true");
+            });
+
+          // Click ra ngoài popup
+          popupRemove &&
+            popupRemove.addEventListener("click", (e) => {
+              if (e.target === popupRemove) {
+                popupRemove.classList.remove("active");
+                popupRemove.setAttribute("aria-hidden", "true");
+              }
+            });
+
+          // ESC để đóng
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && popupRemove.classList.contains("active")) {
+              popupRemove.classList.remove("active");
+              popupRemove.setAttribute("aria-hidden", "true");
+            }
+          });
+
+          // ================== KHI CLICK XÓA ==================
+          if (action === "remove") {
+            showRemovePopup(currentMember);
+          }
+        });
+      </script>
 
       <!-- RIGHT PANEL STACK -->
       <div class="right-panel-stack" id="rightPanelStack">
@@ -708,6 +920,27 @@
               const popupProfile = document.getElementById('popupProfile');
               const closeProfileBtn = document.getElementById('closeProfileBtn');
 
+              // ===== Account menu & profile popup =====
+              const openProfile = document.getElementById("openProfile");
+              const userMenu = document.getElementById("userMenu");
+              openProfile.addEventListener("click", function (e) {
+                e.stopPropagation();
+                userMenu.style.display =
+                  userMenu.style.display === "block" ? "none" : "block";
+              });
+              document.addEventListener("mousedown", function (e) {
+                if (!openProfile.contains(e.target)) {
+                  userMenu.style.display = "none";
+                }
+              });
+              document.getElementById("Profile").onclick = function () {
+                document.getElementById("popupProfile").style.display = "flex";
+                document
+                  .getElementById("popupProfile")
+                  .setAttribute("aria-hidden", "false");
+                userMenu.style.display = "none";
+              };
+
               // Khi bấm nút X thì ẩn popup
               closeProfileBtn.addEventListener('click', function () {
                 popupProfile.style.display = 'none';
@@ -739,7 +972,7 @@
                 </label>
               </div>
 
-              <!-- javascript thay đổi avatar và background -->
+              <!-- javascript xem trước avatar và background -->
               <script>
                 // Xem trước ảnh
                 function previewImage(event, previewId) {
@@ -778,14 +1011,10 @@
                 value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
                 style="flex: 1; padding: 10px 13px" />
             </div>
-            <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+            <div class="form-row" style="display: flex; align-items:center; gap:10px">
               <label class="form-label" for="gender" style="width: 110px">Giới tính</label>
-              <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
-                <option value="">--Chọn--</option>
-                <option value="male" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
-                <option value="female" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
-                <option value="other" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
-              </select>
+              <input class="form-input" name="gender" type="text" value="<%=user.gender || '' %>" readonly id="gender"
+                style="flex: 1; padding: 10px 13px" />
             </div>
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
               <label class="form-label" for="address" style="width: 110px">Địa chỉ</label>
@@ -927,9 +1156,9 @@
                   <div class="wh-label">Giới tính</div>
                   <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
                     <option value="">--Chọn--</option>
-                    <option value="male" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
-                    <option value="female" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
-                    <option value="other" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
+                    <option value="Nam" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
+                    <option value="Nũ" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
+                    <option value="Khác" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
                   </select>
                 </div>
               </div>
@@ -945,6 +1174,7 @@
                 <button class="btn" type="submit" id="saveProfileBtn"
                   style="display: none; background: var(--secondary)">Xác nhận</button>
               </div>
+
               <!-- javascript sửa thông tin -->
               <script>
                 const editBtn = document.getElementById("editProfileBtn");
@@ -1044,6 +1274,55 @@
         </div>
       </div>
       <!-- ========== /WORKHUB SETTINGS OVERLAY ========== -->
+      <!-- javascript mở trang cài đặt -->
+      <script>
+        const whOverlay = document.getElementById("whSettings");
+        const whBtnOpen = document.getElementById("OpenSettings");
+        const whBtnClose = document.getElementById("whClose");
+
+        if (whBtnOpen) {
+          whBtnOpen.addEventListener("click", () => {
+            whOverlay.style.display = "block";
+            if (userMenu) userMenu.style.display = "none";
+          });
+        }
+        if (whBtnClose) {
+          whBtnClose.addEventListener("click", () => {
+            whOverlay.style.display = "none";
+          });
+        }
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && whOverlay.style.display === "block") {
+            whOverlay.style.display = "none";
+          }
+        });
+
+        // Tabs trong trang cài đặt
+        document.querySelectorAll(".wh-tab").forEach((tab) => {
+          tab.addEventListener("click", () => {
+            document
+              .querySelectorAll(".wh-tab")
+              .forEach((t) => t.classList.remove("wh-active"));
+            document
+              .querySelectorAll(".wh-panel")
+              .forEach((p) => p.classList.remove("wh-show"));
+            tab.classList.add("wh-active");
+            document
+              .querySelector(`.wh-panel[data-tab="${tab.dataset.tab}"]`)
+              ?.classList.add("wh-show");
+          });
+        });
+
+        // Sidebar highlight
+        document.querySelectorAll(".wh-nav-item").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document
+              .querySelectorAll(".wh-nav-item")
+              .forEach((b) => b.classList.remove("wh-active"));
+            btn.classList.add("wh-active");
+          });
+        });
+      </script>
     </div>
 
     <script>
@@ -1286,74 +1565,10 @@
         buildCalendar(view);
       }
 
-      // ===== Account menu & profile popup =====
-      const openProfile = document.getElementById("openProfile");
-      const userMenu = document.getElementById("userMenu");
-      openProfile.addEventListener("click", function (e) {
-        e.stopPropagation();
-        userMenu.style.display =
-          userMenu.style.display === "block" ? "none" : "block";
-      });
-      document.addEventListener("mousedown", function (e) {
-        if (!openProfile.contains(e.target)) {
-          userMenu.style.display = "none";
-        }
-      });
-      document.getElementById("Profile").onclick = function () {
-        document.getElementById("popupProfile").style.display = "flex";
-        document
-          .getElementById("popupProfile")
-          .setAttribute("aria-hidden", "false");
-        userMenu.style.display = "none";
-      };
+
 
       // ===== WORKHUB SETTINGS (mở/đóng) =====
-      const whOverlay = document.getElementById("whSettings");
-      const whBtnOpen = document.getElementById("OpenSettings");
-      const whBtnClose = document.getElementById("whClose");
 
-      if (whBtnOpen) {
-        whBtnOpen.addEventListener("click", () => {
-          whOverlay.style.display = "block";
-          if (userMenu) userMenu.style.display = "none";
-        });
-      }
-      if (whBtnClose) {
-        whBtnClose.addEventListener("click", () => {
-          whOverlay.style.display = "none";
-        });
-      }
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && whOverlay.style.display === "block") {
-          whOverlay.style.display = "none";
-        }
-      });
-
-      // Tabs trong trang cài đặt
-      document.querySelectorAll(".wh-tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-          document
-            .querySelectorAll(".wh-tab")
-            .forEach((t) => t.classList.remove("wh-active"));
-          document
-            .querySelectorAll(".wh-panel")
-            .forEach((p) => p.classList.remove("wh-show"));
-          tab.classList.add("wh-active");
-          document
-            .querySelector(`.wh-panel[data-tab="${tab.dataset.tab}"]`)
-            ?.classList.add("wh-show");
-        });
-      });
-
-      // Sidebar highlight
-      document.querySelectorAll(".wh-nav-item").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".wh-nav-item")
-            .forEach((b) => b.classList.remove("wh-active"));
-          btn.classList.add("wh-active");
-        });
-      });
       //Đăng xuất với hộp thoại xác nhận
       const logoutBtn = document.getElementById("Logout");
       const logoutConfirm = document.getElementById("popupLogout");
@@ -1407,6 +1622,105 @@
         });
       }
     </script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- javascript chat -->
+<script>
+  const socket = io(); // Kết nối socket.io
+  const chatMessages = document.getElementById("chatMessages");
+  const chatInput = document.getElementById("chatInputCenter");
+  const sendBtn = document.getElementById("sendBtnCenter");
+  const fileInput = document.getElementById("fileInputCenter");
+
+  //const groupId = "<%= group.id %>";          // id nhóm hiện tại
+  const currentUser = "<%= user.username %>"; // người đang đăng nhập
+  const avatar = "<%= user.avatarPath || '/uploads/default-avatar.png' %>";
+
+  // Tham gia room chat nhóm
+  socket.emit("joinRoom", groupId);
+
+  // Lắng nghe tin nhắn realtime từ server
+  socket.on("receiveMessage", (msg) => {
+    renderMessage(msg);
+  });
+
+  // Gửi tin nhắn văn bản
+  sendBtn.addEventListener("click", sendMessage);
+  chatInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+  });
+
+  // Gửi file
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      socket.emit("sendMessage", {
+        groupId,
+        sender: currentUser,
+        avatar,
+        content: file.name,
+        fileUrl: reader.result,
+        messageType: "file",
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function sendMessage() {
+    const content = chatInput.value.trim();
+    if (!content) return;
+
+    const messageData = {
+      groupId,
+      sender: currentUser,
+      avatar,
+      content,
+      messageType: "text",
+      createdAt: new Date().toISOString(),
+    };
+
+    socket.emit("sendMessage", messageData); // gửi tới server
+    renderMessage(messageData);              // hiển thị luôn cho người gửi
+    chatInput.value = "";
+  }
+
+  // Hàm hiển thị tin nhắn
+  function renderMessage(msg) {
+    const isMine = msg.sender === currentUser;
+
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("chat-message");
+    wrapper.style.display = "flex";
+    wrapper.style.marginBottom = "10px";
+    wrapper.style.alignItems = "flex-end";
+    wrapper.style.justifyContent = isMine ? "flex-end" : "flex-start";
+
+    wrapper.innerHTML = `
+      ${!isMine ? `<img src="${msg.avatar}" alt="" style="width:36px;height:36px;border-radius:50%;margin-right:8px;">` : ""}
+      <div style="max-width:70%;">
+        ${!isMine ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:2px;">${msg.sender}</div>` : ""}
+        <div style="background:${isMine ? 'var(--primary)' : '#f1f1f1'};color:${isMine ? 'white' : 'black'};
+                    padding:10px 14px;border-radius:14px;word-wrap:break-word;">
+          ${
+            msg.messageType === "file"
+              ? `<a href="${msg.fileUrl}" download style="color:inherit;text-decoration:underline">${msg.content}</a>`
+              : msg.content
+          }
+        </div>
+        <div style="font-size:11px;color:gray;margin-top:3px;text-align:${isMine ? 'right' : 'left'}">
+          ${new Date(msg.createdAt || Date.now()).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+        </div>
+      </div>
+      ${isMine ? `<img src="${msg.avatar}" alt="" style="width:36px;height:36px;border-radius:50%;margin-left:8px;">` : ""}
+    `;
+
+    chatMessages.appendChild(wrapper);
+    chatMessages.scrollTop = chatMessages.scrollHeight; // tự cuộn xuống
+  }
+</script>
 
   </div>
 </body>

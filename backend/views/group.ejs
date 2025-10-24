@@ -650,7 +650,6 @@
                   const result = await res.json();
 
                   if (res.ok && result.success) {
-<<<<<<< HEAD
                     showToast(result.message || "Nhóm đã được xóa thành công!", "success");
                     setTimeout(() => (window.location.href = "/"), 2000);
                   } else {
@@ -659,16 +658,6 @@
                 } catch (err) {
                   console.error(err);
                   showToast("Lỗi khi gửi yêu cầu xóa nhóm.", "error");
-=======
-                    alert("Nhóm đã được xóa thành công!");
-                    window.location.href = "/";
-                  } else {
-                    alert(`${result.error || "Không thể xóa nhóm."}`);
-                  }
-                } catch (err) {
-                  console.error(err);
-                  alert("Lỗi khi gửi yêu cầu xóa nhóm.");
->>>>>>> 2670951b92d4f62764e18cd448f62a2fa94c8261
                 }
               });
             });

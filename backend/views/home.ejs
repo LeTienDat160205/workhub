@@ -9,6 +9,7 @@
 </head>
 
 <body>
+  <div id="toast-container"></div>
   <div class="dashboard-frame">
     <!-- HEADER -->
     <div class="dashboard-header" style="margin-top: 0">
@@ -48,12 +49,15 @@
         <!-- account -->
         <div class="user-account" id="openProfile" title="Account" style="position: relative">
           <div style="position: relative">
-            <img id="avatarPreview" name="avatarPath" alt="avatar"
-              src="<%= user.avatarPath || '/uploads/default-avatar.png' %>"
-              style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;" />
-            <span
-              style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;">
-            </span>
+            <div id="avatarWrapper"
+              style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1;  display: flex; align-items: center; justify-content: center;">
+              <img id="avatarPreview" name="avatarPath" alt="avatar"
+                src="<%= user.avatarPath || '/uploads/default-avatar.png' %>"
+                style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;" />
+              <span
+                style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;">
+              </span>
+            </div>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-start;">
             <span style="font-weight: 700; font-size: 1.08rem; line-height: 1.1; color: var(--text);">
@@ -121,6 +125,68 @@
         </div>
       </div>
     </div>
+
+    <!-- XỬ LÝ AVATAR -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const avatarPreview = document.getElementById("avatarPreview");
+        const avatarWrapper = document.getElementById("avatarWrapper") || avatarPreview.parentElement;
+
+        const userName = "<%= user.name || 'User' %>";
+        const avatarSrc = "<%= user.avatarPath || '' %>";
+
+        // Nếu người dùng chưa có ảnh avatar thật
+        if (!avatarSrc || avatarSrc.includes("default-avatar")) {
+          // Ẩn ảnh thật
+          avatarPreview.style.display = "none";
+
+          // Tạo avatar chữ cái đầu tiên
+          const initial = userName.trim() ? userName.trim().charAt(0).toUpperCase() : "?";
+
+          // Kiểm tra màu trong localStorage
+          const colorKey = `avatarColor_${userName}`;
+          let bgColor = localStorage.getItem(colorKey);
+
+          // Nếu chưa có thì random 1 lần
+          if (!bgColor) {
+            const colors = ["#f87171", "#fb923c", "#facc15", "#4ade80", "#60a5fa", "#a78bfa", "#f472b6"];
+            bgColor = colors[Math.floor(Math.random() * colors.length)];
+            localStorage.setItem(colorKey, bgColor);
+          }
+
+          // Tạo avatar bằng chữ
+          const letterAvatar = document.createElement("div");
+          letterAvatar.textContent = initial;
+          letterAvatar.style.cssText = `width: 100%;height: 100%;border-radius: 50%;background: ${bgColor};color: white;font-weight: 600; font-size: 1.2rem;display: flex;align-items: center;justify-content: center;`;
+          avatarWrapper.appendChild(letterAvatar);
+        } else {
+          // Có ảnh thật thì hiển thị ảnh
+          avatarPreview.src = avatarSrc;
+          avatarPreview.style.display = "block";
+        }
+
+        // ====== Khi người dùng chọn ảnh mới ======
+        const avatarInput = document.getElementById("avatarInput");
+        if (avatarInput) {
+          avatarInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+              // Nếu đã có avatar chữ thì xóa
+              const existingLetter = avatarWrapper.querySelector("div");
+              if (existingLetter) existingLetter.remove();
+
+              // Hiển thị ảnh mới
+              avatarPreview.src = reader.result;
+              avatarPreview.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+      });
+    </script>
 
     <!-- POPUP XÁC NHẬN ĐĂNG XUẤT -->
     <div class="popup-overlay" id="popupLogout" aria-hidden="true">
@@ -286,6 +352,25 @@
                   </button>
                 </div>
               </form>
+
+              <!-- hiển thị thông báo  -->
+              <script>
+                function showToast(message, type = 'success') {
+                  const container = document.getElementById('toast-container');
+                  if (!container) return;
+                  const toast = document.createElement('div');
+                  toast.className = `toast ${type}`;
+                  toast.textContent = message;
+
+                  container.appendChild(toast);
+                  setTimeout(() => toast.classList.add('show'), 100);
+                  setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                  }, 4000);
+                }
+              </script>
+
               <!-- javascript hiện cửa sổ tạo nhóm -->
               <script>
                 const popupGroup = document.getElementById('popupGroup');
@@ -374,8 +459,14 @@
                         credentials: 'same-origin'
                       });
                       const data = await res.json();
-                      if (!res.ok) throw new Error(data.error || 'Lỗi tạo nhóm');
-                      alert('Tạo nhóm thành công!');
+                      // if (!res.ok) throw new Error(data.error || 'Lỗi tạo nhóm');
+                      // alert('Tạo nhóm thành công!');
+                      if (!res.ok) {
+                        showToast(data.error || 'Lỗi tạo nhóm', 'error');
+                      } else {
+                        showToast('Tạo nhóm thành công!', 'success');
+                      }
+
                       groupForm.reset();
                       document.getElementById('popupGroup').style.display = 'none';
                       loadGroups();
@@ -434,6 +525,7 @@
                     onchange="previewImage(event, 'avatarPreview')" />
                 </label>
               </div>
+
               <!-- Thông tin tài  khoản -->
               <div>
                 <input class="name" type="text" name="name" value="<%= user.name || '' %>" readonly>
@@ -473,22 +565,23 @@
                 id="address" style="flex: 1; padding: 10px 13px" />
             </div>
           </form>
-          <!------------------------------------------- POPUP XÁC NHẬN ------------------------------------------>
+          <!------------------------------------------- POPUP XÁC NHẬN UPLOAD ẢNH  ------------------------------------------->
           <div class="confirm-overlay" id="confirmOverlay"
-            style="display:none; position: fixed; inset:0; background: rgba(0,0,0,0.3); align-items: center; justify-content: center; z-index: 1100;">
+            style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); align-items:center; justify-content:center; z-index:1100;">
             <div class="confirm-box"
-              style="background:white; padding:20px 25px; border-radius:10px; text-align:center;">
-              <p style="margin-bottom:15px; font-size:17px;">Bạn có chắc chắn không?</p>
+              style="background:#fff; padding:22px 28px; border-radius:10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); transform:scale(0.95); transition:all 0.2s ease;">
+              <p style="margin-bottom:15px; font-size:17px; font-weight:500; color:var(--text);">Bạn có chắc chắn không?
+              </p>
               <div style="display:flex; justify-content:center; gap:10px;">
-                <button id="confirmYes" class="btn" style="background:#4CAF50; color:white; padding:6px 14px;">Xác
+                <button id="confirmYes" class="btn"
+                  style="background:#4CAF50; color:white; padding:6px 14px; border:none; border-radius:6px; cursor:pointer;">Xác
                   nhận</button>
                 <button id="confirmNo" class="btn"
-                  style="background:#f44336; color:white; padding:6px 14px;">Hủy</button>
+                  style="background:#f44336; color:white; padding:6px 14px; border:none; border-radius:6px; cursor:pointer;">Hủy</button>
               </div>
             </div>
           </div>
           <!------------------------------------------------------------------------------------------------------>
-          <!-- javascript thay đổi avatar và background -->
           <script>
             const profileForm = document.getElementById('profileForm');
             const avatarInput = document.getElementById('avatarInput');
@@ -535,8 +628,21 @@
             });
           </script>
 
-        </div>
-      </div>
+          <!-- <div class="confirm-overlay" id="confirmOverlay"
+            style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); align-items:center; justify-content:center; z-index:1100;">
+            <div class="confirm-box"
+              style="background:#fff; padding:22px 28px; border-radius:10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); transform:scale(0.95); transition:all 0.2s ease;">
+              <p style="margin-bottom:15px; font-size:17px; font-weight:500; color:var(--text);">Bạn có chắc chắn không?
+              </p>
+              <div style="display:flex; justify-content:center; gap:10px;">
+                <button id="confirmYes" class="btn"
+                  style="background:#4CAF50; color:white; padding:6px 14px; border:none; border-radius:6px; cursor:pointer;">Xác
+                  nhận</button>
+                <button id="confirmNo" class="btn"
+                  style="background:#f44336; color:white; padding:6px 14px; border:none; border-radius:6px; cursor:pointer;">Hủy</button>
+              </div>
+            </div>
+          </div> -->
 
       <!-- ========== WORKHUB SETTINGS OVERLAY ========== -->
       <div id="whSettings" class="wh-settings" aria-hidden="true">
@@ -1058,6 +1164,8 @@
           }
         });
       }
+
+
     </script>
   </div>
 </body>

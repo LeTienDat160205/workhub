@@ -9,6 +9,7 @@
 </head>
 
 <body>
+  <div id="toast-container"></div>
   <div class="dashboard-frame">
     <!-- HEADER -->
     <div class="dashboard-header" style="margin-top: 0">
@@ -49,12 +50,15 @@
         <!-- account -->
         <div class="user-account" id="openProfile" title="Account" style="position: relative">
           <div style="position: relative">
-            <img id="avatarPreview" name="avatarPath" alt="avatar"
-              src="<%= user.avatarPath || '/uploads/default-avatar.png' %>"
-              style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;" />
-            <span
-              style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;">
-            </span>
+            <div id="avatarWrapper"
+              style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1;  display: flex; align-items: center; justify-content: center;">
+              <img id="avatarPreview" name="avatarPath" alt="avatar"
+                src="<%= user.avatarPath || '/uploads/default-avatar.png' %>"
+                style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;" />
+              <span
+                style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;">
+              </span>
+            </div>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-start;">
             <span style="font-weight: 700; font-size: 1.08rem; line-height: 1.1; color: var(--text);">
@@ -122,6 +126,68 @@
         </div>
       </div>
     </div>
+
+    <!-- XỬ LÝ AVATAR -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const avatarPreview = document.getElementById("avatarPreview");
+        const avatarWrapper = document.getElementById("avatarWrapper") || avatarPreview.parentElement;
+
+        const userName = "<%= user.name || 'User' %>";
+        const avatarSrc = "<%= user.avatarPath || '' %>";
+
+        // Nếu người dùng chưa có ảnh avatar thật
+        if (!avatarSrc || avatarSrc.includes("default-avatar")) {
+          // Ẩn ảnh thật
+          avatarPreview.style.display = "none";
+
+          // Tạo avatar chữ cái đầu tiên
+          const initial = userName.trim() ? userName.trim().charAt(0).toUpperCase() : "?";
+
+          // Kiểm tra màu trong localStorage
+          const colorKey = `avatarColor_${userName}`;
+          let bgColor = localStorage.getItem(colorKey);
+
+          // Nếu chưa có thì random 1 lần
+          if (!bgColor) {
+            const colors = ["#f87171", "#fb923c", "#facc15", "#4ade80", "#60a5fa", "#a78bfa", "#f472b6"];
+            bgColor = colors[Math.floor(Math.random() * colors.length)];
+            localStorage.setItem(colorKey, bgColor);
+          }
+
+          // Tạo avatar bằng chữ
+          const letterAvatar = document.createElement("div");
+          letterAvatar.textContent = initial;
+          letterAvatar.style.cssText = `width: 100%;height: 100%;border-radius: 50%;background: ${bgColor};color: white;font-weight: 600; font-size: 1.2rem;display: flex;align-items: center;justify-content: center;`;
+          avatarWrapper.appendChild(letterAvatar);
+        } else {
+          // Có ảnh thật thì hiển thị ảnh
+          avatarPreview.src = avatarSrc;
+          avatarPreview.style.display = "block";
+        }
+
+        // ====== Khi người dùng chọn ảnh mới ======
+        const avatarInput = document.getElementById("avatarInput");
+        if (avatarInput) {
+          avatarInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+              // Nếu đã có avatar chữ thì xóa
+              const existingLetter = avatarWrapper.querySelector("div");
+              if (existingLetter) existingLetter.remove();
+
+              // Hiển thị ảnh mới
+              avatarPreview.src = reader.result;
+              avatarPreview.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+      });
+    </script>
 
     <!-- POPUP XÁC NHẬN ĐĂNG XUẤT -->
     <div class="popup-overlay" id="popupLogout" aria-hidden="true">
@@ -204,6 +270,25 @@
                     </button>
                   </div>
                 </form>
+
+                <!-- hiển thị thông báo  -->
+                <script>
+                  function showToast(message, type = 'success') {
+                    const container = document.getElementById('toast-container');
+                    if (!container) return;
+                    const toast = document.createElement('div');
+                    toast.className = `toast ${type}`;
+                    toast.textContent = message;
+
+                    container.appendChild(toast);
+                    setTimeout(() => toast.classList.add('show'), 100);
+                    setTimeout(() => {
+                      toast.classList.remove('show');
+                      setTimeout(() => toast.remove(), 300);
+                    }, 4000);
+                  }
+                </script>
+
                 <!-- javascript hiện cửa sổ tạo nhóm -->
                 <script>
                   const popupGroup = document.getElementById('popupGroup');
@@ -291,8 +376,14 @@
                           credentials: 'same-origin'
                         });
                         const data = await res.json();
-                        if (!res.ok) throw new Error(data.error || 'Lỗi tạo nhóm');
-                        alert('Tạo nhóm thành công!');
+                        // if (!res.ok) throw new Error(data.error || 'Lỗi tạo nhóm');
+                        // alert('Tạo nhóm thành công!');
+                        if (!res.ok) {
+                          showToast(data.error || 'Lỗi tạo nhóm', 'error');
+                        } else {
+                          showToast('Tạo nhóm thành công!', 'success');
+                        }
+
                         groupForm.reset();
                         document.getElementById('popupGroup').style.display = 'none';
                         loadGroups();
@@ -391,7 +482,8 @@
                               closeMember();
                             }
                           });
-                          // Xủa lý thêm thành viên
+
+                          // XỬ LÝ THÊM THÀNH VIÊN 
                           const memberForm = document.getElementById("memberForm");
                           const memberNameInput = document.getElementById("memberName");
                           const groupId = "<%= group.id %>";
@@ -400,36 +492,52 @@
                             e.preventDefault();
                             const memberName = memberNameInput.value.trim();
                             if (!memberName) {
-                              alert("Vui lòng nhập tên tài khoản hoặc email!");
+                              showToast("Vui lòng nhập tên tài khoản hoặc email!", "warning");
                               return;
                             }
 
                             try {
                               const res = await fetch(`/groups/${groupId}/add-member`, {
                                 method: "POST",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                },
+                                headers: { "Content-Type": "application/json" },
                                 credentials: "same-origin",
                                 body: JSON.stringify({ memberName }),
                               });
 
                               const result = await res.json();
 
+                              // ✅ Kiểm tra phản hồi từ server
                               if (res.ok && result.success) {
-                                alert(result.message);
-                                closeMember(); // đóng popup
+                                // Thành công
+                                showToast(result.message || "Đã thêm thành viên thành công.", "success");
+                                closeMember(); // Đóng popup
                                 memberNameInput.value = "";
-                                loadMembers(); // gọi lại hàm loadMembers để cập nhật danh sách
+                                loadMembers(); // Cập nhật danh sách
                               } else {
-                                alert((result.error || "Thêm thành viên thất bại"));
+                                // Các lỗi cụ thể được trả về từ server
+                                switch (res.status) {
+                                  case 400:
+                                    showToast(result.error || "Vui lòng nhập tên tài khoản hoặc email.", "warning");
+                                    break;
+                                  case 403:
+                                    showToast(result.error || "Chỉ trưởng nhóm mới có quyền thêm thành viên.", "error");
+                                    break;
+                                  case 404:
+                                    showToast(result.error || "Không tìm thấy tài khoản hoặc email này.", "error");
+                                    break;
+                                  case 409:
+                                    showToast(result.error || "Người này đã là thành viên của nhóm.", "warning");
+                                    break;
+                                  default:
+                                    showToast(result.error || "Thêm thành viên thất bại.", "error");
+                                    break;
+                                }
                               }
                             } catch (err) {
-                              console.error(err);
-                              alert("Lỗi khi gửi yêu cầu.");
+                              console.error("Lỗi fetch:", err);
+                              showToast("Lỗi khi gửi yêu cầu đến máy chủ.", "error");
                             }
                           });
-
                         </script>
                       </div>
                     </div>
@@ -538,7 +646,7 @@
             <button id="openDeletePopup" class="btn btn-danger">Xóa nhóm</button>
           </div>
 
-          <!-- javascript của xóa nhóm -->
+          <!-- Xử lý xóa nhóm -->
           <script>
             document.addEventListener("DOMContentLoaded", () => {
               // Lấy phần tử popup và các nút
@@ -587,14 +695,14 @@
                   const result = await res.json();
 
                   if (res.ok && result.success) {
-                    alert("✅ Nhóm đã được xóa thành công!");
-                    window.location.href = "/";
+                    showToast(result.message || "Nhóm đã được xóa thành công!", "success");
+                    setTimeout(() => (window.location.href = "/"), 2000);
                   } else {
-                    alert(`❌ ${result.error || "Không thể xóa nhóm."}`);
+                    showToast(result.error || "Không thể xóa nhóm.", "error");
                   }
                 } catch (err) {
                   console.error(err);
-                  alert("⚠️ Lỗi khi gửi yêu cầu xóa nhóm.");
+                  showToast("Lỗi khi gửi yêu cầu xóa nhóm.", "error");
                 }
               });
             });
@@ -706,18 +814,60 @@
               return;
             }
 
+            // === Hàm tạo avatar ===
+            const colors = [
+              "#f87171",
+              "#fb923c",
+              "#facc15",
+              "#4ade80",
+              "#60a5fa",
+              "#a78bfa",
+              "#f472b6",
+            ];
+
+            const getAvatarHTML = (member) => {
+              if (member.avatarPath && member.avatarPath.trim() !== "") {
+                // Có ảnh thật
+                return `<img src="${member.avatarPath}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 50%;">`;
+              } else {
+                // Không có ảnh -> chữ cái đầu
+                const letter = member.name
+                  ? member.name.trim().charAt(0).toUpperCase()
+                  : "?";
+                const colorKey = `avatarColor_${member.userId}`;
+                let bgColor = localStorage.getItem(colorKey);
+                if (!bgColor) {
+                  bgColor = colors[Math.floor(Math.random() * colors.length)];
+                  localStorage.setItem(colorKey, bgColor);
+                }
+                return `<div style="
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: ${bgColor};
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">${letter}</div>`;
+              }
+            };
+
+            // === Render danh sách ===
             membersWrap.innerHTML = members
               .map(
                 (m) => `
-          <div class="member-item" data-userid="${m.userId}">
-            <div class="avatar">
-              ${m.avatarPath ? `<img src="${m.avatarPath}" style="width: 32px; height: 32px;object-fit:cover;border-radius:50%;">` : m.name.charAt(0).toUpperCase()}
+        <div class="member-item" data-userid="${m.userId}" style="display: flex; align-items: center; gap: 8px; padding: 6px 0;">
+          <div class="avatar">${getAvatarHTML(m)}</div>
+          <div style="flex:1">
+            <div style="font-weight:600;color:var(--text)">${m.name}</div>
+            <div style="font-size:0.9rem;color:var(--text-muted)">
+              ${m.roleInGroup === "leader" ? "👑 Trưởng nhóm" : "👤 Thành viên"}
             </div>
-            <div style="flex:1">
-              <div style="font-weight:600;color:var(--text)">${m.name}</div>
-              <div style="font-size:0.9rem;color:var(--text-muted)">${m.roleInGroup === 'leader' ? '👑 Trưởng nhóm' : '👤 Thành viên'}</div>
-            </div>
-          </div>`
+          </div>
+        </div>`
               )
               .join("");
 
@@ -843,34 +993,37 @@
           }
 
           // Xử lý xác nhận XÓA
-          removeConfirmYes &&
-            removeConfirmYes.addEventListener("click", async () => {
-              if (!memberToRemove) return;
+          removeConfirmYes && removeConfirmYes.addEventListener("click", async () => {
+            if (!memberToRemove) return;
 
-              try {
-                const groupId = "<%= group.id %>";
-                const res = await fetch(`/groups/${groupId}/remove-member`, {
-                  method: "DELETE",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ userId: memberToRemove }),
-                });
+            try {
+              const groupId = "<%= group.id %>";
+              const res = await fetch(`/groups/${groupId}/remove-member`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: memberToRemove }),
+                credentials: "same-origin"
+              });
 
-                const result = await res.json();
-                if (res.ok && result.success) {
-                  alert("🗑️ Đã xóa thành viên!");
-                  loadMembers(); // cập nhật danh sách
-                } else {
-                  alert(result.error || "Không thể xóa thành viên");
-                }
-              } catch (err) {
-                console.error(err);
-                alert("Lỗi khi xóa thành viên.");
-              } finally {
-                popupRemove.classList.remove("active");
-                popupRemove.setAttribute("aria-hidden", "true");
-                memberToRemove = null;
+              const result = await res.json();
+
+              if (res.ok && result.success) {
+                showToast(result.message || "🗑️ Đã xoá thành viên thành công!", "success");
+                loadMembers(); // cập nhật danh sách
+              } else {
+                // Các lỗi phổ biến từ backend: 400, 403, 404, 409, 500
+                showToast(result.error || "Không thể xoá thành viên.", "error");
               }
-            });
+            } catch (err) {
+              console.error("Lỗi khi xoá thành viên:", err);
+              showToast("⚠️ Lỗi khi gửi yêu cầu xoá thành viên.", "error");
+            } finally {
+              // Đóng popup dù thành công hay thất bại
+              popupRemove.classList.remove("active");
+              popupRemove.setAttribute("aria-hidden", "true");
+              memberToRemove = null;
+            }
+          });
 
           // Nút "Hủy"
           removeConfirmNo &&
@@ -1006,6 +1159,7 @@
                     onchange="previewImage(event, 'bgPreview')" />
                 </label>
               </div>
+
               <div class="avatar">
                 <img id="avatarPreview" name="avatarPath" alt="avatar"
                   src="<%= user.avatarPath || '/uploads/default-avatar.png' %>" />
@@ -1066,17 +1220,19 @@
                 id="address" style="flex: 1; padding: 10px 13px" />
             </div>
           </form>
-          <!------------------------------------------- POPUP XÁC NHẬN ------------------------------------------>
+          <!------------------------------------------- POPUP XÁC NHẬN ------------------------------------------->
           <div class="confirm-overlay" id="confirmOverlay"
-            style="display:none; position: fixed; inset:0; background: rgba(0,0,0,0.3); align-items: center; justify-content: center; z-index: 1100;">
+            style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); align-items:center; justify-content:center; z-index:1100;">
             <div class="confirm-box"
-              style="background:white; padding:20px 25px; border-radius:10px; text-align:center;">
-              <p style="margin-bottom:15px; font-size:17px;">Bạn có chắc chắn không?</p>
+              style="background:#fff; padding:22px 28px; border-radius:10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); transform:scale(0.95); transition:all 0.2s ease;">
+              <p style="margin-bottom:15px; font-size:17px; font-weight:500; color:var(--text);">Bạn có chắc chắn không?
+              </p>
               <div style="display:flex; justify-content:center; gap:10px;">
-                <button id="confirmYes" class="btn" style="background:#4CAF50; color:white; padding:6px 14px;">Xác
+                <button id="confirmYes" class="btn"
+                  style="background:#4CAF50; color:white; padding:6px 14px; border:none; border-radius:6px; cursor:pointer;">Xác
                   nhận</button>
                 <button id="confirmNo" class="btn"
-                  style="background:#f44336; color:white; padding:6px 14px;">Hủy</button>
+                  style="background:#f44336; color:white; padding:6px 14px; border:none; border-radius:6px; cursor:pointer;">Hủy</button>
               </div>
             </div>
           </div>

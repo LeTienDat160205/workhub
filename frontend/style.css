@@ -1741,3 +1741,38 @@ select.form-input {
 [data-theme="dark"] .form-row input:focus {
   border-color: var(--accent-dark, #81c784);
 }
+
+/* thông báo  */
+/* Khung chứa toast */
+#toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+/* Mỗi toast */
+.toast {
+  background-color: #4caf50;
+  /* xanh khi thành công */
+  color: white;
+  padding: 12px 20px;
+  margin-top: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
+  font-size: 14px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.error {
+  background-color: #f44336;
+  /* đỏ khi lỗi */
+}
+

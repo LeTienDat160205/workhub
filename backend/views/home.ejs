@@ -496,6 +496,27 @@
               const popupProfile = document.getElementById('popupProfile');
               const closeProfileBtn = document.getElementById('closeProfileBtn');
 
+              // ===== Account menu & profile popup =====
+              const openProfile = document.getElementById("openProfile");
+              const userMenu = document.getElementById("userMenu");
+              openProfile.addEventListener("click", function (e) {
+                e.stopPropagation();
+                userMenu.style.display =
+                  userMenu.style.display === "block" ? "none" : "block";
+              });
+              document.addEventListener("mousedown", function (e) {
+                if (!openProfile.contains(e.target)) {
+                  userMenu.style.display = "none";
+                }
+              });
+              document.getElementById("Profile").onclick = function () {
+                document.getElementById("popupProfile").style.display = "flex";
+                document
+                  .getElementById("popupProfile")
+                  .setAttribute("aria-hidden", "false");
+                userMenu.style.display = "none";
+              };
+
               // Khi bấm nút X thì ẩn popup
               closeProfileBtn.addEventListener('click', function () {
                 popupProfile.style.display = 'none';
@@ -644,267 +665,346 @@
             </div>
           </div> -->
 
-      <!-- ========== WORKHUB SETTINGS OVERLAY ========== -->
-      <div id="whSettings" class="wh-settings" aria-hidden="true">
-        <!-- Sidebar cài đặt -->
-        <div class="wh-wrap">
-          <aside class="wh-side">
-            <div class="wh-search"><input placeholder="Tìm kiếm..." /></div>
-            <div class="wh-group">CÀI ĐẶT NGƯỜI DÙNG</div>
-            <nav class="wh-nav">
-              <button class="wh-nav-item wh-active" data-view="account">
-                Tài Khoản Của Tôi
-              </button>
-              <!-- chưa nghĩ ra cài đặt gì khác -->
-            </nav>
-            <div class="wh-group">CÀI ĐẶT TRANG WEB</div>
-            <nav class="wh-nav">
-              <button></button>
-              <!-- chưa nghĩ ra cài đặt gì khác -->
-            </nav>
-          </aside>
+          <!-- ========== WORKHUB SETTINGS OVERLAY ========== -->
+          <div id="whSettings" class="wh-settings" aria-hidden="true">
+            <!-- Sidebar cài đặt -->
+            <div class="wh-wrap">
+              <aside class="wh-side">
+                <div class="wh-search"><input placeholder="Tìm kiếm..." /></div>
+                <div class="wh-group">CÀI ĐẶT NGƯỜI DÙNG</div>
+                <nav class="wh-nav">
+                  <button class="wh-nav-item wh-active" data-view="account">
+                    Tài Khoản Của Tôi
+                  </button>
+                  <!-- chưa nghĩ ra cài đặt gì khác -->
+                </nav>
+                <div class="wh-group">CÀI ĐẶT TRANG WEB</div>
+                <nav class="wh-nav">
+                  <button></button>
+                  <!-- chưa nghĩ ra cài đặt gì khác -->
+                </nav>
+              </aside>
 
-          <main class="wh-main">
-            <header class="wh-topbar">
-              <div class="wh-title">Tài Khoản Của Tôi</div>
-              <button class="wh-btn wh-primary" id="whClose" title="ESC">
-                Đóng
-              </button>
-            </header>
-            <!-- Thông tin tài khoản ------------------------------------------------------------>
-            <form class="wh-card" action="/info" method="post" id="settingInfoAccount">
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Tên hiển thị</div>
-                  <input class="form-input" type="text" name="name" value="<%= user.name || '' %>" readonly
-                    style="flex: 1; padding: 10px 13px">
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Tên đăng nhập</div>
-                  <input class="form-input" name="username" type="text" value="<%= user.username %>" readonly
-                    id="username" style="flex: 1; padding: 10px 13px" />
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Email</div>
-                  <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email"
-                    style="flex: 1; padding: 10px 13px" />
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Số Điện Thoại</div>
-                  <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>"
-                    readonly id="phone" style="flex: 1; padding: 10px 13px" />
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Ngày sinh</div>
-                  <input class="form-input" name="dob" type="date"
-                    value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
-                    style="flex: 1; padding: 10px 13px" />
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Giới tính</div>
-                  <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
-                    <option value="">--Chọn--</option>
-                    <option value="Nam" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
-                    <option value="Nũ" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
-                    <option value="Khác" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
-                  </select>
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Địa chỉ</div>
-                  <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly
-                    id="address" style="flex: 1; padding: 10px 13px" />
-                </div>
-              </div>
-              <div class="wh-btnEditProfile" style="margin-top: 10px;">
-                <button class="btn" type="button" id="editProfileBtn" style="background: var(--secondary)">Sửa</button>
-                <button class="btn" type="submit" id="saveProfileBtn"
-                  style="display: none; background: var(--secondary)">Xác nhận</button>
-              </div>
-              <!-- javascript sửa thông tin -->
-              <script>
-                const editBtn = document.getElementById("editProfileBtn");
-                const saveBtn = document.getElementById("saveProfileBtn");
-
-                editBtn.addEventListener("click", () => {
-                  // Ẩn nút "Sửa"
-                  editBtn.style.display = "none";
-
-                  // Hiện nút "Xác nhận"
-                  saveBtn.style.display = "inline-block";
-
-                  // Mở khóa các input (trừ username và email)
-                  document.querySelectorAll("input[readonly], select[disabled]").forEach(el => {
-                    const fieldName = el.getAttribute("name");
-                    if (fieldName !== "username" && fieldName !== "email") {
-                      el.removeAttribute("readonly");
-                      el.removeAttribute("disabled");
-                      el.style.background = "#fff";
-                    }
-                  });
-                });
-
-                // Khi bấm "Xác nhận" thì đổi lại nút "Sửa"
-                saveBtn.addEventListener("click", () => {
-                  editBtn.style.display = "inline-block";
-                  saveBtn.style.display = "none";
-                });
-              </script>
-            </form>
-            <!-- ----------------------------------------------------------------------------------------- -->
-            <div class="wh-tabs">
-              <button class="wh-tab wh-active" data-tab="security">
-                Bảo mật
-              </button>
-              <button class="wh-tab" data-tab="status">Trạng thái</button>
-            </div>
-            <div class="wh-panel wh-show" data-tab="security">
-              <h3 class="wh-section">Mật Khẩu và Xác Thực</h3>
-              <div class="wh-card">
-                <div class="wh-row wh-between">
-                  <div>
-                    <div class="wh-t">Đổi Mật Khẩu</div>
-                    <div class="wh-sub">
-                      Cập nhật mật khẩu để bảo vệ tài khoản.
+              <main class="wh-main">
+                <header class="wh-topbar">
+                  <div class="wh-title">Tài Khoản Của Tôi</div>
+                  <button class="wh-btn wh-primary" id="whClose" title="ESC">
+                    Đóng
+                  </button>
+                </header>
+                <!-- Thông tin tài khoản ------------------------------------------------------------>
+                <form class="wh-card" action="/info" method="post" id="settingInfoAccount">
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Tên hiển thị</div>
+                      <input class="form-input" type="text" name="name" value="<%= user.name || '' %>" readonly
+                        style="flex: 1; padding: 10px 13px">
                     </div>
                   </div>
-                  <button class="wh-btn wh-primary">Đổi Mật Khẩu</button>
-                </div>
-                <hr style="border: 0; border-top: 1px solid var(--border-color)" />
-                <div class="wh-row wh-between">
-                  <div>
-                    <div class="wh-t">Ứng Dụng Xác Thực</div>
-                    <div class="wh-sub">
-                      Thêm lớp bảo mật bổ sung khi đăng nhập.
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Tên đăng nhập</div>
+                      <input class="form-input" name="username" type="text" value="<%= user.username %>" readonly
+                        id="username" style="flex: 1; padding: 10px 13px" />
                     </div>
                   </div>
-                  <button class="wh-btn wh-primary">
-                    Bật Ứng Dụng Xác Thực
-                  </button>
-                </div>
-                <hr style="border: 0; border-top: 1px solid var(--border-color)" />
-                <div class="wh-row wh-between">
-                  <div>
-                    <div class="wh-t">Mã bảo mật</div>
-                    <div class="wh-sub">
-                      Tạo mã dự phòng để đăng nhập an toàn.
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Email</div>
+                      <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email"
+                        style="flex: 1; padding: 10px 13px" />
                     </div>
                   </div>
-                  <button class="wh-btn wh-secondary">
-                    Đăng ký Mã Bảo Mật
-                  </button>
-                </div>
-              </div>
-              <div class="wh-card wh-danger-zone">
-                <h4 class="wh-section">Ngừng Sử Dụng Tài Khoản</h4>
-                <div class="wh-row" style="gap: 10px">
-                  <button class="wh-btn wh-danger">
-                    Vô Hiệu Hóa Tài Khoản
-                  </button>
-                  <button class="wh-btn wh-outline">Xóa Tài Khoản</button>
-                </div>
-              </div>
-            </div>
-            <div class="wh-panel" data-tab="status">
-              <div class="wh-card">
-                <div class="wh-row wh-between">
-                  <div>
-                    <div class="wh-t">Trạng thái tài khoản</div>
-                    <div class="wh-sub">Tài khoản hoạt động bình thường.</div>
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Số Điện Thoại</div>
+                      <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>"
+                        readonly id="phone" style="flex: 1; padding: 10px 13px" />
+                    </div>
                   </div>
-                  <span class="wh-pill-ok">Đang hoạt động</span>
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Ngày sinh</div>
+                      <input class="form-input" name="dob" type="date"
+                        value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
+                        style="flex: 1; padding: 10px 13px" />
+                    </div>
+                  </div>
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Giới tính</div>
+                      <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
+                        <option value="">--Chọn--</option>
+                        <option value="Nam" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
+                        <option value="Nũ" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
+                        <option value="Khác" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Địa chỉ</div>
+                      <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly
+                        id="address" style="flex: 1; padding: 10px 13px" />
+                    </div>
+                  </div>
+                  <div class="wh-btnEditProfile" style="margin-top: 10px;">
+                    <button class="btn" type="button" id="editProfileBtn"
+                      style="background: var(--secondary)">Sửa</button>
+                    <button class="btn" type="submit" id="saveProfileBtn"
+                      style="display: none; background: var(--secondary)">Xác nhận</button>
+                  </div>
+
+                  <!-- javascript sửa thông tin -->
+                  <script>
+                    const editBtn = document.getElementById("editProfileBtn");
+                    const saveBtn = document.getElementById("saveProfileBtn");
+
+                    editBtn.addEventListener("click", () => {
+                      // Ẩn nút "Sửa"
+                      editBtn.style.display = "none";
+
+                      // Hiện nút "Xác nhận"
+                      saveBtn.style.display = "inline-block";
+
+                      // Mở khóa các input (trừ username và email)
+                      document.querySelectorAll("input[readonly], select[disabled]").forEach(el => {
+                        const fieldName = el.getAttribute("name");
+                        if (fieldName !== "username" && fieldName !== "email") {
+                          el.removeAttribute("readonly");
+                          el.removeAttribute("disabled");
+                          el.style.background = "#fff";
+                        }
+                      });
+                    });
+
+                    // Khi bấm "Xác nhận" thì đổi lại nút "Sửa"
+                    saveBtn.addEventListener("click", () => {
+                      editBtn.style.display = "inline-block";
+                      saveBtn.style.display = "none";
+                    });
+                  </script>
+                </form>
+                <!-- ----------------------------------------------------------------------------------------- -->
+                <div class="wh-tabs">
+                  <button class="wh-tab wh-active" data-tab="security">
+                    Bảo mật
+                  </button>
+                  <button class="wh-tab" data-tab="status">Trạng thái</button>
                 </div>
-              </div>
+                <div class="wh-panel wh-show" data-tab="security">
+                  <h3 class="wh-section">Mật Khẩu và Xác Thực</h3>
+                  <div class="wh-card">
+                    <div class="wh-row wh-between">
+                      <div>
+                        <div class="wh-t">Đổi Mật Khẩu</div>
+                        <div class="wh-sub">
+                          Cập nhật mật khẩu để bảo vệ tài khoản.
+                        </div>
+                      </div>
+                      <button class="wh-btn wh-primary">Đổi Mật Khẩu</button>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid var(--border-color)" />
+                    <div class="wh-row wh-between">
+                      <div>
+                        <div class="wh-t">Ứng Dụng Xác Thực</div>
+                        <div class="wh-sub">
+                          Thêm lớp bảo mật bổ sung khi đăng nhập.
+                        </div>
+                      </div>
+                      <button class="wh-btn wh-primary">
+                        Bật Ứng Dụng Xác Thực
+                      </button>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid var(--border-color)" />
+                    <div class="wh-row wh-between">
+                      <div>
+                        <div class="wh-t">Mã bảo mật</div>
+                        <div class="wh-sub">
+                          Tạo mã dự phòng để đăng nhập an toàn.
+                        </div>
+                      </div>
+                      <button class="wh-btn wh-secondary">
+                        Đăng ký Mã Bảo Mật
+                      </button>
+                    </div>
+                  </div>
+                  <div class="wh-card wh-danger-zone">
+                    <h4 class="wh-section">Ngừng Sử Dụng Tài Khoản</h4>
+                    <div class="wh-row" style="gap: 10px">
+                      <button class="wh-btn wh-danger">
+                        Vô Hiệu Hóa Tài Khoản
+                      </button>
+                      <button class="wh-btn wh-outline">Xóa Tài Khoản</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="wh-panel" data-tab="status">
+                  <div class="wh-card">
+                    <div class="wh-row wh-between">
+                      <div>
+                        <div class="wh-t">Trạng thái tài khoản</div>
+                        <div class="wh-sub">Tài khoản hoạt động bình thường.</div>
+                      </div>
+                      <span class="wh-pill-ok">Đang hoạt động</span>
+                    </div>
+                  </div>
+                </div>
+              </main>
             </div>
-          </main>
+          </div>
+
+          <!-- ========== /WORKHUB SETTINGS OVERLAY ========== -->
+          <!-- javascript mở trang cài đặt -->
+          <script>
+            const whOverlay = document.getElementById("whSettings");
+            const whBtnOpen = document.getElementById("OpenSettings");
+            const whBtnClose = document.getElementById("whClose");
+
+            // Move settings overlay outside of profile popup
+            if (whOverlay && whOverlay.parentElement.classList.contains('popup-content')) {
+              document.body.appendChild(whOverlay);
+            }
+
+            if (whBtnOpen) {
+              whBtnOpen.addEventListener("click", () => {
+                whOverlay.style.display = "block";
+                // Close profile popup when opening settings
+                if (popupProfile) popupProfile.style.display = "none";
+                if (userMenu) userMenu.style.display = "none";
+              });
+            }
+            if (whBtnClose) {
+              whBtnClose.addEventListener("click", () => {
+                whOverlay.style.display = "none";
+              });
+            }
+            document.addEventListener("keydown", (e) => {
+              if (e.key === "Escape" && whOverlay.style.display === "block") {
+                whOverlay.style.display = "none";
+              }
+            });
+
+            // Tabs trong trang cài đặt
+            document.querySelectorAll(".wh-tab").forEach((tab) => {
+              tab.addEventListener("click", () => {
+                document
+                  .querySelectorAll(".wh-tab")
+                  .forEach((t) => t.classList.remove("wh-active"));
+                document
+                  .querySelectorAll(".wh-panel")
+                  .forEach((p) => p.classList.remove("wh-show"));
+                tab.classList.add("wh-active");
+                document
+                  .querySelector(`.wh-panel[data-tab="${tab.dataset.tab}"]`)
+                  ?.classList.add("wh-show");
+              });
+            });
+
+            // Sidebar highlight
+            document.querySelectorAll(".wh-nav-item").forEach((btn) => {
+              btn.addEventListener("click", () => {
+                document
+                  .querySelectorAll(".wh-nav-item")
+                  .forEach((b) => b.classList.remove("wh-active"));
+                btn.classList.add("wh-active");
+              });
+            });
+          </script>
         </div>
-      </div>
-      <!-- ========== /WORKHUB SETTINGS OVERLAY ========== -->
-    </div>
 
-    <script>
-      // ===== Theme =====
-      const THEME_KEY = "workhub-theme";
-      const themeBtn = document.getElementById("btnTheme");
-      const themeIcon = document.getElementById("themeIcon");
+        <script>
+          // ===== CONFIG =====
+          const USE_FETCH = true;
+          const API = {
+            createGroup: "/groups",
+            updateProfile: "/api/profile/update",
+          };
 
-      function getPreferredTheme() {
-        const saved = localStorage.getItem(THEME_KEY);
-        if (saved === "light" || saved === "dark") return saved;
-        return window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
-      }
-      function applyTheme(t) {
-        document.documentElement.setAttribute("data-theme", t);
-        themeBtn.title =
-          t === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối";
-        themeBtn.setAttribute("aria-pressed", t === "dark");
-        themeIcon.innerHTML =
-          t === "dark"
-            ? `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2"/>`
-            : `<circle cx="12" cy="12" r="5" stroke-width="2"/> 
+          // Xem trước hình (background/avatar)
+          function previewImage(evt, targetId) {
+            const file = evt.target.files?.[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            const img = document.getElementById(targetId);
+            if (img) {
+              img.src = url;
+            }
+          }
+
+          // Create-group UI removed. The sidebar button opens addmembers.html in a new tab.
+
+          // ===== Theme =====
+          const THEME_KEY = "workhub-theme";
+          const themeBtn = document.getElementById("btnTheme");
+          const themeIcon = document.getElementById("themeIcon");
+
+          function getPreferredTheme() {
+            const saved = localStorage.getItem(THEME_KEY);
+            if (saved === "light" || saved === "dark") return saved;
+            return window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+          }
+          function applyTheme(t) {
+            document.documentElement.setAttribute("data-theme", t);
+            themeBtn.title =
+              t === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối";
+            themeBtn.setAttribute("aria-pressed", t === "dark");
+            themeIcon.innerHTML =
+              t === "dark"
+                ? `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2"/>`
+                : `<circle cx="12" cy="12" r="5" stroke-width="2"/> 
                  <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/>`;
-      }
-      function toggleTheme() {
-        const current =
-          document.documentElement.getAttribute("data-theme") || "light";
-        const next = current === "dark" ? "light" : "dark";
-        localStorage.setItem(THEME_KEY, next);
-        applyTheme(next);
-      }
-      applyTheme(getPreferredTheme());
-      themeBtn.addEventListener("click", toggleTheme);
+          }
+          function toggleTheme() {
+            const current =
+              document.documentElement.getAttribute("data-theme") || "light";
+            const next = current === "dark" ? "light" : "dark";
+            localStorage.setItem(THEME_KEY, next);
+            applyTheme(next);
+          }
+          applyTheme(getPreferredTheme());
+          themeBtn.addEventListener("click", toggleTheme);
 
-      // Tabs (toolbar)
-      document.querySelectorAll(".tab-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".tab-btn")
-            .forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-        });
-      });
+          // Tabs (toolbar)
+          document.querySelectorAll(".tab-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              document
+                .querySelectorAll(".tab-btn")
+                .forEach((b) => b.classList.remove("active"));
+              btn.classList.add("active");
+            });
+          });
 
-      // Right panels
-      const notifPanel = document.getElementById("notifPanel");
-      const notifPanelContent = document.getElementById("notifPanelContent");
-      const calendarPanel = document.getElementById("calendarPanel");
-      const calendarPanelContent = document.getElementById(
-        "calendarPanelContent"
-      );
-      const closeNotifPanel = document.getElementById("closeNotifPanel");
-      const closeCalendarPanel =
-        document.getElementById("closeCalendarPanel");
-      const btnNotif = document.getElementById("btnNotif");
-      const btnCalendar = document.getElementById("btnCalendar");
+          // Right panels
+          const notifPanel = document.getElementById("notifPanel");
+          const notifPanelContent = document.getElementById("notifPanelContent");
+          const calendarPanel = document.getElementById("calendarPanel");
+          const calendarPanelContent = document.getElementById(
+            "calendarPanelContent"
+          );
+          const closeNotifPanel = document.getElementById("closeNotifPanel");
+          const closeCalendarPanel =
+            document.getElementById("closeCalendarPanel");
+          const btnNotif = document.getElementById("btnNotif");
+          const btnCalendar = document.getElementById("btnCalendar");
 
-      let panelOrder = [];
-      function showPanel(panel) {
-        if (panelOrder.includes(panel)) {
-          closePanel(panel);
-          return;
-        }
-        panelOrder = [panel, ...panelOrder];
-        if (panelOrder.length > 2) panelOrder = panelOrder.slice(0, 2);
+          let panelOrder = [];
+          function showPanel(panel) {
+            if (panelOrder.includes(panel)) {
+              closePanel(panel);
+              return;
+            }
+            panelOrder = [panel, ...panelOrder];
+            if (panelOrder.length > 2) panelOrder = panelOrder.slice(0, 2);
 
-        notifPanel.classList.remove("top", "bottom", "show");
-        calendarPanel.classList.remove("top", "bottom", "show");
+            notifPanel.classList.remove("top", "bottom", "show");
+            calendarPanel.classList.remove("top", "bottom", "show");
 
-        function renderNotif() {
-          notifPanelContent.innerHTML = `
+            function renderNotif() {
+              notifPanelContent.innerHTML = `
             <div class="notif-list">
               <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
               <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
@@ -912,9 +1012,9 @@
               <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
             </div>
           `;
-        }
-        function renderCalendar() {
-          calendarPanelContent.innerHTML = `
+            }
+            function renderCalendar() {
+              calendarPanelContent.innerHTML = `
             <div class="calendar-card" id="calendarCard">
               <div class="calendar-head">
                 <div>
@@ -929,245 +1029,186 @@
               <div class="calendar-grid" id="calGrid"></div>
             </div>
           `;
-          setTimeout(initCalendar, 0);
-        }
-
-        if (panelOrder.length === 1) {
-          if (panelOrder[0] === "notif") {
-            notifPanel.classList.add("show", "top");
-            renderNotif();
-          } else {
-            calendarPanel.classList.add("show", "top");
-            renderCalendar();
-          }
-        } else {
-          if (panelOrder[0] === "notif" && panelOrder[1] === "calendar") {
-            notifPanel.classList.add("show", "top");
-            calendarPanel.classList.add("show", "bottom");
-            renderNotif();
-          } else {
-            calendarPanel.classList.add("show", "top");
-            notifPanel.classList.add("show", "bottom");
-            renderCalendar();
-          }
-        }
-      }
-      function closePanel(panel) {
-        panelOrder = panelOrder.filter((p) => p !== panel);
-        notifPanel.classList.remove("top", "bottom", "show");
-        calendarPanel.classList.remove("top", "bottom", "show");
-        if (panelOrder.length === 1) {
-          if (panelOrder[0] === "notif") {
-            notifPanel.classList.add("show", "top");
-          } else {
-            calendarPanel.classList.add("show", "top");
-          }
-        }
-      }
-      btnNotif.onclick = () => showPanel("notif");
-      btnCalendar.onclick = () => showPanel("calendar");
-      closeNotifPanel &&
-        (closeNotifPanel.onclick = () => closePanel("notif"));
-      closeCalendarPanel &&
-        (closeCalendarPanel.onclick = () => closePanel("calendar"));
-      document.addEventListener("mousedown", (e) => {
-        if (
-          notifPanel.classList.contains("show") &&
-          !notifPanel.contains(e.target) &&
-          !btnNotif.contains(e.target)
-        )
-          closePanel("notif");
-        if (
-          calendarPanel.classList.contains("show") &&
-          !calendarPanel.contains(e.target) &&
-          !btnCalendar.contains(e.target)
-        )
-          closePanel("calendar");
-      });
-
-      function initCalendar() {
-        const calGrid = document.getElementById("calGrid");
-        const titleDay = document.getElementById("titleDay");
-        const subMonth = document.getElementById("subMonth");
-        const prevMth = document.getElementById("prevMth");
-        const nextMth = document.getElementById("nextMth");
-
-        let view = new Date();
-        function headText(d) {
-          return new Intl.DateTimeFormat("vi-VN", {
-            weekday: "short",
-            month: "short",
-            day: "2-digit",
-          }).format(d);
-        }
-        function buildCalendar(date) {
-          const y = date.getFullYear(),
-            m = date.getMonth();
-          titleDay.textContent = headText(new Date());
-          subMonth.textContent = new Intl.DateTimeFormat("vi-VN", {
-            month: "long",
-            year: "numeric",
-          })
-            .format(new Date(y, m, 1))
-            .toUpperCase();
-          const first = new Date(y, m, 1);
-          const start = (first.getDay() + 6) % 7; // Monday first
-          const days = new Date(y, m + 1, 0).getDate();
-          const prevDays = new Date(y, m, 0).getDate();
-          const parts = [];
-          ["T2", "T3", "T4", "T5", "T6", "T7", "CN"].forEach((d) =>
-            parts.push(`<div class="dow">${d}</div>`)
-          );
-          for (let i = 0; i < 42; i++) {
-            let label,
-              cls = "cell";
-            if (i < start) {
-              label = prevDays - start + i + 1;
-              cls += " faded";
-            } else if (i < start + days) {
-              label = i - start + 1;
-            } else {
-              label = i - (start + days) + 1;
-              cls += " faded";
+              setTimeout(initCalendar, 0);
             }
-            const today = new Date();
+
+            if (panelOrder.length === 1) {
+              if (panelOrder[0] === "notif") {
+                notifPanel.classList.add("show", "top");
+                renderNotif();
+              } else {
+                calendarPanel.classList.add("show", "top");
+                renderCalendar();
+              }
+            } else {
+              if (panelOrder[0] === "notif" && panelOrder[1] === "calendar") {
+                notifPanel.classList.add("show", "top");
+                calendarPanel.classList.add("show", "bottom");
+                renderNotif();
+              } else {
+                calendarPanel.classList.add("show", "top");
+                notifPanel.classList.add("show", "bottom");
+                renderCalendar();
+              }
+            }
+          }
+          function closePanel(panel) {
+            panelOrder = panelOrder.filter((p) => p !== panel);
+            notifPanel.classList.remove("top", "bottom", "show");
+            calendarPanel.classList.remove("top", "bottom", "show");
+            if (panelOrder.length === 1) {
+              if (panelOrder[0] === "notif") {
+                notifPanel.classList.add("show", "top");
+              } else {
+                calendarPanel.classList.add("show", "top");
+              }
+            }
+          }
+          btnNotif.onclick = () => showPanel("notif");
+          btnCalendar.onclick = () => showPanel("calendar");
+          closeNotifPanel &&
+            (closeNotifPanel.onclick = () => closePanel("notif"));
+          closeCalendarPanel &&
+            (closeCalendarPanel.onclick = () => closePanel("calendar"));
+          document.addEventListener("mousedown", (e) => {
             if (
-              y === today.getFullYear() &&
-              m === today.getMonth() &&
-              label === today.getDate() &&
-              !cls.includes("faded")
+              notifPanel.classList.contains("show") &&
+              !notifPanel.contains(e.target) &&
+              !btnNotif.contains(e.target)
             )
-              cls += " today";
-            parts.push(`<div class="${cls}">${label}</div>`);
+              closePanel("notif");
+            if (
+              calendarPanel.classList.contains("show") &&
+              !calendarPanel.contains(e.target) &&
+              !btnCalendar.contains(e.target)
+            )
+              closePanel("calendar");
+          });
+
+          function initCalendar() {
+            const calGrid = document.getElementById("calGrid");
+            const titleDay = document.getElementById("titleDay");
+            const subMonth = document.getElementById("subMonth");
+            const prevMth = document.getElementById("prevMth");
+            const nextMth = document.getElementById("nextMth");
+
+            let view = new Date();
+            function headText(d) {
+              return new Intl.DateTimeFormat("vi-VN", {
+                weekday: "short",
+                month: "short",
+                day: "2-digit",
+              }).format(d);
+            }
+            function buildCalendar(date) {
+              const y = date.getFullYear(),
+                m = date.getMonth();
+              titleDay.textContent = headText(new Date());
+              subMonth.textContent = new Intl.DateTimeFormat("vi-VN", {
+                month: "long",
+                year: "numeric",
+              })
+                .format(new Date(y, m, 1))
+                .toUpperCase();
+              const first = new Date(y, m, 1);
+              const start = (first.getDay() + 6) % 7; // Monday first
+              const days = new Date(y, m + 1, 0).getDate();
+              const prevDays = new Date(y, m, 0).getDate();
+              const parts = [];
+              ["T2", "T3", "T4", "T5", "T6", "T7", "CN"].forEach((d) =>
+                parts.push(`<div class="dow">${d}</div>`)
+              );
+              for (let i = 0; i < 42; i++) {
+                let label,
+                  cls = "cell";
+                if (i < start) {
+                  label = prevDays - start + i + 1;
+                  cls += " faded";
+                } else if (i < start + days) {
+                  label = i - start + 1;
+                } else {
+                  label = i - (start + days) + 1;
+                  cls += " faded";
+                }
+                const today = new Date();
+                if (
+                  y === today.getFullYear() &&
+                  m === today.getMonth() &&
+                  label === today.getDate() &&
+                  !cls.includes("faded")
+                )
+                  cls += " today";
+                parts.push(`<div class="${cls}">${label}</div>`);
+              }
+              calGrid.innerHTML = parts.join("");
+            }
+            prevMth.addEventListener("click", () => {
+              view.setMonth(view.getMonth() - 1);
+              buildCalendar(view);
+            });
+            nextMth.addEventListener("click", () => {
+              view.setMonth(view.getMonth() + 1);
+              buildCalendar(view);
+            });
+            buildCalendar(view);
           }
-          calGrid.innerHTML = parts.join("");
-        }
-        prevMth.addEventListener("click", () => {
-          view.setMonth(view.getMonth() - 1);
-          buildCalendar(view);
-        });
-        nextMth.addEventListener("click", () => {
-          view.setMonth(view.getMonth() + 1);
-          buildCalendar(view);
-        });
-        buildCalendar(view);
-      }
 
-      // ===== Account menu & profile popup =====
-      const openProfile = document.getElementById("openProfile");
-      const userMenu = document.getElementById("userMenu");
-      openProfile.addEventListener("click", function (e) {
-        e.stopPropagation();
-        userMenu.style.display =
-          userMenu.style.display === "block" ? "none" : "block";
-      });
-      document.addEventListener("mousedown", function (e) {
-        if (!openProfile.contains(e.target)) {
-          userMenu.style.display = "none";
-        }
-      });
-      document.getElementById("Profile").onclick = function () {
-        document.getElementById("popupProfile").style.display = "flex";
-        document
-          .getElementById("popupProfile")
-          .setAttribute("aria-hidden", "false");
-        userMenu.style.display = "none";
-      };
+          //Đăng xuất với hộp thoại xác nhận
+          const logoutBtn = document.getElementById("Logout");
+          const logoutConfirm = document.getElementById("popupLogout");
+          const logoutConfirmYes = document.getElementById("logoutConfirmYes");
+          const logoutConfirmNo = document.getElementById("logoutConfirmNo");
 
-      // ===== WORKHUB SETTINGS (mở/đóng) =====
-      const whOverlay = document.getElementById("whSettings");
-      const whBtnOpen = document.getElementById("OpenSettings");
-      const whBtnClose = document.getElementById("whClose");
+          logoutBtn && logoutBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (logoutConfirm) {
+              logoutConfirm.classList.add("active");
+              logoutConfirm.setAttribute("aria-hidden", "false");
+            } else {
+              // chuyển hướng
+              window.location.href = "/auth/logout";
+            }
+            // ẩn user menu
+            if (userMenu) userMenu.style.display = "none";
+          });
 
-      if (whBtnOpen) {
-        whBtnOpen.addEventListener("click", () => {
-          whOverlay.style.display = "block";
-          if (userMenu) userMenu.style.display = "none";
-        });
-      }
-      if (whBtnClose) {
-        whBtnClose.addEventListener("click", () => {
-          whOverlay.style.display = "none";
-        });
-      }
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && whOverlay.style.display === "block") {
-          whOverlay.style.display = "none";
-        }
-      });
+          // confirm
+          logoutConfirmYes && logoutConfirmYes.addEventListener("click", () => {
+            window.location.href = "/auth/logout";
+          });
+          logoutConfirmNo && logoutConfirmNo.addEventListener("click", () => {
+            if (logoutConfirm) {
+              logoutConfirm.classList.remove("active");
+              logoutConfirm.setAttribute("aria-hidden", "true");
+            }
+          });
+          const closeLogoutBtn = document.getElementById("closeLogoutBtn");
+          closeLogoutBtn && closeLogoutBtn.addEventListener("click", () => {
+            if (logoutConfirm) {
+              logoutConfirm.classList.remove("active");
+              logoutConfirm.setAttribute("aria-hidden", "true");
+            }
+          });
 
-      // Tabs trong trang cài đặt
-      document.querySelectorAll(".wh-tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-          document
-            .querySelectorAll(".wh-tab")
-            .forEach((t) => t.classList.remove("wh-active"));
-          document
-            .querySelectorAll(".wh-panel")
-            .forEach((p) => p.classList.remove("wh-show"));
-          tab.classList.add("wh-active");
-          document
-            .querySelector(`.wh-panel[data-tab="${tab.dataset.tab}"]`)
-            ?.classList.add("wh-show");
-        });
-      });
-
-      //Đăng xuất với hộp thoại xác nhận
-      const logoutBtn = document.getElementById("Logout");
-      const logoutConfirm = document.getElementById("popupLogout");
-      const logoutConfirmYes = document.getElementById("logoutConfirmYes");
-      const logoutConfirmNo = document.getElementById("logoutConfirmNo");
-
-      logoutBtn && logoutBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (logoutConfirm) {
-          logoutConfirm.classList.add("active");
-          logoutConfirm.setAttribute("aria-hidden", "false");
-        } else {
-          // chuyển hướng
-          window.location.href = "/auth/logout";
-        }
-        // ẩn user menu
-        if (userMenu) userMenu.style.display = "none";
-      });
-
-      // confirm
-      logoutConfirmYes && logoutConfirmYes.addEventListener("click", () => {
-        window.location.href = "/auth/logout";
-      });
-      logoutConfirmNo && logoutConfirmNo.addEventListener("click", () => {
-        if (logoutConfirm) {
-          logoutConfirm.classList.remove("active");
-          logoutConfirm.setAttribute("aria-hidden", "true");
-        }
-      });
-      const closeLogoutBtn = document.getElementById("closeLogoutBtn");
-      closeLogoutBtn && closeLogoutBtn.addEventListener("click", () => {
-        if (logoutConfirm) {
-          logoutConfirm.classList.remove("active");
-          logoutConfirm.setAttribute("aria-hidden", "true");
-        }
-      });
-
-      // Nhấn X hoặc click ra ngoài để thoát
-      if (logoutConfirm) {
-        logoutConfirm.addEventListener("click", (e) => {
-          if (e.target === logoutConfirm) {
-            logoutConfirm.classList.remove("active");
-            logoutConfirm.setAttribute("aria-hidden", "true");
+          // Nhấn X hoặc click ra ngoài để thoát
+          if (logoutConfirm) {
+            logoutConfirm.addEventListener("click", (e) => {
+              if (e.target === logoutConfirm) {
+                logoutConfirm.classList.remove("active");
+                logoutConfirm.setAttribute("aria-hidden", "true");
+              }
+            });
+            document.addEventListener("keydown", (e) => {
+              if (e.key === "Escape" && logoutConfirm.classList.contains("active")) {
+                logoutConfirm.classList.remove("active");
+                logoutConfirm.setAttribute("aria-hidden", "true");
+              }
+            });
           }
-        });
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape" && logoutConfirm.classList.contains("active")) {
-            logoutConfirm.classList.remove("active");
-            logoutConfirm.setAttribute("aria-hidden", "true");
-          }
-        });
-      }
 
 
-    </script>
-  </div>
+        </script>
+      </div>
 </body>
 
 </html>

@@ -170,9 +170,10 @@ router.delete("/:id/delete", ensureAuth, async (req, res) => {
       return res.status(403).json({ error: "Bạn không có quyền xóa nhóm này." });
     }
 
-    // Xóa nhóm + liên kết thành viên
+    // Xóa nhóm + liên kết thành viên + chat
     await db.promise().query(`DELETE FROM group_user WHERE groupId = UUID_TO_BIN(?)`, [id]);
     await db.promise().query(`DELETE FROM \`group\` WHERE id = UUID_TO_BIN(?)`, [id]);
+    // await db.promise().query(`DELETE FROM chat WHERE groupId = UUID_TO_BIN(?)`, [id]);
 
     res.json({ success: true, message: "Đã xóa nhóm thành công." });
   } catch (err) {

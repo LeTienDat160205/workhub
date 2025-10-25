@@ -9,6 +9,7 @@
 </head>
 
 <body>
+  <div id="toast-container"></div>
   <div class="dashboard-frame">
     <!-- HEADER -->
     <div class="dashboard-header" style="margin-top: 0">
@@ -48,12 +49,15 @@
         <!-- account -->
         <div class="user-account" id="openProfile" title="Account" style="position: relative">
           <div style="position: relative">
-            <img id="avatarPreview" name="avatarPath" alt="avatar"
-              src="<%= user.avatarPath || '/uploads/default-avatar.png' %>"
-              style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;" />
-            <span
-              style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;">
-            </span>
+            <div id="avatarWrapper"
+              style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1;  display: flex; align-items: center; justify-content: center;">
+              <img id="avatarPreview" name="avatarPath" alt="avatar"
+                src="<%= user.avatarPath || '/uploads/default-avatar.png' %>"
+                style="width: 32px; height: 32px; border-radius: 50%; background: #cbd5e1; display: flex; align-items: center; justify-content: center;" />
+              <span
+                style="position: absolute; bottom: 0; right: -2px; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid var(--surface); display: block;">
+              </span>
+            </div>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-start;">
             <span style="font-weight: 700; font-size: 1.08rem; line-height: 1.1; color: var(--text);">
@@ -122,6 +126,68 @@
       </div>
     </div>
 
+    <!-- XỬ LÝ AVATAR -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const avatarPreview = document.getElementById("avatarPreview");
+        const avatarWrapper = document.getElementById("avatarWrapper") || avatarPreview.parentElement;
+
+        const userName = "<%= user.name || 'User' %>";
+        const avatarSrc = "<%= user.avatarPath || '' %>";
+
+        // Nếu người dùng chưa có ảnh avatar thật
+        if (!avatarSrc || avatarSrc.includes("default-avatar")) {
+          // Ẩn ảnh thật
+          avatarPreview.style.display = "none";
+
+          // Tạo avatar chữ cái đầu tiên
+          const initial = userName.trim() ? userName.trim().charAt(0).toUpperCase() : "?";
+
+          // Kiểm tra màu trong localStorage
+          const colorKey = `avatarColor_${userName}`;
+          let bgColor = localStorage.getItem(colorKey);
+
+          // Nếu chưa có thì random 1 lần
+          if (!bgColor) {
+            const colors = ["#f87171", "#fb923c", "#facc15", "#4ade80", "#60a5fa", "#a78bfa", "#f472b6"];
+            bgColor = colors[Math.floor(Math.random() * colors.length)];
+            localStorage.setItem(colorKey, bgColor);
+          }
+
+          // Tạo avatar bằng chữ
+          const letterAvatar = document.createElement("div");
+          letterAvatar.textContent = initial;
+          letterAvatar.style.cssText = `width: 100%;height: 100%;border-radius: 50%;background: ${bgColor};color: white;font-weight: 600; font-size: 1.2rem;display: flex;align-items: center;justify-content: center;`;
+          avatarWrapper.appendChild(letterAvatar);
+        } else {
+          // Có ảnh thật thì hiển thị ảnh
+          avatarPreview.src = avatarSrc;
+          avatarPreview.style.display = "block";
+        }
+
+        // ====== Khi người dùng chọn ảnh mới ======
+        const avatarInput = document.getElementById("avatarInput");
+        if (avatarInput) {
+          avatarInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+              // Nếu đã có avatar chữ thì xóa
+              const existingLetter = avatarWrapper.querySelector("div");
+              if (existingLetter) existingLetter.remove();
+
+              // Hiển thị ảnh mới
+              avatarPreview.src = reader.result;
+              avatarPreview.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+      });
+    </script>
+
     <!-- POPUP XÁC NHẬN ĐĂNG XUẤT -->
     <div class="popup-overlay" id="popupLogout" aria-hidden="true">
       <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="logout-title">
@@ -155,7 +221,8 @@
               <input type="text" placeholder="Search" />
             </div>
           </div>
-          <div class="sidebar-list" id="groupList"></div>
+          <div class="sidebar-list" id="groupList">
+          </div>
         </div>
 
         <!-- NÚT: TẠO NHÓM -->
@@ -171,378 +238,49 @@
 
       <!-- MAIN -->
       <div class="main-content" id="mainContent">
-        <!-- POPUP TẠO NHÓM -->
-        <div class="popup-overlay" id="popupGroup" aria-hidden="true">
-          <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
-            <button class="close-btn" id="closeGroupPopup" aria-label="Đóng">
-              &times;
+        <div class="main-toolbar">
+          <div class="task-tabs">
+            <button class="tab-btn active" tabindex="0">
+              <svg viewBox="0 0 20 20">
+                <path d="M4 10l4 4 8-8" />
+              </svg>
+              Đã giao
             </button>
-            <div class="popup-inner-content" style="flex-direction: column; width: 100%">
-              <div>
-                <div id="create-group-title" class="popup-title">
-                  Tạo nhóm mới
-                </div>
-                <form id="groupForm" action="/groups" method="POST" style="
-                    display: flex;
-                    flex-direction: column;
-                    gap: 18px;
-                    min-width: 260px;
-                  ">
-                  <input type="hidden" name="csrf_token" value="" />
-                  <div style="display: flex; flex-direction: column; gap: 6px">
-                    <label for="groupName" class="form-label" style="font-weight: 600">Tên nhóm</label>
-                    <input id="groupName" name="groupName" type="text" required placeholder="Nhập tên nhóm"
-                      class="form-input" style="padding: 10px 13px" />
-                  </div>
-                  <div style="display: flex; justify-content: flex-end; gap: 12px">
-                    <button type="button" class="btn" id="cancelGroupBtn" style="background: #9e9e9e">
-                      Huỷ
-                    </button>
-                    <button type="submit" class="btn" id="createGroupBtn">
-                      Tạo nhóm
-                    </button>
-                  </div>
-                </form>
-                <!-- javascript hiện cửa sổ tạo nhóm -->
-                <script>
-                  const popupGroup = document.getElementById('popupGroup');
-                  // nút để mở popup (dòng 1500)
-                  const btnAddGroup = document.getElementById('btnAddGroup');
-                  const closeGroupPopup = document.getElementById('closeGroupPopup'); // nút X
-                  const cancelGroupBtn = document.getElementById('cancelGroupBtn'); // nút Huỷ
+            <button class="tab-btn" tabindex="0">
+              <svg viewBox="0 0 20 20">
+                <circle cx="9" cy="9" r="7" />
+                <path d="M13 13l4 4" />
+              </svg>
+              Được giao
+            </button>
+          </div>
 
-                  // Hàm mở popup
-                  function openGroupPopup() {
-                    popupGroup.style.display = 'flex';
-                    popupGroup.style.alignItems = 'center';
-                    popupGroup.style.justifyContent = 'center';
-                    popupGroup.style.backdropFilter = 'blur(2px)';
-                  }
+          <div class="search-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"></line>
+            </svg>
+            <input type="text" placeholder="Search" />
+          </div>
 
-                  // Hàm đóng popup
-                  function closeGroup() {
-                    popupGroup.style.display = 'none';
-                  }
-
-                  // Sự kiện mở popup 
-                  if (btnAddGroup) {
-                    btnAddGroup.addEventListener('click', openGroupPopup);
-                  }
-
-                  // Sự kiện đóng popup khi bấm nút X hoặc Huỷ
-                  closeGroupPopup.addEventListener('click', closeGroup);
-                  cancelGroupBtn.addEventListener('click', closeGroup);
-
-                  // Đóng popup khi click ra ngoài phần nội dung
-                  popupGroup.addEventListener('click', function (e) {
-                    if (e.target === popupGroup) {
-                      closeGroup();
-                    }
-                  });
-                  // ---------------------------------------------------
-                  // Load danh sách nhóm đã tham gia
-                  async function loadGroups() {
-                    const groupList = document.getElementById('groupList');
-                    if (!groupList) return;
-                    groupList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Đang tải...</div>';
-                    try {
-                      const res = await fetch('/groups/my-groups', { credentials: 'same-origin' });
-                      if (!res.ok) throw new Error('Lỗi khi tải nhóm');
-                      const groups = await res.json();
-                      if (!Array.isArray(groups) || groups.length === 0) {
-                        groupList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Bạn chưa tham gia nhóm nào.</div>';
-                        return;
-                      }
-                      groupList.innerHTML = groups.map(g => {
-                        const leaderName = g.leaderName || 'Không rõ';
-                        return `
-                      <div class="group-card" data-id="${g.id}" style="cursor:pointer; border:1px solid #ddd; border-radius:8px; padding:10px 12px; margin:6px 0;">
-                        <div class="group-title">${g.groupName}</div>
-                        <div class="group-leader">Nhóm trưởng: <span>${leaderName}</span></div>
-                      </div>
-                      `;
-                      }).join('');
-
-                      // Thêm sự kiện click sau khi render
-                      document.querySelectorAll('.group-card').forEach(card => {
-                        card.addEventListener('click', () => {
-                          const groupId = card.getAttribute('data-id');
-                          window.location.href = `/groups/${groupId}`; // render group.ejs tương ứng
-                        });
-                      });
-                    } catch (err) {
-                      groupList.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;">Lỗi khi tải danh sách nhóm.</div>';
-                    }
-                  }
-                  window.addEventListener('DOMContentLoaded', loadGroups);
-
-                  // Xử lý submit tạo nhóm
-                  const groupForm = document.getElementById('groupForm');
-                  if (groupForm) {
-                    groupForm.addEventListener('submit', async function (e) {
-                      e.preventDefault();
-                      const groupName = document.getElementById('groupName').value.trim();
-                      if (!groupName) return alert('Vui lòng nhập tên nhóm');
-                      try {
-                        const res = await fetch('/groups', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ groupName }),
-                          credentials: 'same-origin'
-                        });
-                        const data = await res.json();
-                        if (!res.ok) throw new Error(data.error || 'Lỗi tạo nhóm');
-                        alert('Tạo nhóm thành công!');
-                        groupForm.reset();
-                        document.getElementById('popupGroup').style.display = 'none';
-                        loadGroups();
-                      } catch (err) {
-                        alert(err.message || 'Lỗi khi tạo nhóm');
-                      }
-                    });
-                  }
-                </script>
-              </div>
-            </div>
+          <div class="">
+            <ul class="task-menu">
+              <li>
+                <a href="javascript:void(0)">Bộ lọc công việc</a>
+                <ul class="task-sub">
+                  <li><a href="javascript:void(0)">Tất cả</a></li>
+                  <li><a href="javascript:void(0)">Đã hoàn thành</a></li>
+                  <li><a href="javascript:void(0)">Đang làm</a></li>
+                  <li><a href="javascript:void(0)">Chưa nhận</a></li>
+                </ul>
+              </li>
+            </ul>
           </div>
         </div>
-        
-        <!-- Trang nhóm -->
-        <div class="content-task" id="paperArea">
-          <div class="chat-wrapper" style="display:flex;flex-direction:column">
-            <div class="chat-header-bar">
-              <div style="display:flex;flex-direction:column">
-                <div style="font-weight:800;color:var(--text)">
-                  <%= group.groupName %>
-                </div>
-                <div style="font-size:0.9rem;color:var(--text-muted)">
-                  <%= group.memberCount %> thành viên
-                </div>
-              </div>
-              <div style="display:flex;gap:12px">
-                <button id="addMemberBtnSmall">
-                  + Thêm thành viên
-                </button>
-                <button id="createTaskBtnSmall">
-                  Tạo công việc
-                </button>
-              </div>
-            </div>
-            <div id="chatMessages" class="chat-messages">
-              <!-- message 
-              <div class="msg-row" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
-                <div class="avatar" style="width:44px;height:44px;border-radius:50%;background:#e6f7ed;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary);">A</div>
-                <div class="bubble" style="background:#f6fff6;padding:10px 12px;border-radius:10px;max-width:70%;">
-                  <strong>A</strong>
-                  <div>Xin chào!</div>
-                </div>
-              </div>
 
-              
-              <div class="msg-row" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
-                <div class="avatar" style="width:44px;height:44px;border-radius:50%;background:#e6f7ed;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary);">B</div>
-                <div class="bubble" style="background:#f6fff6;padding:10px 12px;border-radius:10px;max-width:70%;">
-                  <strong>B</strong>
-                  <div>Chào bạn!</div>
-                </div>
-              </div> -->
-            </div>
-
-            <!-- input row -->
-            <div class="chat-input-row">
-              <label for="fileInputCenter" class="attach-circle" title="Đính kèm" style="margin-right:8px">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 01-7.78 0 5.5 5.5 0 010-7.78l8.49-8.49a3.5 3.5 0 014.95 4.95l-8.49 8.49a1.5 1.5 0 01-2.12-2.12l7.07-7.07"
-                    fill="currentColor" />
-                </svg>
-              </label>
-              <input id="fileInputCenter" type="file" style="display:none" />
-              <input id="chatInputCenter" placeholder="Nhập tin nhắn...">
-              <button id="sendBtnCenter">Gửi</button>
-            </div>
-          </div>
-
-          <!-- <script>
-            (function(){
-              var send = document.getElementById('sendBtnCenter');
-              var input = document.getElementById('chatInputCenter');
-              var fileInput = document.getElementById('fileInputCenter');
-              var messages = document.getElementById('chatMessages');
-
-              function appendMessage(label, text){
-                var row = document.createElement('div');
-                row.className = 'msg-row';
-                row.style.display = 'flex'; row.style.gap='12px'; row.style.alignItems='flex-start'; row.style.marginBottom='12px';
-                var av = document.createElement('div'); av.style.width='44px'; av.style.height='44px'; av.style.borderRadius='50%'; av.style.background='#e6f7ed'; av.style.display='flex'; av.style.alignItems='center'; av.style.justifyContent='center'; av.style.fontWeight='700'; av.style.color='var(--primary)'; av.textContent = label;
-                var bubble = document.createElement('div'); bubble.style.background='#f6fff6'; bubble.style.padding='10px 12px'; bubble.style.borderRadius='10px'; bubble.style.maxWidth='70%';
-                bubble.innerHTML = '<strong>'+label+'</strong><div>'+text+'</div>';
-                row.appendChild(av); row.appendChild(bubble); messages.appendChild(row); messages.scrollTop = messages.scrollHeight;
-              }
-
-              if(send && input){
-                send.addEventListener('click', function(){
-                  var v = input.value.trim(); if(!v) return; appendMessage('Bạn', v); input.value = '';
-                });
-                input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); send.click(); } });
-              }
-
-              if(fileInput){
-                document.querySelector('label[for="fileInputCenter"]').addEventListener('click', function(){ fileInput.click(); });
-                fileInput.addEventListener('change', function(){ if(fileInput.files[0]){ appendMessage('Bạn', 'Đã gửi tệp: '+fileInput.files[0].name); } });
-              }
-            })();
-          </script> -->
-        </div>
+        <!-- Nội dung dạng "giấy kẻ ngang" -->
+        <div class="content-task" id="paperArea">WorkHub</div>
       </div>
-
-      <!-- RIGHT COLUMN: members list -->
-      <div class="right-column">
-        <div class="right-panel">
-          <div class="search-members">
-            <input id="memberSearchRight" placeholder="Tìm kiếm thành viên...">
-          </div>
-          <div id="membersWrapRight" class="member-list"></div>
-          <div id="memberCountRight" style="padding:12px 8px;color:var(--text-muted)"></div>
-
-          <!-- POPUP XÁC NHẬN XÓA NHÓM -->
-          <div class="popup-overlay" id="popupDeleteGroup" aria-hidden="true">
-            <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="delete-group-title">
-              <button class="close-btn" id="closeDeletePopup" aria-label="Đóng">&times;</button>
-              <div class="popup-inner-content" style="flex-direction: column; width: 100%; text-align: left;">
-                <div id="delete-group-title" class="popup-title" style="color: red; font-weight: 700;">
-                  Xóa nhóm
-                </div>
-                <p style="margin: 15px 0 25px;">Bạn có chắc chắn muốn xóa nhóm này không?</p>
-                <div style="display: flex; justify-content: right; gap: 12px;">
-                  <button type="button" class="btn" id="cancelDeleteBtn" style="background: #9e9e9e;">Huỷ</button>
-                  <button type="button" class="btn" id="confirmDeleteBtn" style="background: red;">Xóa</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Nút Xóa nhóm -->
-          <div class="deleteGroup">
-            <button type="button" style="width: 100%; color: red;" id="openDeletePopup">Xóa nhóm</button>
-          </div>
-
-          <!-- javascript của xóa nhóm -->
-          <script>
-            document.addEventListener("DOMContentLoaded", () => {
-              // Lấy phần tử popup và các nút
-              const popupDeleteGroup = document.getElementById("popupDeleteGroup");
-              const openDeletePopup = document.getElementById("openDeletePopup");
-              const closeDeletePopup = document.getElementById("closeDeletePopup");
-              const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
-              const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-              const groupId = "<%= group.id %>";
-
-              // ====== Hàm mở popup ======
-              function openPopupDelete() {
-                popupDeleteGroup.style.display = "flex";
-                popupDeleteGroup.style.alignItems = "center";
-                popupDeleteGroup.style.justifyContent = "center";
-                popupDeleteGroup.style.backdropFilter = "blur(2px)";
-              }
-
-              // ====== Hàm đóng popup ======
-              function closePopupDelete() {
-                popupDeleteGroup.style.display = "none";
-              }
-
-              // ====== Gắn sự kiện ======
-              openDeletePopup.addEventListener("click", openPopupDelete);
-              closeDeletePopup.addEventListener("click", closePopupDelete);
-              cancelDeleteBtn.addEventListener("click", closePopupDelete);
-
-              // Đóng popup khi click ra ngoài
-              popupDeleteGroup.addEventListener("click", (e) => {
-                if (e.target === popupDeleteGroup) {
-                  closePopupDelete();
-                }
-              });
-
-              // ====== Khi xác nhận xóa nhóm ======
-              confirmDeleteBtn.addEventListener("click", async () => {
-                closePopupDelete(); // đóng popup ngay
-
-                try {
-                  const res = await fetch(`/groups/${groupId}/delete`, {
-                    method: "DELETE",
-                    credentials: "same-origin"
-                  });
-
-                  const result = await res.json();
-
-                  if (res.ok && result.success) {
-                    alert("✅ Nhóm đã được xóa thành công!");
-                    window.location.href = "/";
-                  } else {
-                    alert(`❌ ${result.error || "Không thể xóa nhóm."}`);
-                  }
-                } catch (err) {
-                  console.error(err);
-                  alert("⚠️ Lỗi khi gửi yêu cầu xóa nhóm.");
-                }
-              });
-            });
-          </script>
-
-        </div>
-      </div>
-
-
-      <!-- member context menu -->
-      <div id="memberMenu" class="member-menu" role="menu" aria-hidden="true">
-        <div class="menu-item" data-action="view">👁️ Xem thông tin</div>
-        <div class="menu-item" data-action="message">💬 Nhắn tin</div>
-        <div class="menu-item" data-action="remove" style="color:#d32f2f">🗑️ Xóa thành viên</div>
-      </div>
-
-      <!-- javascript load thành viên -->
-      <script>
-        async function loadMembers() {
-          const membersWrap = document.getElementById("membersWrapRight");
-          const memberCountRight = document.getElementById("memberCountRight");
-          const groupId = "<%= group.id %>";
-
-          membersWrap.innerHTML = '<div style="padding:10px;color:var(--text-muted);text-align:center">Đang tải...</div>';
-          try {
-            const res = await fetch(`/groups/${groupId}/members`, { credentials: "same-origin" });
-            if (!res.ok) throw new Error("Lỗi khi tải danh sách thành viên");
-            const members = await res.json();
-            if (members.length === 0) {
-              membersWrap.innerHTML = '<div style="padding:10px;color:var(--text-muted);text-align:center">Chưa có thành viên nào.</div>';
-              memberCountRight.textContent = "0 thành viên";
-              return;
-            }
-
-            membersWrap.innerHTML = members
-              .map(
-                (m) => `
-          <div class="member-item">
-            <div class="avatar">
-              ${m.avatarPath ? `<img src="${m.avatarPath}" style="width: 32px; height: 32px;object-fit:cover;border-radius:50%;">` : m.name.charAt(0).toUpperCase()}
-            </div>
-            <div style="flex:1">
-              <div style="font-weight:600;color:var(--text)">${m.name}</div>
-              <div style="font-size:0.9rem;color:var(--text-muted)">${m.roleInGroup === 'leader' ? '👑 Trưởng nhóm' : '👤 Thành viên'}</div>
-            </div>
-          </div>`
-              )
-              .join("");
-
-            memberCountRight.textContent = `${members.length} thành viên`;
-          } catch (err) {
-            console.error(err);
-            membersWrap.innerHTML = '<div style="padding:10px;color:#ef4444;text-align:center">Không thể tải danh sách thành viên.</div>';
-          }
-        }
-
-        document.addEventListener("DOMContentLoaded", loadMembers);
-      </script>
-
 
       <!-- RIGHT PANEL STACK -->
       <div class="right-panel-stack" id="rightPanelStack">
@@ -582,12 +320,174 @@
         </div>
       </div>
 
+      <!-- POPUP TẠO NHÓM -->
+      <div class="popup-overlay" id="popupGroup" aria-hidden="true">
+        <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
+          <button class="close-btn" id="closeGroupPopup" aria-label="Đóng">
+            &times;
+          </button>
+          <div class="popup-inner-content" style="flex-direction: column; width: 100%">
+            <div>
+              <div id="create-group-title" class="popup-title">
+                Tạo nhóm mới
+              </div>
+              <form id="groupForm" action="/groups" method="POST" style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 18px;
+                    min-width: 260px;
+                  ">
+                <input type="hidden" name="csrf_token" value="" />
+                <div style="display: flex; flex-direction: column; gap: 6px">
+                  <label style="height: 20px;"></label>
+                  <input id="groupName" name="groupName" type="text" required placeholder="Nhập tên nhóm"
+                    class="form-input" style="padding: 10px 13px" />
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 12px">
+                  <button type="button" class="btn" id="cancelGroupBtn" style="background: #9e9e9e">
+                    Huỷ
+                  </button>
+                  <button type="submit" class="btn" id="createGroupBtn">
+                    Tạo nhóm
+                  </button>
+                </div>
+              </form>
+
+              <!-- hiển thị thông báo  -->
+              <script>
+                function showToast(message, type = 'success') {
+                  const container = document.getElementById('toast-container');
+                  if (!container) return;
+                  const toast = document.createElement('div');
+                  toast.className = `toast ${type}`;
+                  toast.textContent = message;
+
+                  container.appendChild(toast);
+                  setTimeout(() => toast.classList.add('show'), 100);
+                  setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                  }, 4000);
+                }
+              </script>
+
+              <!-- javascript hiện cửa sổ tạo nhóm -->
+              <script>
+                const popupGroup = document.getElementById('popupGroup');
+                // nút để mở popup (dòng 1500)
+                const btnAddGroup = document.getElementById('btnAddGroup');
+                const closeGroupPopup = document.getElementById('closeGroupPopup'); // nút X
+                const cancelGroupBtn = document.getElementById('cancelGroupBtn'); // nút Huỷ
+
+                // Hàm mở popup
+                function openGroupPopup() {
+                  popupGroup.style.display = 'flex';
+                  popupGroup.style.alignItems = 'center';
+                  popupGroup.style.justifyContent = 'center';
+                  popupGroup.style.backdropFilter = 'blur(2px)';
+                }
+
+                // Hàm đóng popup
+                function closeGroup() {
+                  popupGroup.style.display = 'none';
+                }
+
+                // Sự kiện mở popup 
+                if (btnAddGroup) {
+                  btnAddGroup.addEventListener('click', openGroupPopup);
+                }
+
+                // Sự kiện đóng popup khi bấm nút X hoặc Huỷ
+                closeGroupPopup.addEventListener('click', closeGroup);
+                cancelGroupBtn.addEventListener('click', closeGroup);
+
+                // Đóng popup khi click ra ngoài phần nội dung
+                popupGroup.addEventListener('click', function (e) {
+                  if (e.target === popupGroup) {
+                    closeGroup();
+                  }
+                });
+                // ---------------------------------------------------
+                // Load danh sách nhóm đã tham gia
+                async function loadGroups() {
+                  const groupList = document.getElementById('groupList');
+                  if (!groupList) return;
+                  groupList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Đang tải...</div>';
+                  try {
+                    const res = await fetch('/groups/my-groups', { credentials: 'same-origin' });
+                    if (!res.ok) throw new Error('Lỗi khi tải nhóm');
+                    const groups = await res.json();
+                    if (!Array.isArray(groups) || groups.length === 0) {
+                      groupList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Bạn chưa tham gia nhóm nào.</div>';
+                      return;
+                    }
+                    groupList.innerHTML = groups.map(g => {
+                      const leaderName = g.leaderName || 'Không rõ';
+                      return `
+                      <div class="group-card" data-id="${g.id}" >
+                        <div class="group-title">${g.groupName}</div>
+                        <div class="group-leader">Nhóm trưởng: <span>${leaderName}</span></div>
+                      </div>
+                      `;
+                    }).join('');
+
+                    // Thêm sự kiện click sau khi render
+                    document.querySelectorAll('.group-card').forEach(card => {
+                      card.addEventListener('click', () => {
+                        const groupId = card.getAttribute('data-id');
+                        window.location.href = `/groups/${groupId}`; // render group.ejs tương ứng
+                      });
+                    });
+                  } catch (err) {
+                    groupList.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;">Lỗi khi tải danh sách nhóm.</div>';
+                  }
+                }
+                window.addEventListener('DOMContentLoaded', loadGroups);
+
+                // Xử lý submit tạo nhóm
+                const groupForm = document.getElementById('groupForm');
+                if (groupForm) {
+                  groupForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const groupName = document.getElementById('groupName').value.trim();
+                    if (!groupName) return alert('Vui lòng nhập tên nhóm');
+                    try {
+                      const res = await fetch('/groups', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ groupName }),
+                        credentials: 'same-origin'
+                      });
+                      const data = await res.json();
+                      // if (!res.ok) throw new Error(data.error || 'Lỗi tạo nhóm');
+                      // alert('Tạo nhóm thành công!');
+                      if (!res.ok) {
+                        showToast(data.error || 'Lỗi tạo nhóm', 'error');
+                      } else {
+                        showToast('Tạo nhóm thành công!', 'success');
+                      }
+
+                      groupForm.reset();
+                      document.getElementById('popupGroup').style.display = 'none';
+                      loadGroups();
+                    } catch (err) {
+                      alert(err.message || 'Lỗi khi tạo nhóm');
+                    }
+                  });
+                }
+              </script>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- POPUP THÔNG TIN TÀI KHOẢN -->
-      <div class="popup-overlay" id="popupProfile" aria-hidden="true">
+      <div class="popup-overlay" id="popupProfile"
+        style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); z-index: 1000;"
+        aria-hidden="true">
         <div class="popup-content" style="width: 420px; max-width: 95vw" role="dialog" aria-modal="true"
           aria-labelledby="profile-title">
-          <div class="popup-header"
-            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+          <div class="popup-header">
             <div id="profile-title" class="popup-title" style="font-size: 23px">Thông tin tài khoản</div>
             <button class="close-btn" id="closeProfileBtn" style="font-size: 28px" aria-label="Đóng">&times;</button>
             <!-- javascript đóng popup hiện thông tin -->
@@ -595,6 +495,27 @@
               // Lấy phần tử popup và nút đóng
               const popupProfile = document.getElementById('popupProfile');
               const closeProfileBtn = document.getElementById('closeProfileBtn');
+
+              // ===== Account menu & profile popup =====
+              const openProfile = document.getElementById("openProfile");
+              const userMenu = document.getElementById("userMenu");
+              openProfile.addEventListener("click", function (e) {
+                e.stopPropagation();
+                userMenu.style.display =
+                  userMenu.style.display === "block" ? "none" : "block";
+              });
+              document.addEventListener("mousedown", function (e) {
+                if (!openProfile.contains(e.target)) {
+                  userMenu.style.display = "none";
+                }
+              });
+              document.getElementById("Profile").onclick = function () {
+                document.getElementById("popupProfile").style.display = "flex";
+                document
+                  .getElementById("popupProfile")
+                  .setAttribute("aria-hidden", "false");
+                userMenu.style.display = "none";
+              };
 
               // Khi bấm nút X thì ẩn popup
               closeProfileBtn.addEventListener('click', function () {
@@ -604,8 +525,7 @@
           </div>
 
           <!-- FORM -->
-          <form class="profile-form" id="profileForm" action="/info" method="POST" enctype="multipart/form-data"
-            style=" display: flex; flex-direction: column; gap: 13px; margin-bottom: 22px;">
+          <form class="profile-form" id="profileForm" action="/info" method="POST" enctype="multipart/form-data">
             <!-- Background + Avatar upload -->
             <div class="profile-hero">
               <div class="background">
@@ -627,17 +547,6 @@
                 </label>
               </div>
 
-              <!-- javascript thay đổi avatar và background -->
-              <script>
-                // Xem trước ảnh
-                function previewImage(event, previewId) {
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    document.getElementById(previewId).src = reader.result;
-                  };
-                  reader.readAsDataURL(event.target.files[0]);
-                }
-              </script>
               <!-- Thông tin tài  khoản -->
               <div>
                 <input class="name" type="text" name="name" value="<%= user.name || '' %>" readonly>
@@ -666,14 +575,10 @@
                 value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
                 style="flex: 1; padding: 10px 13px" />
             </div>
-            <div class="form-row" style="display: flex; align-items: center; gap: 10px">
+            <div class="form-row" style="display: flex; align-items:center; gap:10px">
               <label class="form-label" for="gender" style="width: 110px">Giới tính</label>
-              <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
-                <option value="">--Chọn--</option>
-                <option value="male" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
-                <option value="female" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
-                <option value="other" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
-              </select>
+              <input class="form-input" name="gender" type="text" value="<%=user.gender || '' %>" readonly id="gender"
+                style="flex: 1; padding: 10px 13px" />
             </div>
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
               <label class="form-label" for="address" style="width: 110px">Địa chỉ</label>
@@ -681,17 +586,19 @@
                 id="address" style="flex: 1; padding: 10px 13px" />
             </div>
           </form>
-          <!------------------------------------------- POPUP XÁC NHẬN ------------------------------------------>
+          <!------------------------------------------- POPUP XÁC NHẬN UPLOAD ẢNH  ------------------------------------------->
           <div class="confirm-overlay" id="confirmOverlay"
-            style="display:none; position: fixed; inset:0; background: rgba(0,0,0,0.3); align-items: center; justify-content: center; z-index: 1100;">
+            style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); align-items:center; justify-content:center; z-index:1100;">
             <div class="confirm-box"
-              style="background:white; padding:20px 25px; border-radius:10px; text-align:center;">
-              <p style="margin-bottom:15px; font-size:17px;">Bạn có chắc chắn không?</p>
+              style="background:#fff; padding:22px 28px; border-radius:10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); transform:scale(0.95); transition:all 0.2s ease;">
+              <p style="margin-bottom:15px; font-size:17px; font-weight:500; color:var(--text);">Bạn có chắc chắn không?
+              </p>
               <div style="display:flex; justify-content:center; gap:10px;">
-                <button id="confirmYes" class="btn" style="background:#4CAF50; color:white; padding:6px 14px;">Xác
+                <button id="confirmYes" class="btn"
+                  style="background:#4CAF50; color:white; padding:6px 14px; border:none; border-radius:6px; cursor:pointer;">Xác
                   nhận</button>
                 <button id="confirmNo" class="btn"
-                  style="background:#f44336; color:white; padding:6px 14px;">Hủy</button>
+                  style="background:#f44336; color:white; padding:6px 14px; border:none; border-radius:6px; cursor:pointer;">Hủy</button>
               </div>
             </div>
           </div>
@@ -742,290 +649,362 @@
             });
           </script>
 
+          <!-- <div class="confirm-overlay" id="confirmOverlay"
+            style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); align-items:center; justify-content:center; z-index:1100;">
+            <div class="confirm-box"
+              style="background:#fff; padding:22px 28px; border-radius:10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); transform:scale(0.95); transition:all 0.2s ease;">
+              <p style="margin-bottom:15px; font-size:17px; font-weight:500; color:var(--text);">Bạn có chắc chắn không?
+              </p>
+              <div style="display:flex; justify-content:center; gap:10px;">
+                <button id="confirmYes" class="btn"
+                  style="background:#4CAF50; color:white; padding:6px 14px; border:none; border-radius:6px; cursor:pointer;">Xác
+                  nhận</button>
+                <button id="confirmNo" class="btn"
+                  style="background:#f44336; color:white; padding:6px 14px; border:none; border-radius:6px; cursor:pointer;">Hủy</button>
+              </div>
+            </div>
+          </div> -->
+
+          <!-- ========== WORKHUB SETTINGS OVERLAY ========== -->
+          <div id="whSettings" class="wh-settings" aria-hidden="true">
+            <!-- Sidebar cài đặt -->
+            <div class="wh-wrap">
+              <aside class="wh-side">
+                <div class="wh-search"><input placeholder="Tìm kiếm..." /></div>
+                <div class="wh-group">CÀI ĐẶT NGƯỜI DÙNG</div>
+                <nav class="wh-nav">
+                  <button class="wh-nav-item wh-active" data-view="account">
+                    Tài Khoản Của Tôi
+                  </button>
+                  <!-- chưa nghĩ ra cài đặt gì khác -->
+                </nav>
+                <div class="wh-group">CÀI ĐẶT TRANG WEB</div>
+                <nav class="wh-nav">
+                  <button></button>
+                  <!-- chưa nghĩ ra cài đặt gì khác -->
+                </nav>
+              </aside>
+
+              <main class="wh-main">
+                <header class="wh-topbar">
+                  <div class="wh-title">Tài Khoản Của Tôi</div>
+                  <button class="wh-btn wh-primary" id="whClose" title="ESC">
+                    Đóng
+                  </button>
+                </header>
+                <!-- Thông tin tài khoản ------------------------------------------------------------>
+                <form class="wh-card" action="/info" method="post" id="settingInfoAccount">
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Tên hiển thị</div>
+                      <input class="form-input" type="text" name="name" value="<%= user.name || '' %>" readonly
+                        style="flex: 1; padding: 10px 13px">
+                    </div>
+                  </div>
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Tên đăng nhập</div>
+                      <input class="form-input" name="username" type="text" value="<%= user.username %>" readonly
+                        id="username" style="flex: 1; padding: 10px 13px" />
+                    </div>
+                  </div>
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Email</div>
+                      <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email"
+                        style="flex: 1; padding: 10px 13px" />
+                    </div>
+                  </div>
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Số Điện Thoại</div>
+                      <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>"
+                        readonly id="phone" style="flex: 1; padding: 10px 13px" />
+                    </div>
+                  </div>
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Ngày sinh</div>
+                      <input class="form-input" name="dob" type="date"
+                        value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
+                        style="flex: 1; padding: 10px 13px" />
+                    </div>
+                  </div>
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Giới tính</div>
+                      <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
+                        <option value="">--Chọn--</option>
+                        <option value="Nam" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
+                        <option value="Nũ" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
+                        <option value="Khác" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="wh-row">
+                    <div>
+                      <div class="wh-label">Địa chỉ</div>
+                      <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly
+                        id="address" style="flex: 1; padding: 10px 13px" />
+                    </div>
+                  </div>
+                  <div class="wh-btnEditProfile" style="margin-top: 10px;">
+                    <button class="btn" type="button" id="editProfileBtn"
+                      style="background: var(--secondary)">Sửa</button>
+                    <button class="btn" type="submit" id="saveProfileBtn"
+                      style="display: none; background: var(--secondary)">Xác nhận</button>
+                  </div>
+
+                  <!-- javascript sửa thông tin -->
+                  <script>
+                    const editBtn = document.getElementById("editProfileBtn");
+                    const saveBtn = document.getElementById("saveProfileBtn");
+
+                    editBtn.addEventListener("click", () => {
+                      // Ẩn nút "Sửa"
+                      editBtn.style.display = "none";
+
+                      // Hiện nút "Xác nhận"
+                      saveBtn.style.display = "inline-block";
+
+                      // Mở khóa các input (trừ username và email)
+                      document.querySelectorAll("input[readonly], select[disabled]").forEach(el => {
+                        const fieldName = el.getAttribute("name");
+                        if (fieldName !== "username" && fieldName !== "email") {
+                          el.removeAttribute("readonly");
+                          el.removeAttribute("disabled");
+                          el.style.background = "#fff";
+                        }
+                      });
+                    });
+
+                    // Khi bấm "Xác nhận" thì đổi lại nút "Sửa"
+                    saveBtn.addEventListener("click", () => {
+                      editBtn.style.display = "inline-block";
+                      saveBtn.style.display = "none";
+                    });
+                  </script>
+                </form>
+                <!-- ----------------------------------------------------------------------------------------- -->
+                <div class="wh-tabs">
+                  <button class="wh-tab wh-active" data-tab="security">
+                    Bảo mật
+                  </button>
+                  <button class="wh-tab" data-tab="status">Trạng thái</button>
+                </div>
+                <div class="wh-panel wh-show" data-tab="security">
+                  <h3 class="wh-section">Mật Khẩu và Xác Thực</h3>
+                  <div class="wh-card">
+                    <div class="wh-row wh-between">
+                      <div>
+                        <div class="wh-t">Đổi Mật Khẩu</div>
+                        <div class="wh-sub">
+                          Cập nhật mật khẩu để bảo vệ tài khoản.
+                        </div>
+                      </div>
+                      <button class="wh-btn wh-primary">Đổi Mật Khẩu</button>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid var(--border-color)" />
+                    <div class="wh-row wh-between">
+                      <div>
+                        <div class="wh-t">Ứng Dụng Xác Thực</div>
+                        <div class="wh-sub">
+                          Thêm lớp bảo mật bổ sung khi đăng nhập.
+                        </div>
+                      </div>
+                      <button class="wh-btn wh-primary">
+                        Bật Ứng Dụng Xác Thực
+                      </button>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid var(--border-color)" />
+                    <div class="wh-row wh-between">
+                      <div>
+                        <div class="wh-t">Mã bảo mật</div>
+                        <div class="wh-sub">
+                          Tạo mã dự phòng để đăng nhập an toàn.
+                        </div>
+                      </div>
+                      <button class="wh-btn wh-secondary">
+                        Đăng ký Mã Bảo Mật
+                      </button>
+                    </div>
+                  </div>
+                  <div class="wh-card wh-danger-zone">
+                    <h4 class="wh-section">Ngừng Sử Dụng Tài Khoản</h4>
+                    <div class="wh-row" style="gap: 10px">
+                      <button class="wh-btn wh-danger">
+                        Vô Hiệu Hóa Tài Khoản
+                      </button>
+                      <button class="wh-btn wh-outline">Xóa Tài Khoản</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="wh-panel" data-tab="status">
+                  <div class="wh-card">
+                    <div class="wh-row wh-between">
+                      <div>
+                        <div class="wh-t">Trạng thái tài khoản</div>
+                        <div class="wh-sub">Tài khoản hoạt động bình thường.</div>
+                      </div>
+                      <span class="wh-pill-ok">Đang hoạt động</span>
+                    </div>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+
+          <!-- ========== /WORKHUB SETTINGS OVERLAY ========== -->
+          <!-- javascript mở trang cài đặt -->
+          <script>
+            const whOverlay = document.getElementById("whSettings");
+            const whBtnOpen = document.getElementById("OpenSettings");
+            const whBtnClose = document.getElementById("whClose");
+
+            // Move settings overlay outside of profile popup
+            if (whOverlay && whOverlay.parentElement.classList.contains('popup-content')) {
+              document.body.appendChild(whOverlay);
+            }
+
+            if (whBtnOpen) {
+              whBtnOpen.addEventListener("click", () => {
+                whOverlay.style.display = "block";
+                // Close profile popup when opening settings
+                if (popupProfile) popupProfile.style.display = "none";
+                if (userMenu) userMenu.style.display = "none";
+              });
+            }
+            if (whBtnClose) {
+              whBtnClose.addEventListener("click", () => {
+                whOverlay.style.display = "none";
+              });
+            }
+            document.addEventListener("keydown", (e) => {
+              if (e.key === "Escape" && whOverlay.style.display === "block") {
+                whOverlay.style.display = "none";
+              }
+            });
+
+            // Tabs trong trang cài đặt
+            document.querySelectorAll(".wh-tab").forEach((tab) => {
+              tab.addEventListener("click", () => {
+                document
+                  .querySelectorAll(".wh-tab")
+                  .forEach((t) => t.classList.remove("wh-active"));
+                document
+                  .querySelectorAll(".wh-panel")
+                  .forEach((p) => p.classList.remove("wh-show"));
+                tab.classList.add("wh-active");
+                document
+                  .querySelector(`.wh-panel[data-tab="${tab.dataset.tab}"]`)
+                  ?.classList.add("wh-show");
+              });
+            });
+
+            // Sidebar highlight
+            document.querySelectorAll(".wh-nav-item").forEach((btn) => {
+              btn.addEventListener("click", () => {
+                document
+                  .querySelectorAll(".wh-nav-item")
+                  .forEach((b) => b.classList.remove("wh-active"));
+                btn.classList.add("wh-active");
+              });
+            });
+          </script>
         </div>
-      </div>
 
-      <!-- ========== WORKHUB SETTINGS OVERLAY ========== -->
-      <div id="whSettings" class="wh-settings" aria-hidden="true">
-        <!-- Sidebar cài đặt -->
-        <div class="wh-wrap">
-          <aside class="wh-side">
-            <div class="wh-search"><input placeholder="Tìm kiếm..." /></div>
-            <div class="wh-group">CÀI ĐẶT NGƯỜI DÙNG</div>
-            <nav class="wh-nav">
-              <button class="wh-nav-item wh-active" data-view="account">
-                Tài Khoản Của Tôi
-              </button>
-              <!-- chưa nghĩ ra cài đặt gì khác -->
-            </nav>
-            <div class="wh-group">CÀI ĐẶT TRANG WEB</div>
-            <nav class="wh-nav">
-              <button></button>
-              <!-- chưa nghĩ ra cài đặt gì khác -->
-            </nav>
-          </aside>
+        <script>
+          // ===== CONFIG =====
+          const USE_FETCH = true;
+          const API = {
+            createGroup: "/groups",
+            updateProfile: "/api/profile/update",
+          };
 
-          <main class="wh-main">
-            <header class="wh-topbar">
-              <div class="wh-title">Tài Khoản Của Tôi</div>
-              <button class="wh-btn wh-primary" id="whClose" title="ESC">
-                Đóng
-              </button>
-            </header>
-            <!-- Thông tin tài khoản ------------------------------------------------------------>
-            <form class="wh-card" action="/info" method="post" id="settingInfoAccount">
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Tên hiển thị</div>
-                  <input class="form-input" type="text" name="name" value="<%= user.name || '' %>" readonly
-                    style="flex: 1; padding: 10px 13px">
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Tên đăng nhập</div>
-                  <input class="form-input" name="username" type="text" value="<%= user.username %>" readonly
-                    id="username" style="flex: 1; padding: 10px 13px" />
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Email</div>
-                  <input class="form-input" name="email" type="email" value="<%= user.email %>" readonly id="email"
-                    style="flex: 1; padding: 10px 13px" />
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Số Điện Thoại</div>
-                  <input class="form-input" name="phoneNumber" type="text" value="<%= user.phoneNumber || '' %>"
-                    readonly id="phone" style="flex: 1; padding: 10px 13px" />
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Ngày sinh</div>
-                  <input class="form-input" name="dob" type="date"
-                    value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" readonly id="dob"
-                    style="flex: 1; padding: 10px 13px" />
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Giới tính</div>
-                  <select class="form-input" name="gender" id="gender" disabled style="flex: 1; padding: 10px 13px">
-                    <option value="">--Chọn--</option>
-                    <option value="male" <%=user.gender==='male' ? 'selected' : '' %>>Nam</option>
-                    <option value="female" <%=user.gender==='female' ? 'selected' : '' %>>Nữ</option>
-                    <option value="other" <%=user.gender==='other' ? 'selected' : '' %>>Khác</option>
-                  </select>
-                </div>
-              </div>
-              <div class="wh-row">
-                <div>
-                  <div class="wh-label">Địa chỉ</div>
-                  <input class="form-input" name="address" type="text" value="<%= user.address || '' %>" readonly
-                    id="address" style="flex: 1; padding: 10px 13px" />
-                </div>
-              </div>
-              <div class="wh-btnEditProfile" style="margin-top: 10px;">
-                <button class="btn" type="button" id="editProfileBtn" style="background: var(--secondary)">Sửa</button>
-                <button class="btn" type="submit" id="saveProfileBtn"
-                  style="display: none; background: var(--secondary)">Xác nhận</button>
-              </div>
-              <!-- javascript sửa thông tin -->
-              <script>
-                const editBtn = document.getElementById("editProfileBtn");
-                const saveBtn = document.getElementById("saveProfileBtn");
+          // Xem trước hình (background/avatar)
+          function previewImage(evt, targetId) {
+            const file = evt.target.files?.[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            const img = document.getElementById(targetId);
+            if (img) {
+              img.src = url;
+            }
+          }
 
-                editBtn.addEventListener("click", () => {
-                  // Ẩn nút "Sửa"
-                  editBtn.style.display = "none";
+          // Create-group UI removed. The sidebar button opens addmembers.html in a new tab.
 
-                  // Hiện nút "Xác nhận"
-                  saveBtn.style.display = "inline-block";
+          // ===== Theme =====
+          const THEME_KEY = "workhub-theme";
+          const themeBtn = document.getElementById("btnTheme");
+          const themeIcon = document.getElementById("themeIcon");
 
-                  // Mở khóa các input (trừ username và email)
-                  document.querySelectorAll("input[readonly], select[disabled]").forEach(el => {
-                    const fieldName = el.getAttribute("name");
-                    if (fieldName !== "username" && fieldName !== "email") {
-                      el.removeAttribute("readonly");
-                      el.removeAttribute("disabled");
-                      el.style.background = "#fff";
-                    }
-                  });
-                });
-
-                // Khi bấm "Xác nhận" thì đổi lại nút "Sửa"
-                saveBtn.addEventListener("click", () => {
-                  editBtn.style.display = "inline-block";
-                  saveBtn.style.display = "none";
-                });
-              </script>
-            </form>
-            <!-- ----------------------------------------------------------------------------------------- -->
-            <div class="wh-tabs">
-              <button class="wh-tab wh-active" data-tab="security">
-                Bảo mật
-              </button>
-              <button class="wh-tab" data-tab="status">Trạng thái</button>
-            </div>
-            <div class="wh-panel wh-show" data-tab="security">
-              <h3 class="wh-section">Mật Khẩu và Xác Thực</h3>
-              <div class="wh-card">
-                <div class="wh-row wh-between">
-                  <div>
-                    <div class="wh-t">Đổi Mật Khẩu</div>
-                    <div class="wh-sub">
-                      Cập nhật mật khẩu để bảo vệ tài khoản.
-                    </div>
-                  </div>
-                  <button class="wh-btn wh-primary">Đổi Mật Khẩu</button>
-                </div>
-                <hr style="border: 0; border-top: 1px solid var(--border-color)" />
-                <div class="wh-row wh-between">
-                  <div>
-                    <div class="wh-t">Ứng Dụng Xác Thực</div>
-                    <div class="wh-sub">
-                      Thêm lớp bảo mật bổ sung khi đăng nhập.
-                    </div>
-                  </div>
-                  <button class="wh-btn wh-primary">
-                    Bật Ứng Dụng Xác Thực
-                  </button>
-                </div>
-                <hr style="border: 0; border-top: 1px solid var(--border-color)" />
-                <div class="wh-row wh-between">
-                  <div>
-                    <div class="wh-t">Mã bảo mật</div>
-                    <div class="wh-sub">
-                      Tạo mã dự phòng để đăng nhập an toàn.
-                    </div>
-                  </div>
-                  <button class="wh-btn wh-secondary">
-                    Đăng ký Mã Bảo Mật
-                  </button>
-                </div>
-              </div>
-              <div class="wh-card wh-danger-zone">
-                <h4 class="wh-section">Ngừng Sử Dụng Tài Khoản</h4>
-                <div class="wh-row" style="gap: 10px">
-                  <button class="wh-btn wh-danger">
-                    Vô Hiệu Hóa Tài Khoản
-                  </button>
-                  <button class="wh-btn wh-outline">Xóa Tài Khoản</button>
-                </div>
-              </div>
-            </div>
-            <div class="wh-panel" data-tab="status">
-              <div class="wh-card">
-                <div class="wh-row wh-between">
-                  <div>
-                    <div class="wh-t">Trạng thái tài khoản</div>
-                    <div class="wh-sub">Tài khoản hoạt động bình thường.</div>
-                  </div>
-                  <span class="wh-pill-ok">Đang hoạt động</span>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-      </div>
-      <!-- ========== /WORKHUB SETTINGS OVERLAY ========== -->
-    </div>
-
-    <script>
-      // ===== CONFIG =====
-      const USE_FETCH = true;
-      const API = {
-        createGroup: "/groups",
-        updateProfile: "/api/profile/update",
-      };
-
-      // Xem trước hình (background/avatar)
-      function previewImage(evt, targetId) {
-        const file = evt.target.files?.[0];
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        const img = document.getElementById(targetId);
-        if (img) {
-          img.src = url;
-        }
-      }
-
-      // Create-group UI removed. The sidebar button opens addmembers.html in a new tab.
-
-      // ===== Theme =====
-      const THEME_KEY = "workhub-theme";
-      const themeBtn = document.getElementById("btnTheme");
-      const themeIcon = document.getElementById("themeIcon");
-
-      function getPreferredTheme() {
-        const saved = localStorage.getItem(THEME_KEY);
-        if (saved === "light" || saved === "dark") return saved;
-        return window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
-      }
-      function applyTheme(t) {
-        document.documentElement.setAttribute("data-theme", t);
-        themeBtn.title =
-          t === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối";
-        themeBtn.setAttribute("aria-pressed", t === "dark");
-        themeIcon.innerHTML =
-          t === "dark"
-            ? `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2"/>`
-            : `<circle cx="12" cy="12" r="5" stroke-width="2"/> 
+          function getPreferredTheme() {
+            const saved = localStorage.getItem(THEME_KEY);
+            if (saved === "light" || saved === "dark") return saved;
+            return window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+          }
+          function applyTheme(t) {
+            document.documentElement.setAttribute("data-theme", t);
+            themeBtn.title =
+              t === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối";
+            themeBtn.setAttribute("aria-pressed", t === "dark");
+            themeIcon.innerHTML =
+              t === "dark"
+                ? `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2"/>`
+                : `<circle cx="12" cy="12" r="5" stroke-width="2"/> 
                  <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/>`;
-      }
-      function toggleTheme() {
-        const current =
-          document.documentElement.getAttribute("data-theme") || "light";
-        const next = current === "dark" ? "light" : "dark";
-        localStorage.setItem(THEME_KEY, next);
-        applyTheme(next);
-      }
-      applyTheme(getPreferredTheme());
-      themeBtn.addEventListener("click", toggleTheme);
+          }
+          function toggleTheme() {
+            const current =
+              document.documentElement.getAttribute("data-theme") || "light";
+            const next = current === "dark" ? "light" : "dark";
+            localStorage.setItem(THEME_KEY, next);
+            applyTheme(next);
+          }
+          applyTheme(getPreferredTheme());
+          themeBtn.addEventListener("click", toggleTheme);
 
-      // Tabs (toolbar)
-      document.querySelectorAll(".tab-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".tab-btn")
-            .forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-        });
-      });
+          // Tabs (toolbar)
+          document.querySelectorAll(".tab-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              document
+                .querySelectorAll(".tab-btn")
+                .forEach((b) => b.classList.remove("active"));
+              btn.classList.add("active");
+            });
+          });
 
-      // Right panels
-      const notifPanel = document.getElementById("notifPanel");
-      const notifPanelContent = document.getElementById("notifPanelContent");
-      const calendarPanel = document.getElementById("calendarPanel");
-      const calendarPanelContent = document.getElementById(
-        "calendarPanelContent"
-      );
-      const closeNotifPanel = document.getElementById("closeNotifPanel");
-      const closeCalendarPanel =
-        document.getElementById("closeCalendarPanel");
-      const btnNotif = document.getElementById("btnNotif");
-      const btnCalendar = document.getElementById("btnCalendar");
+          // Right panels
+          const notifPanel = document.getElementById("notifPanel");
+          const notifPanelContent = document.getElementById("notifPanelContent");
+          const calendarPanel = document.getElementById("calendarPanel");
+          const calendarPanelContent = document.getElementById(
+            "calendarPanelContent"
+          );
+          const closeNotifPanel = document.getElementById("closeNotifPanel");
+          const closeCalendarPanel =
+            document.getElementById("closeCalendarPanel");
+          const btnNotif = document.getElementById("btnNotif");
+          const btnCalendar = document.getElementById("btnCalendar");
 
-      let panelOrder = [];
-      function showPanel(panel) {
-        if (panelOrder.includes(panel)) {
-          closePanel(panel);
-          return;
-        }
-        panelOrder = [panel, ...panelOrder];
-        if (panelOrder.length > 2) panelOrder = panelOrder.slice(0, 2);
+          let panelOrder = [];
+          function showPanel(panel) {
+            if (panelOrder.includes(panel)) {
+              closePanel(panel);
+              return;
+            }
+            panelOrder = [panel, ...panelOrder];
+            if (panelOrder.length > 2) panelOrder = panelOrder.slice(0, 2);
 
-        notifPanel.classList.remove("top", "bottom", "show");
-        calendarPanel.classList.remove("top", "bottom", "show");
+            notifPanel.classList.remove("top", "bottom", "show");
+            calendarPanel.classList.remove("top", "bottom", "show");
 
-        function renderNotif() {
-          notifPanelContent.innerHTML = `
+            function renderNotif() {
+              notifPanelContent.innerHTML = `
             <div class="notif-list">
               <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
               <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
@@ -1033,9 +1012,9 @@
               <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
             </div>
           `;
-        }
-        function renderCalendar() {
-          calendarPanelContent.innerHTML = `
+            }
+            function renderCalendar() {
+              calendarPanelContent.innerHTML = `
             <div class="calendar-card" id="calendarCard">
               <div class="calendar-head">
                 <div>
@@ -1050,252 +1029,186 @@
               <div class="calendar-grid" id="calGrid"></div>
             </div>
           `;
-          setTimeout(initCalendar, 0);
-        }
-
-        if (panelOrder.length === 1) {
-          if (panelOrder[0] === "notif") {
-            notifPanel.classList.add("show", "top");
-            renderNotif();
-          } else {
-            calendarPanel.classList.add("show", "top");
-            renderCalendar();
-          }
-        } else {
-          if (panelOrder[0] === "notif" && panelOrder[1] === "calendar") {
-            notifPanel.classList.add("show", "top");
-            calendarPanel.classList.add("show", "bottom");
-            renderNotif();
-          } else {
-            calendarPanel.classList.add("show", "top");
-            notifPanel.classList.add("show", "bottom");
-            renderCalendar();
-          }
-        }
-      }
-      function closePanel(panel) {
-        panelOrder = panelOrder.filter((p) => p !== panel);
-        notifPanel.classList.remove("top", "bottom", "show");
-        calendarPanel.classList.remove("top", "bottom", "show");
-        if (panelOrder.length === 1) {
-          if (panelOrder[0] === "notif") {
-            notifPanel.classList.add("show", "top");
-          } else {
-            calendarPanel.classList.add("show", "top");
-          }
-        }
-      }
-      btnNotif.onclick = () => showPanel("notif");
-      btnCalendar.onclick = () => showPanel("calendar");
-      closeNotifPanel &&
-        (closeNotifPanel.onclick = () => closePanel("notif"));
-      closeCalendarPanel &&
-        (closeCalendarPanel.onclick = () => closePanel("calendar"));
-      document.addEventListener("mousedown", (e) => {
-        if (
-          notifPanel.classList.contains("show") &&
-          !notifPanel.contains(e.target) &&
-          !btnNotif.contains(e.target)
-        )
-          closePanel("notif");
-        if (
-          calendarPanel.classList.contains("show") &&
-          !calendarPanel.contains(e.target) &&
-          !btnCalendar.contains(e.target)
-        )
-          closePanel("calendar");
-      });
-
-      function initCalendar() {
-        const calGrid = document.getElementById("calGrid");
-        const titleDay = document.getElementById("titleDay");
-        const subMonth = document.getElementById("subMonth");
-        const prevMth = document.getElementById("prevMth");
-        const nextMth = document.getElementById("nextMth");
-
-        let view = new Date();
-        function headText(d) {
-          return new Intl.DateTimeFormat("vi-VN", {
-            weekday: "short",
-            month: "short",
-            day: "2-digit",
-          }).format(d);
-        }
-        function buildCalendar(date) {
-          const y = date.getFullYear(),
-            m = date.getMonth();
-          titleDay.textContent = headText(new Date());
-          subMonth.textContent = new Intl.DateTimeFormat("vi-VN", {
-            month: "long",
-            year: "numeric",
-          })
-            .format(new Date(y, m, 1))
-            .toUpperCase();
-          const first = new Date(y, m, 1);
-          const start = (first.getDay() + 6) % 7; // Monday first
-          const days = new Date(y, m + 1, 0).getDate();
-          const prevDays = new Date(y, m, 0).getDate();
-          const parts = [];
-          ["T2", "T3", "T4", "T5", "T6", "T7", "CN"].forEach((d) =>
-            parts.push(`<div class="dow">${d}</div>`)
-          );
-          for (let i = 0; i < 42; i++) {
-            let label,
-              cls = "cell";
-            if (i < start) {
-              label = prevDays - start + i + 1;
-              cls += " faded";
-            } else if (i < start + days) {
-              label = i - start + 1;
-            } else {
-              label = i - (start + days) + 1;
-              cls += " faded";
+              setTimeout(initCalendar, 0);
             }
-            const today = new Date();
+
+            if (panelOrder.length === 1) {
+              if (panelOrder[0] === "notif") {
+                notifPanel.classList.add("show", "top");
+                renderNotif();
+              } else {
+                calendarPanel.classList.add("show", "top");
+                renderCalendar();
+              }
+            } else {
+              if (panelOrder[0] === "notif" && panelOrder[1] === "calendar") {
+                notifPanel.classList.add("show", "top");
+                calendarPanel.classList.add("show", "bottom");
+                renderNotif();
+              } else {
+                calendarPanel.classList.add("show", "top");
+                notifPanel.classList.add("show", "bottom");
+                renderCalendar();
+              }
+            }
+          }
+          function closePanel(panel) {
+            panelOrder = panelOrder.filter((p) => p !== panel);
+            notifPanel.classList.remove("top", "bottom", "show");
+            calendarPanel.classList.remove("top", "bottom", "show");
+            if (panelOrder.length === 1) {
+              if (panelOrder[0] === "notif") {
+                notifPanel.classList.add("show", "top");
+              } else {
+                calendarPanel.classList.add("show", "top");
+              }
+            }
+          }
+          btnNotif.onclick = () => showPanel("notif");
+          btnCalendar.onclick = () => showPanel("calendar");
+          closeNotifPanel &&
+            (closeNotifPanel.onclick = () => closePanel("notif"));
+          closeCalendarPanel &&
+            (closeCalendarPanel.onclick = () => closePanel("calendar"));
+          document.addEventListener("mousedown", (e) => {
             if (
-              y === today.getFullYear() &&
-              m === today.getMonth() &&
-              label === today.getDate() &&
-              !cls.includes("faded")
+              notifPanel.classList.contains("show") &&
+              !notifPanel.contains(e.target) &&
+              !btnNotif.contains(e.target)
             )
-              cls += " today";
-            parts.push(`<div class="${cls}">${label}</div>`);
+              closePanel("notif");
+            if (
+              calendarPanel.classList.contains("show") &&
+              !calendarPanel.contains(e.target) &&
+              !btnCalendar.contains(e.target)
+            )
+              closePanel("calendar");
+          });
+
+          function initCalendar() {
+            const calGrid = document.getElementById("calGrid");
+            const titleDay = document.getElementById("titleDay");
+            const subMonth = document.getElementById("subMonth");
+            const prevMth = document.getElementById("prevMth");
+            const nextMth = document.getElementById("nextMth");
+
+            let view = new Date();
+            function headText(d) {
+              return new Intl.DateTimeFormat("vi-VN", {
+                weekday: "short",
+                month: "short",
+                day: "2-digit",
+              }).format(d);
+            }
+            function buildCalendar(date) {
+              const y = date.getFullYear(),
+                m = date.getMonth();
+              titleDay.textContent = headText(new Date());
+              subMonth.textContent = new Intl.DateTimeFormat("vi-VN", {
+                month: "long",
+                year: "numeric",
+              })
+                .format(new Date(y, m, 1))
+                .toUpperCase();
+              const first = new Date(y, m, 1);
+              const start = (first.getDay() + 6) % 7; // Monday first
+              const days = new Date(y, m + 1, 0).getDate();
+              const prevDays = new Date(y, m, 0).getDate();
+              const parts = [];
+              ["T2", "T3", "T4", "T5", "T6", "T7", "CN"].forEach((d) =>
+                parts.push(`<div class="dow">${d}</div>`)
+              );
+              for (let i = 0; i < 42; i++) {
+                let label,
+                  cls = "cell";
+                if (i < start) {
+                  label = prevDays - start + i + 1;
+                  cls += " faded";
+                } else if (i < start + days) {
+                  label = i - start + 1;
+                } else {
+                  label = i - (start + days) + 1;
+                  cls += " faded";
+                }
+                const today = new Date();
+                if (
+                  y === today.getFullYear() &&
+                  m === today.getMonth() &&
+                  label === today.getDate() &&
+                  !cls.includes("faded")
+                )
+                  cls += " today";
+                parts.push(`<div class="${cls}">${label}</div>`);
+              }
+              calGrid.innerHTML = parts.join("");
+            }
+            prevMth.addEventListener("click", () => {
+              view.setMonth(view.getMonth() - 1);
+              buildCalendar(view);
+            });
+            nextMth.addEventListener("click", () => {
+              view.setMonth(view.getMonth() + 1);
+              buildCalendar(view);
+            });
+            buildCalendar(view);
           }
-          calGrid.innerHTML = parts.join("");
-        }
-        prevMth.addEventListener("click", () => {
-          view.setMonth(view.getMonth() - 1);
-          buildCalendar(view);
-        });
-        nextMth.addEventListener("click", () => {
-          view.setMonth(view.getMonth() + 1);
-          buildCalendar(view);
-        });
-        buildCalendar(view);
-      }
 
-      // ===== Account menu & profile popup =====
-      const openProfile = document.getElementById("openProfile");
-      const userMenu = document.getElementById("userMenu");
-      openProfile.addEventListener("click", function (e) {
-        e.stopPropagation();
-        userMenu.style.display =
-          userMenu.style.display === "block" ? "none" : "block";
-      });
-      document.addEventListener("mousedown", function (e) {
-        if (!openProfile.contains(e.target)) {
-          userMenu.style.display = "none";
-        }
-      });
-      document.getElementById("Profile").onclick = function () {
-        document.getElementById("popupProfile").style.display = "flex";
-        document
-          .getElementById("popupProfile")
-          .setAttribute("aria-hidden", "false");
-        userMenu.style.display = "none";
-      };
+          //Đăng xuất với hộp thoại xác nhận
+          const logoutBtn = document.getElementById("Logout");
+          const logoutConfirm = document.getElementById("popupLogout");
+          const logoutConfirmYes = document.getElementById("logoutConfirmYes");
+          const logoutConfirmNo = document.getElementById("logoutConfirmNo");
 
-      // ===== WORKHUB SETTINGS (mở/đóng) =====
-      const whOverlay = document.getElementById("whSettings");
-      const whBtnOpen = document.getElementById("OpenSettings");
-      const whBtnClose = document.getElementById("whClose");
+          logoutBtn && logoutBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (logoutConfirm) {
+              logoutConfirm.classList.add("active");
+              logoutConfirm.setAttribute("aria-hidden", "false");
+            } else {
+              // chuyển hướng
+              window.location.href = "/auth/logout";
+            }
+            // ẩn user menu
+            if (userMenu) userMenu.style.display = "none";
+          });
 
-      if (whBtnOpen) {
-        whBtnOpen.addEventListener("click", () => {
-          whOverlay.style.display = "block";
-          if (userMenu) userMenu.style.display = "none";
-        });
-      }
-      if (whBtnClose) {
-        whBtnClose.addEventListener("click", () => {
-          whOverlay.style.display = "none";
-        });
-      }
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && whOverlay.style.display === "block") {
-          whOverlay.style.display = "none";
-        }
-      });
+          // confirm
+          logoutConfirmYes && logoutConfirmYes.addEventListener("click", () => {
+            window.location.href = "/auth/logout";
+          });
+          logoutConfirmNo && logoutConfirmNo.addEventListener("click", () => {
+            if (logoutConfirm) {
+              logoutConfirm.classList.remove("active");
+              logoutConfirm.setAttribute("aria-hidden", "true");
+            }
+          });
+          const closeLogoutBtn = document.getElementById("closeLogoutBtn");
+          closeLogoutBtn && closeLogoutBtn.addEventListener("click", () => {
+            if (logoutConfirm) {
+              logoutConfirm.classList.remove("active");
+              logoutConfirm.setAttribute("aria-hidden", "true");
+            }
+          });
 
-      // Tabs trong trang cài đặt
-      document.querySelectorAll(".wh-tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-          document
-            .querySelectorAll(".wh-tab")
-            .forEach((t) => t.classList.remove("wh-active"));
-          document
-            .querySelectorAll(".wh-panel")
-            .forEach((p) => p.classList.remove("wh-show"));
-          tab.classList.add("wh-active");
-          document
-            .querySelector(`.wh-panel[data-tab="${tab.dataset.tab}"]`)
-            ?.classList.add("wh-show");
-        });
-      });
-
-      // Sidebar highlight
-      document.querySelectorAll(".wh-nav-item").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".wh-nav-item")
-            .forEach((b) => b.classList.remove("wh-active"));
-          btn.classList.add("wh-active");
-        });
-      });
-      //Đăng xuất với hộp thoại xác nhận
-      const logoutBtn = document.getElementById("Logout");
-      const logoutConfirm = document.getElementById("popupLogout");
-      const logoutConfirmYes = document.getElementById("logoutConfirmYes");
-      const logoutConfirmNo = document.getElementById("logoutConfirmNo");
-
-      logoutBtn && logoutBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (logoutConfirm) {
-          logoutConfirm.classList.add("active");
-          logoutConfirm.setAttribute("aria-hidden", "false");
-        } else {
-          // chuyển hướng
-          window.location.href = "/auth/logout";
-        }
-        // ẩn user menu
-        if (userMenu) userMenu.style.display = "none";
-      });
-
-      // confirm
-      logoutConfirmYes && logoutConfirmYes.addEventListener("click", () => {
-        window.location.href = "/auth/logout";
-      });
-      logoutConfirmNo && logoutConfirmNo.addEventListener("click", () => {
-        if (logoutConfirm) {
-          logoutConfirm.classList.remove("active");
-          logoutConfirm.setAttribute("aria-hidden", "true");
-        }
-      });
-      const closeLogoutBtn = document.getElementById("closeLogoutBtn");
-      closeLogoutBtn && closeLogoutBtn.addEventListener("click", () => {
-        if (logoutConfirm) {
-          logoutConfirm.classList.remove("active");
-          logoutConfirm.setAttribute("aria-hidden", "true");
-        }
-      });
-
-      // Nhấn X hoặc click ra ngoài để thoát
-      if (logoutConfirm) {
-        logoutConfirm.addEventListener("click", (e) => {
-          if (e.target === logoutConfirm) {
-            logoutConfirm.classList.remove("active");
-            logoutConfirm.setAttribute("aria-hidden", "true");
+          // Nhấn X hoặc click ra ngoài để thoát
+          if (logoutConfirm) {
+            logoutConfirm.addEventListener("click", (e) => {
+              if (e.target === logoutConfirm) {
+                logoutConfirm.classList.remove("active");
+                logoutConfirm.setAttribute("aria-hidden", "true");
+              }
+            });
+            document.addEventListener("keydown", (e) => {
+              if (e.key === "Escape" && logoutConfirm.classList.contains("active")) {
+                logoutConfirm.classList.remove("active");
+                logoutConfirm.setAttribute("aria-hidden", "true");
+              }
+            });
           }
-        });
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape" && logoutConfirm.classList.contains("active")) {
-            logoutConfirm.classList.remove("active");
-            logoutConfirm.setAttribute("aria-hidden", "true");
-          }
-        });
-      }
-    </script>
-  </div>
+
+
+        </script>
+      </div>
 </body>
 
 </html>

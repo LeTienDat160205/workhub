@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng nhập & Đăng ký - WorkHub</title>
 
-    <style>
-      body {
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập & Đăng ký - WorkHub</title>
+</head>
+
+<style>
+    body {
         background: linear-gradient(120deg, #e0e7ff 0%, #f4f6fb 100%);
         font-family: "Segoe UI", Arial, sans-serif;
         display: flex;
@@ -15,30 +17,30 @@
         height: 100vh;
         margin: 0;
         overflow: hidden;
-      }
+    }
 
-      .auth-container {
+    .auth-container {
         background: rgba(255, 255, 255, 0.98);
         padding: 48px 38px 38px 38px;
         border-radius: 28px;
         box-shadow: 0 12px 48px 0 rgba(49, 130, 206, 0.16),
-          0 2px 12px rgba(49, 130, 206, 0.09);
+            0 2px 12px rgba(49, 130, 206, 0.09);
         width: 420px;
         position: relative;
         z-index: 1;
         overflow: visible;
-      }
+    }
 
-      .logo-bar {
+    .logo-bar {
         display: flex;
         align-items: center;
         margin-bottom: 36px;
         gap: 18px;
         position: relative;
-      }
+    }
 
-      .logo-bar .logo {
-        background: linear-gradient(135deg, #2563eb 60%, #60a5fa 100%);
+    .logo-bar .logo {
+        background: linear-gradient(135deg, #4caf50 60%, #2e7d32 100%);
         border-radius: 50%;
         box-shadow: 0 4px 18px 0 #60a5fa33, 0 1.5px 8px #2563eb22;
         width: 68px;
@@ -47,15 +49,15 @@
         align-items: center;
         justify-content: center;
         position: relative;
-      }
+    }
 
-      .logo-bar .logo img {
+    .logo-bar .logo img {
         width: 40px;
         height: 40px;
         filter: drop-shadow(0 2px 6px #fff8);
-      }
+    }
 
-      .logo-bar .logo::after {
+    .logo-bar .logo::after {
         content: "";
         position: absolute;
         width: 84px;
@@ -67,55 +69,55 @@
         border: 2.5px dashed #60a5fa55;
         z-index: 0;
         animation: spin 7s linear infinite;
-      }
+    }
 
-      @keyframes spin {
+    @keyframes spin {
         100% {
-          transform: translate(-50%, -50%) rotate(360deg);
+            transform: translate(-50%, -50%) rotate(360deg);
         }
-      }
+    }
 
-      .logo-bar .site-name {
+    .logo-bar .site-name {
         font-size: 2.2rem;
         font-weight: bold;
-        color: #2563eb;
+        color: #4caf50;
         letter-spacing: 1.5px;
         text-shadow: 0 2px 12px #c7d2fe55, 0 1px 0 #fff;
         position: relative;
-      }
+    }
 
-      .logo-bar .site-name::after {
+    .logo-bar .site-name::after {
         content: "Quản lý nhóm hiệu quả";
         display: block;
         font-size: 1rem;
-        color: #818cf8;
+        color: #2e7d32;
         font-weight: 500;
         margin-top: 2px;
         letter-spacing: 0.5px;
         text-shadow: 0 1px 4px #c7d2fe33;
-      }
+    }
 
-      .auth-container h2 {
+    .auth-container h2 {
         text-align: center;
         margin-bottom: 26px;
         color: #2d3a4b;
         letter-spacing: 1px;
         font-size: 1.5rem;
         font-weight: 600;
-      }
+    }
 
-      .form-group {
+    .form-group {
         margin-bottom: 18px;
-      }
+    }
 
-      .form-group label {
+    .form-group label {
         display: block;
         margin-bottom: 7px;
         color: #4a5568;
         font-size: 15px;
-      }
+    }
 
-      .form-group input {
+    .form-group input {
         width: 100%;
         padding: 12px 14px;
         border: 1.5px solid #d1d5db;
@@ -125,28 +127,28 @@
         background: #f8fafc;
         transition: border-color 0.2s, box-shadow 0.2s;
         box-sizing: border-box;
-      }
+    }
 
-      .form-group input:focus {
-        border-color: #3182ce;
+    .form-group input:focus {
+        border-color: #4caf50;
         box-shadow: 0 0 0 2px #c3dafe;
-      }
+    }
 
-      .form-group input.invalid {
+    .form-group input.invalid {
         border-color: #ef4444;
         background: #fef2f2;
-      }
+    }
 
-      .form-group .error-msg {
+    .form-group .error-msg {
         color: #ef4444;
         font-size: 13px;
         margin-top: 3px;
-      }
+    }
 
-      .auth-btn {
+    .auth-btn {
         width: 100%;
         padding: 13px;
-        background: linear-gradient(90deg, #3182ce 60%, #2563eb 100%);
+        background: linear-gradient(90deg, #2e7d32 60%, #4caf50 100%);
         color: #fff;
         border: none;
         border-radius: 8px;
@@ -155,69 +157,70 @@
         cursor: pointer;
         box-shadow: 0 2px 8px rgba(49, 130, 206, 0.08);
         transition: background 0.2s, transform 0.1s;
-      }
+    }
 
-      .auth-btn:hover {
-        background: linear-gradient(90deg, #2563eb 60%, #3182ce 100%);
+    .auth-btn:hover {
+        background: linear-gradient(90deg, #4caf50 60%, #2e7d32 100%);
         transform: translateY(-2px) scale(1.01);
-      }
+    }
 
-      .auth-footer {
+    .auth-footer {
         text-align: center;
         margin-top: 22px;
         font-size: 14px;
         color: #6b7280;
-      }
+    }
 
-      .auth-footer a {
-        color: #3182ce;
+    .auth-footer a {
+        color: #4caf50;
         text-decoration: none;
         font-weight: 500;
         cursor: pointer;
-      }
+    }
 
-      .auth-footer a:hover {
+    .auth-footer a:hover {
         text-decoration: underline;
-      }
+    }
 
-      .forgot-link {
+    .forgot-link {
         display: block;
         text-align: right;
         margin-top: -14px;
         margin-bottom: 14px;
         font-size: 13px;
-      }
+    }
 
-      .forgot-link a {
-        color: #2563eb;
+    .forgot-link a {
+        color: #4caf50;
         text-decoration: none;
-      }
+    }
 
-      .forgot-link a:hover {
+    .forgot-link a:hover {
         text-decoration: underline;
-      }
+    }
 
-      .hidden {
+    .hidden {
         display: none;
-      }
+    }
 
-      @keyframes fadeInUp {
+    @keyframes fadeInUp {
         from {
-          opacity: 0;
-          transform: translateY(30px);
+            opacity: 0;
+            transform: translateY(30px);
         }
+
         to {
-          opacity: 1;
-          transform: translateY(0);
+            opacity: 1;
+            transform: translateY(0);
         }
-      }
+    }
 
-      .auth-container,
-      .logo-bar {
+    .auth-container,
+    .logo-bar {
         animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-      }
+    }
 
-      .auth-container::before {
+    .auth-container::before {
         content: "";
         position: absolute;
         left: -18px;
@@ -229,32 +232,33 @@
         opacity: 0.13;
         z-index: 0;
         filter: blur(1.5px);
-      }
+    }
 
-      .auth-container::after {
+    .auth-container::after {
         content: "";
         position: absolute;
         right: -22px;
         bottom: -22px;
         width: 80px;
         height: 80px;
-        background: linear-gradient(135deg, #60a5fa 60%, #34d399 100%);
+        background: linear-gradient(135deg, #2e7d32 60%, #34d399 100%);
         border-radius: 50%;
         opacity: 0.1;
         z-index: 0;
         filter: blur(2px);
-      }
+    }
 
-      /* ==== Nút con mắt đẹp, tròn, không nền ==== */
-      .input-wrap {
+    /* ==== Nút con mắt đẹp, tròn, không nền ==== */
+    .input-wrap {
         position: relative;
         width: 100%;
-      }
-      input.has-toggle {
-        padding-right: 44px;
-      }
+    }
 
-      .toggle-password {
+    input.has-toggle {
+        padding-right: 44px;
+    }
+
+    .toggle-password {
         position: absolute;
         right: 10px;
         top: 50%;
@@ -271,212 +275,150 @@
         border-radius: 50%;
         line-height: 0;
         transition: background 0.2s;
-      }
+    }
 
-      .toggle-password:hover {
+    .toggle-password:hover {
         background: #e5e7eb;
-      }
+    }
 
-      .toggle-password .icon {
+    .toggle-password .icon {
         width: 20px;
         height: 20px;
         opacity: 0.7;
         transition: opacity 0.15s, transform 0.15s;
-      }
+    }
 
-      .toggle-password:hover .icon {
+    .toggle-password:hover .icon {
         opacity: 1;
-      }
+    }
 
-      .toggle-password:active .icon {
+    .toggle-password:active .icon {
         transform: scale(0.96);
-      }
+    }
 
-      .eye-closed {
+    .eye-closed {
         display: none;
-      }
-      .toggle-password.is-showing .eye-open {
+    }
+
+    .toggle-password.is-showing .eye-open {
         display: none;
-      }
-      .toggle-password.is-showing .eye-closed {
+    }
+
+    .toggle-password.is-showing .eye-closed {
         display: block;
-      }
-    </style>
-  </head>
+    }
+</style>
 
-  <body>
+<body>
     <div class="auth-container">
-      <div class="logo-bar">
-        <span class="site-name">WorkHub</span>
-      </div>
-
-      <form method="POST" action="/auth/register" autocomplete="off">
-        <h2>Đăng ký</h2>
-
-        <div class="form-group">
-          <label for="register-name">Tên người dùng</label>
-          <input
-            type="text"
-            id="register-name"
-            name="name"
-            placeholder="Nhập tên người dùng"
-            value="<%= typeof formData !== 'undefined' ? formData.name || '' : '' %>"
-            required
-          />
+        <div class="logo-bar">
+            <!-- logo SVG -->
+            <span class="site-name">WorkHub</span>
         </div>
-
-        <div class="form-group">
-          <label for="register-username">Tên tài khoản</label>
-          <input
-            type="text"
-            id="register-username"
-            name="username"
-            placeholder="Nhập tên tài khoản"
-            value="<%= typeof formData !== 'undefined' ? formData.username || '' : '' %>"
-            required
-          />
-          <% if (error && error.includes("Username")) { %>
-          <p class="error-msg"><%= error %></p>
-          <% } %>
-        </div>
-
-        <div class="form-group">
-          <label for="register-email">Email</label>
-          <input
-            type="email"
-            id="register-email"
-            name="email"
-            placeholder="Nhập email"
-            value="<%= typeof formData !== 'undefined' ? formData.email || '' : '' %>"
-            required
-            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$"
-          />
-          <% if (error && error.includes("Email")) { %>
-          <p class="error-msg"><%= error %></p>
-          <% } %>
-        </div>
-
-        <div class="form-group">
-          <label for="register-password">Mật khẩu</label>
-          <div class="input-wrap">
-            <input
-              type="password"
-              id="register-password"
-              name="password"
-              placeholder="Nhập mật khẩu"
-              class="has-toggle"
-              required
-            />
-            <button
-              type="button"
-              class="toggle-password"
-              aria-label="Hiện mật khẩu"
-              aria-pressed="false"
-            >
-              <svg
-                class="icon eye-open"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              <svg
-                class="icon eye-closed"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-5.94M9.9 4.24A10.93 10.93 0 0 1 12 4c7 0 11 8 11 8a21.9 21.9 0 0 1-3.34 4.37"
-                />
-                <path d="M1 1l22 22" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="register-confirmPassword">Xác nhận mật khẩu</label>
-          <div class="input-wrap">
-            <input
-              type="password"
-              id="register-confirmPassword"
-              name="confirmPassword"
-              placeholder="Nhập lại mật khẩu"
-              class="has-toggle"
-              required
-            />
-            <button
-              type="button"
-              class="toggle-password"
-              aria-label="Hiện mật khẩu"
-              aria-pressed="false"
-            >
-              <svg
-                class="icon eye-open"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              <svg
-                class="icon eye-closed"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-5.94M9.9 4.24A10.93 10.93 0 0 1 12 4c7 0 11 8 11 8a21.9 21.9 0 0 1-3.34 4.37"
-                />
-                <path d="M1 1l22 22" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <button type="submit" class="auth-btn">Đăng ký</button>
-
-        <div class="auth-footer">
-          Đã có tài khoản? <a href="/auth/login">Đăng nhập</a>
-        </div>
-      </form>
+        <form method="POST" action="/auth/register" autocomplete="off">
+            <h2>Đăng ký</h2>
+            <div class="form-group">
+                <label for="register-name">Tên người dùng</label>
+                <input type="text" id="register-name" name="name" placeholder="Nhập tên người dùng"
+                    value="<%= typeof formData !== 'undefined' ? formData.name || '' : '' %>" required>
+            </div>
+            <div class="form-group">
+                <label for="register-username">Tên tài khoản</label>
+                <input type="username" id="register-username" name="username" placeholder="Nhập tên tài khoản"
+                    value="<%= typeof formData !== 'undefined' ? formData.username || '' : '' %>" required>
+                <% if (error && error.includes("Username")) { %>
+                    <p style="color: red;">
+                        <%= error %>
+                    </p>
+                    <% } %>
+            </div>
+            <div class="form-group">
+                <label for="register-email">Email</label>
+                <input type="email" id="register-email" name="email" placeholder="Nhập email"
+                    value="<%= typeof formData !== 'undefined' ? formData.email || '' : '' %>" required
+                    pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$">
+                <% if (error && error.includes("Email")) { %>
+                    <p style="color: red;">
+                        <%= error %>
+                    </p>
+                    <% } %>
+            </div>
+            <div class="form-group">
+                <label for="register-password">Mật khẩu</label>
+                <div class="input-wrap">
+                    <input type="password" id="register-password" name="password" placeholder="Nhập mật khẩu"
+                        class="has-toggle" required />
+                    <button type="button" class="toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false">
+                        <svg class="icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <svg class="icon eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-5.94M9.9 4.24A10.93 10.93 0 0 1 12 4c7 0 11 8 11 8a21.9 21.9 0 0 1-3.34 4.37" />
+                            <path d="M1 1l22 22" />
+                        </svg>
+                    </button>
+                </div>
+                <% if (error && error.includes("Mật khẩu phải")) { %>
+                    <p style="color: red;">
+                        <%= error %>
+                    </p>
+                    <% } %>
+            </div>
+            <div class="form-group">
+                <label for="register-confirmPassword">Xác nhận mật khẩu</label>
+                <div class="input-wrap">
+                    <input type="password" id="register-confirmPassword" name="confirmPassword"
+                        placeholder="Nhập lại mật khẩu" class="has-toggle" required />
+                    <button type="button" class="toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false">
+                        <svg class="icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <svg class="icon eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-5.94M9.9 4.24A10.93 10.93 0 0 1 12 4c7 0 11 8 11 8a21.9 21.9 0 0 1-3.34 4.37" />
+                            <path d="M1 1l22 22" />
+                        </svg>
+                    </button>
+                </div>
+                <% if (error && error.includes("Mật khẩu xác nhận")) { %>
+                    <p style="color: red;">
+                        <%= error %>
+                    </p>
+                    <% } %>
+            </div>
+            <button type="submit" class="auth-btn">Đăng ký</button>
+            <div class="auth-footer">
+                Đã có tài khoản? <a href="/auth/login">Đăng nhập</a>
+            </div>
+        </form>
     </div>
+</body>
 
-    <script>
-      // Toggle hiển thị/ẩn mật khẩu cho nhiều ô
-      document.querySelectorAll(".toggle-password").forEach((btn) => {
+<script>
+    // Toggle hiển thị/ẩn mật khẩu cho nhiều ô
+    document.querySelectorAll(".toggle-password").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const input = btn.parentElement.querySelector("input");
-          const showing = input.type === "password";
-          input.type = showing ? "text" : "password";
-          btn.classList.toggle("is-showing", showing);
-          btn.setAttribute("aria-pressed", showing ? "true" : "false");
-          btn.setAttribute(
-            "aria-label",
-            showing ? "Ẩn mật khẩu" : "Hiện mật khẩu"
-          );
-          input.focus({ preventScroll: true });
-          const val = input.value;
-          input.value = "";
-          input.value = val;
+            const input = btn.parentElement.querySelector("input");
+            const showing = input.type === "password";
+            input.type = showing ? "text" : "password";
+            btn.classList.toggle("is-showing", showing);
+            btn.setAttribute("aria-pressed", showing ? "true" : "false");
+            btn.setAttribute(
+                "aria-label",
+                showing ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+            );
+            input.focus({ preventScroll: true });
+            const val = input.value;
+            input.value = "";
+            input.value = val;
         });
-      });
-    </script>
-  </body>
+    });
+</script>
 </html>

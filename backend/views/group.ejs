@@ -348,6 +348,7 @@
                       `;
                       }).join('');
 
+
                       // Thêm sự kiện click sau khi render
                       document.querySelectorAll('.group-card').forEach(card => {
                         card.addEventListener('click', () => {
@@ -360,6 +361,20 @@
                     }
                   }
                   window.addEventListener('DOMContentLoaded', loadGroups);
+
+                  // card.addEventListener('click', () => {
+                  //   document.querySelectorAll('.group-card').forEach(c => c.classList.remove('active'));
+                  //   card.classList.add('active');
+                  //   window.location.href = `/groups/${groupId}`;
+                  // });
+
+                  document.querySelector('.sidebar-search input').addEventListener('input', e => {
+                    const keyword = e.target.value.toLowerCase();
+                    document.querySelectorAll('.group-card').forEach(card => {
+                      const name = card.querySelector('.group-title').textContent.toLowerCase();
+                      card.style.display = name.includes(keyword) ? '' : 'none';
+                    });
+                  });
 
                   // Xử lý submit tạo nhóm
                   const groupForm = document.getElementById('groupForm');
@@ -447,7 +462,7 @@
                           </div>
                         </form>
 
-                        <!-- javascript hiện cửa sổ thêm thàn viên -->
+                        <!-- javascript hiện cửa sổ thêm thành viên -->
                         <script>
                           const popupMember = document.getElementById('popupMember');
                           const addMemberBtnSmall = document.getElementById('addMemberBtnSmall');
@@ -759,7 +774,7 @@
             }
 
             // === Hàm tạo avatar ===
-            const colors = ["#f87171","#fb923c","#facc15","#4ade80","#60a5fa","#a78bfa","#f472b6",];
+            const colors = ["#f87171", "#fb923c", "#facc15", "#4ade80", "#60a5fa", "#a78bfa", "#f472b6",];
 
             const getAvatarHTML = (member) => {
               if (member.avatarPath && member.avatarPath.trim() !== "") {
@@ -1809,7 +1824,7 @@
 
           document.querySelector(".outputChat").appendChild(div);
         }
-        
+
         // ========== GỬI TIN NHẮN ==========
         sendBtn.addEventListener("click", sendMessage);
         input.addEventListener("keypress", (e) => {

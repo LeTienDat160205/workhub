@@ -5,6 +5,7 @@ select * from user
 select * from message
 drop database team_task_management
 
+
 -- Bảng user
 CREATE TABLE user (
     id BINARY(16) PRIMARY KEY,

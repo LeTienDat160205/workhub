@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng nhập & Đăng ký - WorkHub</title>
 
-    <style>
-      /* Giữ nền gốc của bạn */
-      body {
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập & Đăng ký - WorkHub</title>
+</head>
+
+<style>
+    /* Giữ nền gốc của bạn */
+    body {
         background: linear-gradient(120deg, #e0e7ff 0%, #f4f6fb 100%);
         font-family: "Segoe UI", Arial, sans-serif;
         display: flex;
@@ -16,86 +18,90 @@
         height: 100vh;
         margin: 0;
         overflow: hidden;
-      }
+    }
 
-      /* Ngăn tràn chiều rộng khi dùng width:100% */
-      *,
-      *::before,
-      *::after {
+    /* Ngăn tràn chiều rộng khi dùng width:100% */
+    *,
+    *::before,
+    *::after {
         box-sizing: border-box;
-      }
+    }
 
-      .auth-container {
+    .auth-container {
         background: rgba(255, 255, 255, 0.98);
         padding: 48px 38px 38px 38px;
         border-radius: 28px;
         box-shadow: 0 12px 48px 0 rgba(49, 130, 206, 0.16),
-          0 2px 12px rgba(49, 130, 206, 0.09);
+            0 2px 12px rgba(49, 130, 206, 0.09);
         width: 420px;
         position: relative;
         z-index: 1;
         overflow: visible;
         animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-      }
+    }
 
-      @keyframes fadeInUp {
+    @keyframes fadeInUp {
         from {
-          opacity: 0;
-          transform: translateY(30px);
+            opacity: 0;
+            transform: translateY(30px);
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
 
-      .logo-bar {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .logo-bar {
         display: flex;
         align-items: center;
         margin-bottom: 36px;
         gap: 18px;
         position: relative;
-      }
-      .logo-bar .site-name {
+    }
+
+    .logo-bar .site-name {
         font-size: 2.2rem;
         font-weight: bold;
-        color: #2563eb;
+        color: #4caf50;
         letter-spacing: 1.5px;
         text-shadow: 0 2px 12px #c7d2fe55, 0 1px 0 #fff;
         position: relative;
-      }
-      .logo-bar .site-name::after {
+    }
+
+    .logo-bar .site-name::after {
         content: "Quản lý nhóm hiệu quả";
         display: block;
         font-size: 1rem;
-        color: #818cf8;
+        color: #2e7d32;
         font-weight: 500;
         margin-top: 2px;
         letter-spacing: 0.5px;
         text-shadow: 0 1px 4px #c7d2fe33;
-      }
+    }
 
-      h2 {
+    h2 {
         text-align: center;
         margin-bottom: 26px;
         color: #2d3a4b;
         letter-spacing: 1px;
         font-size: 1.5rem;
         font-weight: 600;
-      }
+    }
 
-      .form-group {
+    .form-group {
         margin-bottom: 18px;
-      }
-      .form-group label {
+    }
+
+    .form-group label {
         display: block;
         margin-bottom: 7px;
         color: #4a5568;
         font-size: 15px;
-      }
+    }
 
-      /* Tất cả input cùng 1 kích thước, không vượt container */
-      .form-group input {
+    /* Tất cả input cùng 1 kích thước, không vượt container */
+    .form-group input {
         display: block;
         width: 100%;
         padding: 12px 14px;
@@ -105,25 +111,28 @@
         outline: none;
         background: #f8fafc;
         transition: border-color 0.2s, box-shadow 0.2s;
-      }
-      .form-group input:focus {
-        border-color: #3182ce;
-        box-shadow: 0 0 0 2px #c3dafe;
-      }
-      .form-group input.invalid {
+    }
+
+    .form-group input:focus {
+        border-color: #2e7d32;
+        box-shadow: 0 0 0 2px #c3feda;
+    }
+
+    .form-group input.invalid {
         border-color: #ef4444;
         background: #fef2f2;
-      }
-      .form-group .error-msg {
+    }
+
+    .form-group .error-msg {
         color: #ef4444;
         font-size: 13px;
         margin-top: 3px;
-      }
+    }
 
-      .auth-btn {
+    .auth-btn {
         width: 100%;
         padding: 13px;
-        background: linear-gradient(90deg, #3182ce 60%, #2563eb 100%);
+        background: linear-gradient(90deg, #2e7d32 60%, #4caf50 100%);
         color: #fff;
         border: none;
         border-radius: 8px;
@@ -132,13 +141,14 @@
         cursor: pointer;
         box-shadow: 0 2px 8px rgba(49, 130, 206, 0.08);
         transition: background 0.2s, transform 0.1s;
-      }
-      .auth-btn:hover {
-        background: linear-gradient(90deg, #2563eb 60%, #3182ce 100%);
-        transform: translateY(-2px) scale(1.01);
-      }
+    }
 
-      .google-btn {
+    .auth-btn:hover {
+        background: linear-gradient(90deg, #4caf50 60%, #2e7d32 100%);
+        transform: translateY(-2px) scale(1.01);
+    }
+
+    .google-btn {
         width: 100%;
         padding: 12px;
         background: #fff;
@@ -155,55 +165,65 @@
         margin: 16px 0 0 0;
         box-shadow: 0 1.5px 8px #c7d2fe22;
         transition: background 0.2s, border 0.2s;
-      }
-      .google-btn:hover {
+    }
+
+    .google-btn:hover {
         background: #f3f4f6;
-        border: 1.5px solid #2563eb;
-      }
-      .google-btn img {
+        border: 1.5px solid #4caf50;
+    }
+
+    .google-btn img {
         width: 22px;
         height: 22px;
-      }
+    }
 
-      .auth-footer {
+    .auth-footer {
         text-align: center;
         margin-top: 22px;
         font-size: 14px;
         color: #6b7280;
-      }
-      .auth-footer a {
-        color: #3182ce;
+    }
+
+    .auth-footer a {
+        color: #4caf50;
         text-decoration: none;
         font-weight: 500;
-      }
-      .auth-footer a:hover {
-        text-decoration: underline;
-      }
+    }
 
-      .forgot-link {
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .forgot-link {
         display: block;
         text-align: right;
         margin-top: -14px;
         margin-bottom: 14px;
         font-size: 13px;
-      }
-      .forgot-link a {
-        color: #2563eb;
-        text-decoration: none;
-      }
-      .forgot-link a:hover {
-        text-decoration: underline;
-      }
+    }
 
-      /* --------- Phần nút con mắt đẹp, không nền ---------- */
-      .input-wrap {
+    .forgot-link a {
+        color: #4caf50;
+        text-decoration: none;
+    }
+
+    .forgot-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* --------- Phần nút con mắt đẹp, không nền ---------- */
+    .input-wrap {
         position: relative;
         width: 100%;
-      } /* cùng bề rộng với input khác */
-      input.has-toggle {
+    }
+
+    /* cùng bề rộng với input khác */
+    input.has-toggle {
         padding-right: 44px;
-      } /* chừa chỗ cho icon */
-      .toggle-password {
+    }
+
+    /* chừa chỗ cho icon */
+    .toggle-password {
         position: absolute;
         right: 10px;
         top: 50%;
@@ -220,164 +240,128 @@
         color: #6b7280;
         line-height: 0;
         border-radius: 999px;
-      }
-      .toggle-password .icon {
+    }
+
+    .toggle-password .icon {
         width: 20px;
         height: 20px;
         opacity: 0.75;
         transition: opacity 0.15s, transform 0.15s;
-      }
-      .toggle-password:hover .icon {
+    }
+
+    .toggle-password:hover .icon {
         opacity: 1;
-      }
-      .toggle-password:active .icon {
+    }
+
+    .toggle-password:active .icon {
         transform: scale(0.96);
-      }
-      .toggle-password:focus-visible {
-        outline: 2px solid #2563eb;
+    }
+
+    .toggle-password:focus-visible {
+        outline: 2px solid #2e7d32;
         outline-offset: 2px;
-      }
+    }
 
-      /* Ẩn/hiện 2 trạng thái icon */
-      .eye-closed {
+    /* Ẩn/hiện 2 trạng thái icon */
+    .eye-closed {
         display: none;
-      }
-      .toggle-password.is-showing .eye-open {
+    }
+
+    .toggle-password.is-showing .eye-open {
         display: none;
-      }
-      .toggle-password.is-showing .eye-closed {
+    }
+
+    .toggle-password.is-showing .eye-closed {
         display: block;
-      }
+    }
+</style>
 
-      /* Xoá rule width cố định cũ nếu có */
-      /* .form-group input { width: 390px; }  -> BỎ */
-    </style>
-  </head>
-
-  <body>
+<body>
     <div class="auth-container">
-      <div class="logo-bar">
-        <span class="site-name">WorkHub</span>
-      </div>
-
-      <form method="POST" action="/auth/login" autocomplete="off">
-        <h2>Đăng nhập</h2>
-
-        <div class="form-group">
-          <label for="login-username">Tên tài khoản hoặc email</label>
-          <input
-            type="text"
-            id="login-username"
-            name="usernameOrEmail"
-            placeholder="Nhập tên tài khoản hoặc email"
-            value="<%= typeof formData !== 'undefined' ? formData.usernameOrEmail || '' : '' %>"
-            required
-          />
-          <% if (error && error.includes("Tài khoản")) { %>
-          <p class="error-msg"><%= error %></p>
-          <% } %>
+        <div class="logo-bar">
+            <!--logo SVG -->
+            <span class="site-name">WorkHub</span>
         </div>
-
-        <div class="form-group">
-          <label for="login-password">Mật khẩu</label>
-          <div class="input-wrap">
-            <input
-              type="password"
-              id="login-password"
-              name="password"
-              placeholder="Nhập mật khẩu"
-              class="has-toggle"
-              required
-            />
-            <!-- Nút mắt gọn, không nền -->
-            <button
-              type="button"
-              class="toggle-password"
-              aria-label="Hiện mật khẩu"
-              aria-pressed="false"
-            >
-              <!-- Eye open -->
-              <svg
-                class="icon eye-open"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              <!-- Eye closed -->
-              <svg
-                class="icon eye-closed"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-5.94M9.9 4.24A10.93 10.93 0 0 1 12 4c7 0 11 8 11 8a21.9 21.9 0 0 1-3.34 4.37"
-                />
-                <path d="M1 1l22 22" />
-              </svg>
+        <form method="POST" action="/auth/login" autocomplete="off">
+            <h2>Đăng nhập</h2>
+            <div class="form-group">
+                <label for="login-username">Tên tài khoản hoặc email</label>
+                <input type="username" id="login-username" name="usernameOrEmail"
+                    placeholder="Nhập tên tài khoản hoặc email"
+                    value="<%= typeof formData !== 'undefined' ? formData.usernameOrEmail || '' : '' %>" required>
+                <% if (error && error.includes("Tài khoản")) { %>
+                    <p style="color: red;">
+                        <%= error %>
+                    </p>
+                    <% } %>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Mật khẩu</label>
+                <div class="input-wrap">
+                    <input type="password" id="login-password" name="password" placeholder="Nhập mật khẩu"
+                        class="has-toggle" required />
+                    <!-- Nút mắt gọn, không nền -->
+                    <button type="button" class="toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false">
+                        <!-- Eye open -->
+                        <svg class="icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <!-- Eye closed -->
+                        <svg class="icon eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-5.94M9.9 4.24A10.93 10.93 0 0 1 12 4c7 0 11 8 11 8a21.9 21.9 0 0 1-3.34 4.37" />
+                            <path d="M1 1l22 22" />
+                        </svg>
+                    </button>
+                </div>
+                <% if (error && error.includes("mật khẩu")) { %>
+                    <p style="color: red;">
+                        <%= error %>
+                    </p>
+                    <% } %>
+            </div>
+            <div class="forgot-link">
+                <a href="/auth/forgot">Quên mật khẩu?</a>
+            </div>
+            <button type="submit" class="auth-btn">Đăng nhập</button>
+            <button type="button" class="google-btn"
+                onclick="alert('Chức năng đăng nhập bằng Google sẽ được tích hợp sau!')">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google">
+                Đăng nhập với Google
             </button>
-          </div>
-          <% if (error && error.includes("mật khẩu")) { %>
-          <p class="error-msg"><%= error %></p>
-          <% } %>
-        </div>
-
-        <div class="forgot-link">
-          <a href="/auth/forgot">Quên mật khẩu?</a>
-        </div>
-
-        <button type="submit" class="auth-btn">Đăng nhập</button>
-
-        <button
-          type="button"
-          class="google-btn"
-          onclick="alert('Chức năng đăng nhập bằng Google sẽ được tích hợp sau!')"
-        >
-          <img
-            src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-            alt="Google"
-          />
-          Đăng nhập với Google
-        </button>
-
-        <div class="auth-footer">
-          Chưa có tài khoản? <a href="/auth/register">Đăng ký</a>
-        </div>
-      </form>
+            <div class="auth-footer">
+                Chưa có tài khoản? <a href="/auth/register">Đăng ký</a>
+            </div>
+        </form>
     </div>
+</body>
 
-    <script>
-      // Toggle show/hide password + đổi icon + ARIA
-      (function () {
+<script>
+    // Toggle show/hide password + đổi icon + ARIA
+    (function () {
         const input = document.getElementById("login-password");
         const btn = document.querySelector(".toggle-password");
 
         btn.addEventListener("click", () => {
-          const showing = input.type === "password";
-          input.type = showing ? "text" : "password";
-          btn.classList.toggle("is-showing", showing);
-          btn.setAttribute("aria-pressed", showing ? "true" : "false");
-          btn.setAttribute(
-            "aria-label",
-            showing ? "Ẩn mật khẩu" : "Hiện mật khẩu"
-          );
+            const showing = input.type === "password";
+            input.type = showing ? "text" : "password";
+            btn.classList.toggle("is-showing", showing);
+            btn.setAttribute("aria-pressed", showing ? "true" : "false");
+            btn.setAttribute(
+                "aria-label",
+                showing ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+            );
 
-          // giữ con trỏ cuối text khi đổi type
-          input.focus({ preventScroll: true });
-          const v = input.value;
-          input.value = "";
-          input.value = v;
+            // giữ con trỏ cuối text khi đổi type
+            input.focus({ preventScroll: true });
+            const v = input.value;
+            input.value = "";
+            input.value = v;
         });
-      })();
-    </script>
-  </body>
+    })();
+</script>
+
 </html>

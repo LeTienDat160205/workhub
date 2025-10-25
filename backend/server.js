@@ -21,8 +21,8 @@ import { createSocket } from "./config/socket.js";
 
 // Setup
 const app = express();
-const server = http.createServer(app); 
-const io = createSocket(server);       // Tạo socket server
+//const server = http.createServer(app); 
+//const io = createSocket(server);       // Tạo socket server
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,9 +48,14 @@ app.use("/frontend", express.static(path.join(__dirname, "..", "frontend")));
 app.use("/auth", authRoutes);
 app.use("/info", infoRoutes);
 app.use("/groups", groupRoutes);
-app.use("/chats", chatRoutes);
+app.use("/chat", chatRoutes);
 
-// Khởi tạo logic chat realtime
+// Khởi tạo socket.io
+import { createServer } from "http";
+import { Server } from "socket.io";
+const server = createServer(app);
+const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
+// Tạo logic chat real time
 initChatSocket(io);
 
 // Trang mặc định: nếu chưa login thì hiện form đăng nhập

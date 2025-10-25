@@ -1773,7 +1773,7 @@
       document.addEventListener("DOMContentLoaded", () => {
         const socket = io(); // tự động kết nối đến backend
 
-        const chatId = "<%= group.chatId %>"; // cần backend truyền biến này khi render
+        const chatId = "<%= chatId %>";
         const userId = "<%= user.id %>";
         const username = "<%= user.name %>";
         const avatarPath = "<%= user.avatarPath || '/uploads/default-avatar.png' %>";
@@ -1788,36 +1788,50 @@
         // ========== LOAD TIN NHẮN CŨ ==========
         async function loadMessages() {
           try {
+            console.log("Fetching messages from:", `/chat/${chatId}/messages`);
             const res = await fetch(`/chat/${chatId}/messages`);
+            console.log("Response status:", res.status);
             if (!res.ok) throw new Error("Không thể tải tin nhắn");
             const messages = await res.json();
             outputChat.innerHTML = "";
             messages.forEach(renderMessage);
             outputChat.scrollTop = outputChat.scrollHeight;
           } catch (err) {
-            console.error(err);
+            console.error("Lỗi khi loadMessages:", err);
             outputChat.innerHTML = `<div style="color:red;padding:10px;">Lỗi tải tin nhắn.</div>`;
           }
         }
 
+
         // ========== HIỂN THỊ 1 TIN NHẮN ==========
+        // ========== HIỂN THỊ 1 TIN NHẮN ==========  
         function renderMessage(msg) {
           const mine = msg.senderId === "<%= user.id %>";
           const time = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
           const div = document.createElement("div");
-          div.classList.add("message", mine ? "mine" : "other");
+          div.classList.add("chat-row", mine ? "mine" : "other");
+
           div.innerHTML = `
-    ${!mine ? `<img class="avatar" src="${msg.avatarPath}" alt="">` : ""}
-    <div>
-      ${!mine ? `<div class="name">${msg.username}</div>` : ""}
-      <div class="bubble">${msg.content}</div>
-      <div class="time">${time}</div>
-    </div>
-    ${mine ? `<img class="avatar" src="${msg.avatarPath}" alt="">` : ""}
+    ${!mine ? `
+      <img class="avatar" src="${msg.avatarPath || '/uploads/default-avatar.png'}" alt="">
+      <div class="chat-content">
+        <div class="name">${msg.username || 'Người dùng'}</div>
+        <div class="bubble bubble-other">${msg.content}</div>
+        <div class="time">${time}</div>
+      </div>
+    ` : `
+      <div class="chat-content">
+        <div class="bubble bubble-mine">${msg.content}</div>
+        <div class="time">${time}</div>
+      </div>
+      <img class="avatar" src="${msg.avatarPath || '/uploads/default-avatar.png'}" alt="">
+    `}
   `;
+
           document.querySelector(".outputChat").appendChild(div);
         }
+
 
 
         // ========== GỬI TIN NHẮN ==========

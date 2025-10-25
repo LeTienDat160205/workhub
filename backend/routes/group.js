@@ -70,6 +70,7 @@ router.get("/:id", ensureAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.session.user.id;
+    const user = req.session.user;
 
     const sql = `
       SELECT 
@@ -92,7 +93,36 @@ router.get("/:id", ensureAuth, async (req, res) => {
     }
 
     const group = rows[0];
-    res.render("group", { user: req.session.user, group });
+
+    // Thêm code chat
+    // Kiểm tra xem nhóm đã có phòng chat chưa
+    const [chats] = await db.promise().query(
+      `SELECT BIN_TO_UUID(id) AS chatId FROM chat WHERE groupId = UUID_TO_BIN(?) LIMIT 1`,
+      [id]
+    );
+
+    let chatId;
+    if (chats.length > 0) {
+      chatId = chats[0].chatId;
+    } else {
+      // Nếu chưa có thì tạo mới phòng chat group
+      chatId = randomUUID({ version: "v7" });
+      await db.promise().query(
+        `INSERT INTO chat (id, chatType, name, groupId, createdBy)
+         VALUES (UUID_TO_BIN(?), 'group', ?, UUID_TO_BIN(?), UUID_TO_BIN(?))`,
+        [chatId, group.groupName, id, userId]
+      );
+
+      // Thêm người tạo vào chat_member
+      await db.promise().query(
+        `INSERT INTO chat_member (chatId, userId, role)
+         VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), 'owner')`,
+        [chatId, userId]
+      );
+    }
+
+
+    res.render("group", { user, group, chatId });
   } catch (err) {
     console.error("GET /groups/:id error:", err);
     res.status(500).send("Lỗi server.");

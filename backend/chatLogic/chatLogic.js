@@ -1,56 +1,77 @@
+// backend/chatLogic/chatLogic.js
 import db from "../config/db.js";
 import { randomUUID } from "crypto";
 
 /**
- * Khởi tạo logic chat realtime
- * @param {Server} io - socket.io instance
+ * Khởi tạo logic chat realtime (socket.io)
+ * @param {Server} io
  */
 export function initChatSocket(io) {
   io.on("connection", (socket) => {
-    console.log("Người dùng đã kết nối:", socket.id);
+    console.log("🟢 Socket connected:", socket.id);
 
     // Khi user join 1 phòng chat
     socket.on("joinChat", (chatId) => {
+      if (!chatId) return;
       socket.join(chatId);
-      console.log(`User ${socket.id} đã vào phòng ${chatId}`);
+      console.log(`→ ${socket.id} joined room ${chatId}`);
     });
 
     // Khi user gửi tin nhắn
-    socket.on("sendMessage", async ({ chatId, senderId, content, messageType = "text" }) => {
+    socket.on("sendMessage", async (payload) => {
       try {
-        const { chatId, senderId, content, messageType = "text" } = data;
+        // debug: in ra payload để kiểm tra client gửi đúng không
+        console.log("recv sendMessage payload:", payload);
 
-        if (!senderId || !content) {
-          console.warn("⚠️ Thiếu senderId hoặc content trong dữ liệu gửi:", data);
+        // payload phải là object: { chatId, senderId, content, messageType?, fileUrl?, replyTo? }
+        if (!payload || typeof payload !== "object") {
+          return socket.emit("errorMessage", { error: "Dữ liệu gửi không hợp lệ." });
+        }
+
+        // Lấy các trường (không dùng 'data' biến lạ)
+        const { chatId, senderId, content, messageType = "text", fileUrl = null, replyTo = null } = payload;
+
+        if (!chatId || !senderId || !content) {
+          console.warn("⚠️ Thiếu senderId/chatId/content:", payload);
           return socket.emit("errorMessage", { error: "Thiếu thông tin người gửi hoặc nội dung." });
         }
 
         const messageId = randomUUID({ version: "v7" });
 
+        // Lưu tin nhắn vào bảng `message`
         await db.promise().query(
-          `INSERT INTO message (id, chatId, senderId, content, messageType)
-           VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?)`,
-          [messageId, chatId, senderId, content, messageType]
+          `INSERT INTO message (id, chatId, senderId, content, messageType, fileUrl, replyTo)
+           VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, UUID_TO_BIN(?))`,
+          [messageId, chatId, senderId, content, messageType, fileUrl, replyTo]
         );
 
-        // Lấy lại thông tin người gửi để hiển thị
-        const [senderInfo] = await db.promise().query(
-          `SELECT username, avatarPath FROM user WHERE id = UUID_TO_BIN(?)`,
+        // Cập nhật lastMessage/lastMessageTime (nếu muốn)
+        await db.promise().query(
+          `UPDATE chat SET lastMessage = ?, lastMessageTime = NOW() WHERE id = UUID_TO_BIN(?)`,
+          [content, chatId]
+        );
+
+        // Lấy thông tin người gửi để trả về client
+        const [senderRows] = await db.promise().query(
+          `SELECT name, username, avatarPath FROM user WHERE id = UUID_TO_BIN(?)`,
           [senderId]
         );
 
+        const sender = senderRows[0] || {};
         const message = {
           id: messageId,
           chatId,
           senderId,
-          username: senderInfo[0]?.username || "Unknown",
-          avatarPath: senderInfo[0]?.avatarPath || "/uploads/default-avatar.png",
+          username: sender.name || sender.username || "Unknown",
+          avatarPath: sender.avatarPath || "/uploads/default-avatar.png",
           content,
           messageType,
+          fileUrl,
+          replyTo,
           createdAt: new Date().toISOString()
         };
 
-        // Gửi message đến tất cả user trong phòng
+        // Gửi tin nhắn realtime tới tất cả thành viên phòng
         io.to(chatId).emit("newMessage", message);
       } catch (err) {
         console.error("Lỗi gửi tin nhắn:", err);
@@ -58,19 +79,40 @@ export function initChatSocket(io) {
       }
     });
 
-    // Hiển thị trạng thái đang nhập
-    socket.on("typing", (chatId) => {
-      socket.to(chatId).emit("đang nhập", { chatId });
+    // Thả cảm xúc
+    socket.on("reactMessage", async ({ messageId, userId, emoji }) => {
+      try {
+        await db.promise().query(
+          `REPLACE INTO message_reaction (messageId, userId, emoji, reactedAt)
+           VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, NOW())`,
+          [messageId, userId, emoji]
+        );
+        io.emit("messageReacted", { messageId, userId, emoji });
+      } catch (err) {
+        console.error("Lỗi reactMessage:", err);
+      }
     });
 
-    // Khi rời phòng
+    // Đánh dấu đã đọc
+    socket.on("markAsRead", async ({ messageId, userId }) => {
+      try {
+        await db.promise().query(
+          `INSERT IGNORE INTO message_read (messageId, userId, readAt)
+           VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), NOW())`,
+          [messageId, userId]
+        );
+      } catch (err) {
+        console.error("Lỗi markAsRead:", err);
+      }
+    });
+
     socket.on("leaveChat", (chatId) => {
-      socket.leave(chatId);
-      console.log(`Người dùng đã rời khỏi phòng: ${chatId}`);
+      if (chatId) socket.leave(chatId);
+      console.log(`${socket.id} left room ${chatId}`);
     });
 
     socket.on("disconnect", () => {
-      console.log("Người dùng mất kết nối:", socket.id);
+      console.log("🔴 Socket disconnected:", socket.id);
     });
   });
 }

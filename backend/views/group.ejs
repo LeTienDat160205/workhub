@@ -545,25 +545,16 @@
                 </div>
               </div>
             </div>
-            <!-- khungg chat mess -->
-            <div id="chatMessages" class="chat-messages">
+            <!-- khu vucj chat -->
+            <div class="outputChat">
 
             </div>
 
-            <!-- input row -->
-            <div class="chat-input-row">
-              <label for="fileInputCenter" class="attach-circle" title="Đính kèm" style="margin-right:8px">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 01-7.78 0 5.5 5.5 0 010-7.78l8.49-8.49a3.5 3.5 0 014.95 4.95l-8.49 8.49a1.5 1.5 0 01-2.12-2.12l7.07-7.07"
-                    fill="currentColor" />
-                </svg>
-              </label>
-              <input id="fileInputCenter" type="file" style="display:none" />
-              <input id="chatInputCenter" placeholder="Nhập tin nhắn..."
-                style="padding:10px 14px;border-radius:20px;border:1px solid var(--border-color);width:calc(100% - 150px);margin-right:8px;vertical-align:middle" />
-              <button id="sendBtnCenter"
-                style="background:var(--primary);color:var(--on-primary);border:none;padding:10px 16px;border-radius:12px;cursor:pointer">Gửi</button>
+            <div class="inputChat">
+              <label for="fileInput" class="sendFile">Chọn file</label>
+              <input type="file" id="fileInput" style="display:none" />
+              <input type="text" id="messageInput" placeholder=". . .">
+              <button class="sendMessage">Gửi</button>
             </div>
           </div>
         </div>
@@ -1776,87 +1767,95 @@
       }
     </script>
 
-    <!-- javascript chat -->
+    <!-- Socket.io client -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      const socket = io(); // Kết nối socket.io server
-      const chatMessages = document.getElementById("chatMessages");
-      const input = document.getElementById("chatInputCenter");
-      const sendBtn = document.getElementById("sendBtnCenter");
-      //const groupId = "<%= group.id %>";
+      document.addEventListener("DOMContentLoaded", () => {
+        const socket = io(); // tự động kết nối đến backend
 
-      // Khi vào nhóm → join phòng chat
-      socket.emit("joinChat", groupId);
+        const chatId = "<%= group.chatId %>"; // cần backend truyền biến này khi render
+        const userId = "<%= user.id %>";
+        const username = "<%= user.name %>";
+        const avatarPath = "<%= user.avatarPath || '/uploads/default-avatar.png' %>";
 
-      // Load tin nhắn cũ
-      async function loadMessages() {
-        try {
-          const res = await fetch(`/chats/${groupId}/messages`);
-          const messages = await res.json();
-          chatMessages.innerHTML = messages
-            .map(m => `
-          <div class="msg-bubble">
-            <div class="msg-header">
-              <img src="${m.avatarPath || '/uploads/default-avatar.png'}" class="msg-avatar">
-              <span class="msg-name">${m.name || m.username}</span>
-              <span class="msg-time">${new Date(m.createdAt).toLocaleTimeString()}</span>
-            </div>
-            <div class="msg-content">${m.content}</div>
-          </div>
-        `)
-            .join("");
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-        } catch (err) {
-          console.error("Lỗi tải tin nhắn:", err);
+        const outputChat = document.querySelector(".outputChat");
+        const input = document.getElementById("messageInput");
+        const sendBtn = document.querySelector(".sendMessage");
+
+        // ========== THAM GIA PHÒNG CHAT ==========
+        socket.emit("joinChat", chatId);
+
+        // ========== LOAD TIN NHẮN CŨ ==========
+        async function loadMessages() {
+          try {
+            const res = await fetch(`/chat/${chatId}/messages`);
+            if (!res.ok) throw new Error("Không thể tải tin nhắn");
+            const messages = await res.json();
+            outputChat.innerHTML = "";
+            messages.forEach(renderMessage);
+            outputChat.scrollTop = outputChat.scrollHeight;
+          } catch (err) {
+            console.error(err);
+            outputChat.innerHTML = `<div style="color:red;padding:10px;">Lỗi tải tin nhắn.</div>`;
+          }
         }
-      }
-      loadMessages();
 
-      // Gửi tin nhắn
-      sendBtn.addEventListener("click", async () => {
-        const content = input.value.trim();
-        if (!content) return;
-        const message = {
-          senderId: "<%= user.id %>",
-          name: "<%= user.name %>",
-          avatarPath: "<%= user.avatarPath || '/uploads/default-avatar.png' %>",
-          content,
-          createdAt: new Date(),
-        };
+        // ========== HIỂN THỊ 1 TIN NHẮN ==========
+        function renderMessage(msg) {
+          const mine = msg.senderId === "<%= user.id %>";
+          const time = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        socket.emit("sendMessage", {
-          chatId: groupId,
-          senderId: "<%= user.id %>", 
-          content: chatInput.value.trim(),
-          messageType: "text",
+          const div = document.createElement("div");
+          div.classList.add("message", mine ? "mine" : "other");
+          div.innerHTML = `
+    ${!mine ? `<img class="avatar" src="${msg.avatarPath}" alt="">` : ""}
+    <div>
+      ${!mine ? `<div class="name">${msg.username}</div>` : ""}
+      <div class="bubble">${msg.content}</div>
+      <div class="time">${time}</div>
+    </div>
+    ${mine ? `<img class="avatar" src="${msg.avatarPath}" alt="">` : ""}
+  `;
+          document.querySelector(".outputChat").appendChild(div);
+        }
+
+
+        // ========== GỬI TIN NHẮN ==========
+        sendBtn.addEventListener("click", sendMessage);
+        input.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") sendMessage();
         });
 
+        function sendMessage() {
+          const content = input.value.trim();
+          if (!content) return;
 
-        // Lưu vào DB
-        await fetch(`/chats/${groupId}/send`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content }),
+          socket.emit("sendMessage", {
+            chatId,
+            senderId: userId,
+            content,
+            messageType: "text"
+          });
+
+          input.value = "";
+        }
+
+        // ========== NHẬN TIN NHẮN MỚI ==========
+        socket.on("newMessage", (msg) => {
+          renderMessage(msg);
+          outputChat.scrollTop = outputChat.scrollHeight;
         });
-      });
 
-      // Nhận tin nhắn realtime
-      socket.on("receiveMessage", (message) => {
-        const div = document.createElement("div");
-        div.classList.add("msg-bubble");
-        div.innerHTML = `
-      <div class="msg-header">
-        <img src="${message.avatarPath}" class="msg-avatar">
-        <span class="msg-name">${message.name}</span>
-        <span class="msg-time">${new Date(message.createdAt).toLocaleTimeString()}</span>
-      </div>
-      <div class="msg-content">${message.content}</div>
-    `;
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        // ========== NGẮT KẾT NỐI ==========
+        window.addEventListener("beforeunload", () => {
+          socket.emit("leaveChat", chatId);
+          socket.disconnect();
+        });
+
+        // Tải tin nhắn ban đầu
+        loadMessages();
       });
     </script>
-
 
   </div>
 </body>

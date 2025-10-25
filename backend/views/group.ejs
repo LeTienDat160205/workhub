@@ -545,13 +545,13 @@
                 </div>
               </div>
             </div>
-            <!-- khu vucj chat -->
+            <!-- khu vực chat -->
             <div class="outputChat"></div>
 
             <div class="inputChat">
               <label for="fileInput" class="sendFile">Chọn file</label>
               <input type="file" id="fileInput" style="display:none" />
-              <input type="text" id="messageInput" placeholder=". . .">
+              <input type="text" id="messageInput" placeholder="Nhập tin nhắn ...">
               <button class="sendMessage">Gửi</button>
             </div>
           </div>
@@ -759,15 +759,7 @@
             }
 
             // === Hàm tạo avatar ===
-            const colors = [
-              "#f87171",
-              "#fb923c",
-              "#facc15",
-              "#4ade80",
-              "#60a5fa",
-              "#a78bfa",
-              "#f472b6",
-            ];
+            const colors = ["#f87171","#fb923c","#facc15","#4ade80","#60a5fa","#a78bfa","#f472b6",];
 
             const getAvatarHTML = (member) => {
               if (member.avatarPath && member.avatarPath.trim() !== "") {
@@ -784,18 +776,7 @@
                   bgColor = colors[Math.floor(Math.random() * colors.length)];
                   localStorage.setItem(colorKey, bgColor);
                 }
-                return `<div style="
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: ${bgColor};
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          ">${letter}</div>`;
+                return `<div style="width: 32px;height: 32px;border-radius: 50%;background: ${bgColor};color: white;font-weight: 600;font-size: 1rem;display: flex;align-items: center;justify-content: center;">${letter}</div>`;
               }
             };
 
@@ -1417,7 +1398,7 @@
           </main>
         </div>
       </div>
-      
+
       <!-- ========== /WORKHUB SETTINGS OVERLAY ========== -->
       <!-- javascript mở trang cài đặt -->
       <script>
@@ -1801,9 +1782,7 @@
           }
         }
 
-
-        // ========== HIỂN THỊ 1 TIN NHẮN ==========
-        // ========== HIỂN THỊ 1 TIN NHẮN ==========  
+        // ========== HIỂN THỊ TIN NHẮN ==========  
         function renderMessage(msg) {
           const mine = msg.senderId === "<%= user.id %>";
           const time = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1817,12 +1796,12 @@
       <div class="chat-content">
         <div class="name">${msg.username || 'Người dùng'}</div>
         <div class="bubble bubble-other">${msg.content}</div>
-        <div class="time">${time}</div>
+        <div class="time-other">${time}</div>
       </div>
     ` : `
       <div class="chat-content">
         <div class="bubble bubble-mine">${msg.content}</div>
-        <div class="time">${time}</div>
+        <div class="time-mine">${time}</div>
       </div>
       <img class="avatar" src="${msg.avatarPath || '/uploads/default-avatar.png'}" alt="">
     `}
@@ -1830,9 +1809,7 @@
 
           document.querySelector(".outputChat").appendChild(div);
         }
-
-
-
+        
         // ========== GỬI TIN NHẮN ==========
         sendBtn.addEventListener("click", sendMessage);
         input.addEventListener("keypress", (e) => {

@@ -803,7 +803,12 @@
                           Cập nhật mật khẩu để bảo vệ tài khoản.
                         </div>
                       </div>
-                      <button class="wh-btn wh-primary">Đổi Mật Khẩu</button>
+                      <button class="wh-btn wh-primary" id="changePassword">Đổi Mật Khẩu</button>
+                      <script>
+                        document.getElementById("changePassword").addEventListener("click", () => {
+                          window.location.href = "/info/changePassword";
+                        });
+                      </script>
                     </div>
                     <hr style="border: 0; border-top: 1px solid var(--border-color)" />
                     <div class="wh-row wh-between">

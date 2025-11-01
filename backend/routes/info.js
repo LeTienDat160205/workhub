@@ -149,4 +149,51 @@ router.post("/",
   }
 );
 
+// Trang đổi mật khẩu
+router.get("/changePassword", (req, res) => {
+  if (!req.session.user) return res.redirect("/auth/login");
+  res.render("changePassword", { error: null, success: null });
+});
+
+// Xử lý đổi mật khẩu
+router.post("/changePassword", async (req, res) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  const userId = req.session.user.id;
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return res.render("changePassword", { error: "Vui lòng điền đầy đủ thông tin!", success: null });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.render("changePassword", { error: "Mật khẩu xác nhận không khớp!", success: null });
+  }
+
+  try {
+    // Lấy mật khẩu hiện tại trong DB
+    const [rows] = await db.promise().query(
+      "SELECT password FROM user WHERE id = UUID_TO_BIN(?)",
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.render("changePassword", { error: "Không tìm thấy người dùng!", success: null });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, rows[0].password);
+    if (!isMatch) {
+      return res.render("changePassword", { error: "Mật khẩu hiện tại không đúng!", success: null });
+    }
+
+    // Cập nhật mật khẩu mới
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await db.promise().query("UPDATE user SET password = ? WHERE id = UUID_TO_BIN(?)", [hashedPassword, userId]);
+
+    return res.render("changePassword", { error: null, success: "Đổi mật khẩu thành công!" });
+  } catch (err) {
+    console.error("Đổi mật khẩu lỗi:", err);
+    res.render("changePassword", { error: "Lỗi hệ thống, vui lòng thử lại!", success: null });
+  }
+});
+
+
 export default router;

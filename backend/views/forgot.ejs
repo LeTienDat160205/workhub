@@ -292,11 +292,16 @@
         <form method="POST" action="/auth/forgot" autocomplete="off">
             <h2>Quên mật khẩu</h2>
             <div class="form-group">
-                <label for="forgot-username">Tên tài khoản hoặc email</label>
-                <input type="username" id="forgot-username" name="username" placeholder="Nhập tên tài khoản hoặc email"
-                    required>
+                <label for="forgot-email">Email</label>
+                <input type="email" id="forgot-email" name="email" placeholder="Nhập email" required>
             </div>
             <button type="submit" class="auth-btn">Gửi yêu cầu</button>
+            <% if (error) { %>
+                <p style="color: red;"><%= error %></p>
+            <% } %>
+            <% if (success) { %>
+                <p style="color: green;"><%= success %></p>
+            <% } %>
             <div class="auth-footer">
                 <a href="/auth/login">Quay lại đăng nhập</a>
             </div>

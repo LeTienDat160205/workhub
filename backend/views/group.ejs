@@ -428,11 +428,15 @@
               <div style="display:flex;gap:12px">
                 <button id="addMemberBtnSmall"
                   style="background:linear-gradient(180deg,var(--primary) 0%,var(--primary-hover) 100%);color:var(--on-primary);border:none;padding:10px 16px;border-radius:10px;font-weight:700;box-shadow:0 6px 18px rgba(76,175,80,0.18);cursor:pointer">
-                  + Thêm thành viên
+                  Thêm thành viên
                 </button>
                 <button id="createTaskBtnSmall"
-                  style="background:linear-gradient(180deg,#2ecc71 0%,#2fbf5a 100%);color:var(--on-primary);border:none;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer">
+                  style="background:linear-gradient(180deg,var(--primary) 0%,var(--primary-hover) 100%);color:var(--on-primary);border:none;padding:10px 16px;border-radius:10px;font-weight:700;box-shadow:0 6px 18px rgba(76,175,80,0.18);cursor:pointer">
                   Tạo công việc
+                </button>
+                <button id="openGroupSettingsBtn"
+                  style="background:linear-gradient(180deg,var(--primary) 0%,var(--primary-hover) 100%);color:var(--on-primary);border:none;padding:10px 16px;border-radius:10px;font-weight:700;box-shadow:0 6px 18px rgba(76,175,80,0.18);cursor:pointer">
+                  Cài đặt
                 </button>
                 <!-- Thêm thành viên -->
                 <div class="popup-overlay" id="popupMember" aria-hidden="true">
@@ -560,6 +564,130 @@
                 </div>
               </div>
             </div>
+
+            <!-- ======= POPUP CÀI ĐẶT NHÓM ======= -->
+            <div class="popup-overlay" id="popupGroupSettings" aria-hidden="true">
+              <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="group-settings-title">
+                <button class="close-btn" id="closeGroupSettings" aria-label="Đóng">&times;</button>
+                <div class="popup-inner-content" style="flex-direction: column; width: 100%;">
+                  <div id="group-settings-title" class="popup-title">Cài đặt nhóm</div>
+                  <div style="height: 15px;"></div>
+                  <div style="display: flex; flex-direction: column; gap: 18px; min-width: 260px;">
+                    <p style="margin: 0; font-size: 15px;">Các chức năng khác sẽ được thêm sau.</p>
+
+                    <!-- Nút Rời nhóm -->
+                    <button id="openLeavePopup" style="background:linear-gradient(180deg,#e74c3c 0%,#c0392b 100%);color:white;border:none;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;">
+                      Rời nhóm
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ======= POPUP XÁC NHẬN RỜI NHÓM ======= -->
+            <div class="popup-overlay" id="popupLeaveGroup" aria-hidden="true">
+              <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="leave-group-title">
+                <button class="close-btn" id="closeLeavePopup" aria-label="Đóng">&times;</button>
+                <div class="popup-inner-content" style="flex-direction: column; width: 100%; text-align: left;">
+                  <div id="leave-group-title" class="popup-title" style="color: red; font-weight: 700;">
+                    Rời nhóm
+                  </div>
+
+                  <div style="height: 10px;"></div>
+                  <p style="margin: 15px 0 25px;">
+                    Bạn có chắc chắn muốn <b>rời khỏi nhóm</b> này không?
+                  </p>
+
+                  <div style="display: flex; justify-content: right; gap: 12px;">
+                    <button type="button" class="btn" id="cancelLeaveBtn" style="background: #9e9e9e;">Huỷ</button>
+                    <button type="button" class="btn" id="confirmLeaveBtn" style="background: red;">Rời nhóm</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- =================== JAVASCRIPT =================== -->
+            <script>
+              document.addEventListener("DOMContentLoaded", () => {
+                // ========== Popup CÀI ĐẶT NHÓM ==========
+                const popupGroupSettings = document.getElementById('popupGroupSettings');
+                const btnOpenSettings = document.getElementById('openGroupSettingsBtn');
+                const closeGroupSettings = document.getElementById('closeGroupSettings');
+
+                function openGroupSettings() {
+                  popupGroupSettings.style.display = 'flex';
+                  popupGroupSettings.style.alignItems = 'center';
+                  popupGroupSettings.style.justifyContent = 'center';
+                  popupGroupSettings.style.backdropFilter = 'blur(2px)';
+                }
+
+                function closeGroupSettingsPopup() {
+                  popupGroupSettings.style.display = 'none';
+                }
+
+                btnOpenSettings?.addEventListener('click', openGroupSettings);
+                closeGroupSettings?.addEventListener('click', closeGroupSettingsPopup);
+
+                popupGroupSettings.addEventListener('click', (e) => {
+                  if (e.target === popupGroupSettings) closeGroupSettingsPopup();
+                });
+
+                // ========== Popup XÁC NHẬN RỜI NHÓM ==========
+                const popupLeaveGroup = document.getElementById("popupLeaveGroup");
+                const openLeavePopup = document.getElementById("openLeavePopup");
+                const closeLeavePopup = document.getElementById("closeLeavePopup");
+                const cancelLeaveBtn = document.getElementById("cancelLeaveBtn");
+                const confirmLeaveBtn = document.getElementById("confirmLeaveBtn");
+                const groupId = "<%= group.id %>";
+
+                function openPopupLeave() {
+                  closeGroupSettingsPopup();
+                  popupLeaveGroup.style.display = "flex";
+                  popupLeaveGroup.style.alignItems = "center";
+                  popupLeaveGroup.style.justifyContent = "center";
+                  popupLeaveGroup.style.backdropFilter = "blur(2px)";
+                }
+
+                function closePopupLeave() {
+                  popupLeaveGroup.style.display = "none";
+                }
+
+                openLeavePopup?.addEventListener("click", openPopupLeave);
+                closeLeavePopup?.addEventListener("click", closePopupLeave);
+                cancelLeaveBtn?.addEventListener("click", closePopupLeave);
+
+                popupLeaveGroup.addEventListener("click", (e) => {
+                  if (e.target === popupLeaveGroup) closePopupLeave();
+                });
+
+                // ========== Khi xác nhận RỜI NHÓM ==========
+                confirmLeaveBtn?.addEventListener("click", async () => {
+                  closePopupLeave();
+
+                  try {
+                    const res = await fetch(`/groups/${groupId}/leave`, {
+                      method: "POST",
+                      eaders: { "Content-Type": "application/json" },
+                      credentials: "same-origin"
+                    });
+
+                    console.log("Response status:", res.status);
+                    const result = await res.json();
+
+                    if (res.ok && result.success) {
+                      showToast(result.message || "Bạn đã rời nhóm thành công!", "success");
+                      setTimeout(() => (window.location.href = "/"), 2000);
+                    } else {
+                      showToast(result.error || "Không thể rời nhóm.", "error");
+                    }
+                  } catch (err) {
+                    console.error("Lỗi khi gửi yêu cầu rời nhóm:", err);
+                    showToast("Lỗi khi gửi yêu cầu rời nhóm.", "error");
+                  }
+                });
+              });
+            </script>
+
             <!-- khu vực chat -->
             <div class="outputChat"></div>
 
@@ -696,11 +824,12 @@
               <div class="avatar">
                 <img id="avatarPreviewMember" alt="avatar" src="/uploads/default-avatar.png" />
               </div>
-              <div>
-                <input class="name" type="text" id="memberName" value="" readonly>
-              </div>
-            </div>
 
+              <div>
+                <input class="name" type="text" name="name" id="memberName" readonly style="flex: 1; padding: 0px 13px">
+              </div>
+
+            </div>
             <div class="form-row" style="display:flex; align-items:center; gap:10px">
               <label style="width:110px">Tên tài khoản</label>
               <input id="memberUsername" type="text" readonly

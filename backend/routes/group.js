@@ -224,11 +224,11 @@ router.post("/:id/add-member", ensureAuth, async (req, res) => {
     // Thêm thành viên
     const newGroupUserId = randomUUID({ version: 'v7' });// cách này ổn hơn với id = uuidv7()
 
-await db.promise().query(
-  `INSERT INTO group_user (id, groupId, userId, roleInGroup, joinAt)
+    await db.promise().query(
+      `INSERT INTO group_user (id, groupId, userId, roleInGroup, joinAt)
    VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, 'member', NOW())`,
-  [newGroupUserId, id, newUserId]
-);
+      [newGroupUserId, id, newUserId]
+    );
 
     res.json({ success: true, message: "Đã thêm thành viên thành công." });
   } catch (err) {
@@ -260,7 +260,7 @@ router.delete("/:id/remove-member", ensureAuth, async (req, res) => {
     // Kiểm tra người cần xoá có trong nhóm không
     const [memberCheck] = await db.promise().query(
       `SELECT 1 FROM group_user WHERE groupId = UUID_TO_BIN(?) AND userId = UUID_TO_BIN(?)`,
-    [id, removeUserId]
+      [id, removeUserId]
     );
     if (memberCheck.length === 0) {
       return res.status(404).json({ error: "Không tìm thấy thành viên trong nhóm." });
@@ -313,5 +313,71 @@ router.get("/users/:id/info", ensureAuth, async (req, res) => {
   }
 });
 
+// =========================== RỜI NHÓM ===========================
+router.post("/:id/leave", ensureAuth, async (req, res) => {
+  try {
+    const { id } = req.params; // groupId
+    const sessionUser = req.session.user;
+
+    if (!sessionUser || !sessionUser.id) {
+      return res.status(401).json({ success: false, error: "Người dùng chưa đăng nhập." });
+    }
+
+    const userId = sessionUser.id;
+
+    console.log("🧩 RỜI NHÓM:", { groupId: id, userId });
+
+    // 1️⃣ Kiểm tra nhóm có tồn tại không
+    const [groups] = await db.promise().query(
+      `SELECT BIN_TO_UUID(leaderId) AS leaderId FROM \`group\` WHERE id = UUID_TO_BIN(?)`,
+      [id]
+    );
+
+    if (groups.length === 0) {
+      return res.status(404).json({ success: false, error: "Nhóm không tồn tại." });
+    }
+
+    const leaderId = groups[0].leaderId;
+
+    // 2️⃣ Nếu là trưởng nhóm → không thể rời
+    if (leaderId && leaderId.toLowerCase() === userId.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        error: "Trưởng nhóm không thể rời nhóm. Hãy chuyển quyền hoặc xóa nhóm."
+      });
+    }
+
+    // 3️⃣ Kiểm tra xem người dùng có trong nhóm không
+    const [check] = await db.promise().query(
+      `SELECT 1 FROM group_user WHERE groupId = UUID_TO_BIN(?) AND userId = UUID_TO_BIN(?)`,
+      [id, userId]
+    );
+
+    if (check.length === 0) {
+      return res.status(404).json({ success: false, error: "Bạn không phải là thành viên của nhóm này." });
+    }
+
+    // 4️⃣ Xóa khỏi group_user
+    await db.promise().query(
+      `DELETE FROM group_user WHERE groupId = UUID_TO_BIN(?) AND userId = UUID_TO_BIN(?)`,
+      [id, userId]
+    );
+
+    // 5️⃣ Cập nhật lại memberCount
+    await db.promise().query(
+      `UPDATE \`group\`
+       SET memberCount = (SELECT COUNT(*) FROM group_user WHERE groupId = UUID_TO_BIN(?))
+       WHERE id = UUID_TO_BIN(?)`,
+      [id, id]
+    );
+
+    console.log("✅ Người dùng", userId, "đã rời nhóm", id);
+
+    res.json({ success: true, message: "Bạn đã rời nhóm thành công!" });
+  } catch (err) {
+    console.error("❌ Lỗi /groups/:id/leave:", err);
+    res.status(500).json({ success: false, error: "Lỗi khi rời nhóm." });
+  }
+});
 
 export default router;

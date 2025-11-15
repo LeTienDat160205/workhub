@@ -2177,9 +2177,76 @@
 
         // ========== NHẬN TIN NHẮN MỚI ==========
         socket.on("newMessage", (msg) => {
-          renderMessage(msg);
+          const { type, fileName, filePath } = msg;
+
+          // Nếu là file
+          if (type === "file" && filePath) {
+            const fileType = getFileType(fileName); // Hàm xác định loại file
+
+            let html = "";
+
+            switch (fileType) {
+              case "image":
+                html = `
+          <div class="message">
+            <img src="${filePath}" class="chat-image" alt="${fileName}">
+          </div>
+        `;
+                break;
+
+              case "video":
+                html = `
+          <div class="message">
+            <video controls class="chat-video">
+              <source src="${filePath}" type="video/mp4">
+              Trình duyệt không hỗ trợ video.
+            </video>
+          </div>
+        `;
+                break;
+
+              case "document":
+                html = `
+          <div class="message file-message">
+            📄 <a href="${filePath}" download>${fileName}</a>
+          </div>
+        `;
+                break;
+
+              case "archive":
+                html = `
+          <div class="message file-message">
+            🗂 <a href="${filePath}" download>${fileName}</a>
+          </div>
+        `;
+                break;
+
+              case "code":
+                html = `
+          <div class="message file-message">
+            💻 <a href="${filePath}" download>${fileName}</a>
+          </div>
+        `;
+                break;
+
+              default:
+                html = `
+          <div class="message file-message">
+            📎 <a href="${filePath}" download>${fileName}</a>
+          </div>
+        `;
+            }
+
+            chatBox.innerHTML += html;
+          } else {
+            // Nếu không phải file, render bình thường
+            renderMessage(msg);
+          }
+
+          // Cuộn chat xuống cuối
           outputChat.scrollTop = outputChat.scrollHeight;
         });
+
 
         // ========== NGẮT KẾT NỐI ==========
         window.addEventListener("beforeunload", () => {

@@ -531,7 +531,7 @@ body {
 }
 
 /* CONTENT */
-.content-task {
+.group-chat {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
@@ -548,7 +548,28 @@ body {
   height: 100%;
 }
 
-[data-theme="dark"] .content-task {
+[data-theme="dark"] .group-chat{
+  background-size: 100% 1.2rem;
+}
+
+.task-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 5px 10px 19px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  min-height: 300px;
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+  background-color: var(--surface);
+  padding: 0px 20px 10px 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+[data-theme="dark"] .task-list {
   background-size: 100% 1.2rem;
 }
 

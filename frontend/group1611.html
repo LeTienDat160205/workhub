@@ -2123,7 +2123,9 @@
               contentHtml = `<video controls src="${url}" class="chat-file-video" style="max-width:320px;display:block;border-radius:8px"></video>`;
             } else {
               contentHtml = `<a href="${url}" download style="text-decoration:underline;color:inherit;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+         stroke-linejoin="round">
       <path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3 3 0 014.24 4.24l-9.2 9.2a1 1 0 01-1.41-1.41l8.49-8.49"/>
     </svg>
                 ${name}</a>`;
@@ -2140,12 +2142,12 @@
       <img class="avatar" src="${msg.avatarPath || '/uploads/default-avatar.png'}" alt="">
       <div class="chat-content">
         <div class="name">${msg.username || 'Người dùng'}</div>
-        <div class="bubble bubble-other">${contentHtml}</div>
+        <div class="bubble bubble-other">${msg.content}</div>
         <div class="time-other">${time}</div>
       </div>
     ` : `
       <div class="chat-content">
-        <div class="bubble bubble-mine">${contentHtml}</div>
+        <div class="bubble bubble-mine">${msg.content}</div>
         <div class="time-mine">${time}</div>
       </div>
       <img class="avatar" src="${msg.avatarPath || '/uploads/default-avatar.png'}" alt="">
@@ -2177,6 +2179,60 @@
 
         // ========== NHẬN TIN NHẮN MỚI ==========
         socket.on("newMessage", (msg) => {
+          if (msg.type === "file") {
+            const type = getFileType(msg.fileName);
+
+            switch (type) {
+              case "image":
+                chatBox.innerHTML += `
+        <div class="message">
+          <img src="${msg.filePath}" class="chat-image">
+        </div>
+      `;
+                break;
+
+              case "video":
+                chatBox.innerHTML += `
+        <div class="message">
+          <video controls class="chat-video">
+            <source src="${msg.filePath}">
+          </video>
+        </div>
+      `;
+                break;
+
+              case "document":
+                chatBox.innerHTML += `
+        <div class="message file-message">
+          📄 <a href="${msg.filePath}" download>${msg.fileName}</a>
+        </div>
+      `;
+                break;
+
+              case "archive":
+                chatBox.innerHTML += `
+        <div class="message file-message">
+          🗂 <a href="${msg.filePath}" download>${msg.fileName}</a>
+        </div>
+      `;
+                break;
+
+              case "code":
+                chatBox.innerHTML += `
+        <div class="message file-message">
+          💻 <a href="${msg.filePath}" download>${msg.fileName}</a>
+        </div>
+      `;
+                break;
+
+              default:
+                chatBox.innerHTML += `
+        <div class="message file-message">
+          📎 <a href="${msg.filePath}" download>${msg.fileName}</a>
+        </div>
+      `;
+            }
+          }
           renderMessage(msg);
           outputChat.scrollTop = outputChat.scrollHeight;
         });
@@ -2189,53 +2245,30 @@
 
         // Tải tin nhắn ban đầu
         loadMessages();
-
-        // Gửi file: xử lý upload rồi emit sendMessage (placed inside DOMContentLoaded so `socket` is available)
-        const fileInputEl = document.getElementById("fileInput");
-        if (fileInputEl) {
-          fileInputEl.addEventListener("change", async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-
-            const form = new FormData();
-            form.append("file", file);
-
-            try {
-              const res = await fetch("/chat/upload", {
-                method: "POST",
-                body: form,
-                credentials: "same-origin",
-              });
-              const data = await res.json();
-              if (!res.ok || !data?.success) {
-                console.error("Upload failed", data);
-                showToast(data?.error || "Không thể upload tệp.", "error");
-                fileInputEl.value = "";
-                return;
-              }
-
-              const filePath = data.filePath;
-
-              socket.emit("sendMessage", {
-                chatId,
-                senderId: userId,
-                content: file.name,
-                messageType: "file",
-                filePath,
-                fileUrl: filePath,
-              });
-
-              fileInputEl.value = "";
-            } catch (err) {
-              console.error("Upload error", err);
-              showToast("Lỗi khi upload tệp.", "error");
-              fileInputEl.value = "";
-            }
-          });
-        }
-
       });
 
+      // gui file
+      document.getElementById("fileInput").onchange = async (e) => {
+        const file = e.target.files[0];
+        const form = new FormData();
+        form.append("file", file);
+
+        const res = await fetch("/upload", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          // gửi file qua chat (socket)
+          socket.emit("chatMessage", {
+            type: "file",
+            filePath: data.filePath,
+            fileName: data.fileName
+          });
+        }
+      };
 
       function getFileType(filename) {
         const ext = filename.split('.').pop().toLowerCase();

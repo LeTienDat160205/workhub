@@ -5,52 +5,50 @@ import fs from "fs";
 
 const router = express.Router();
 
-// Middleware check đăng nhập
-function ensureAuth(req, res, next) {
-  if (!req.session || !req.session.user) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  next();
-}
-
-// Tạo folder nếu chưa có
-const uploadDir = "uploads/chat";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Cấu hình lưu file vào uploads/chat
+// Multer disk storage for chat files (saved to /uploads/chat)
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const timestamp = Date.now();
-    const ext = path.extname(file.originalname);
-    const base = path.basename(file.originalname, ext);
-    cb(null, `${base}-${timestamp}${ext}`);
-  }
+	destination: (req, file, cb) => {
+		const uploadDir = path.join(process.cwd(), "uploads", "chat");
+		try {
+			fs.mkdirSync(uploadDir, { recursive: true });
+		} catch (err) {
+			// ignore, will be handled by cb
+		}
+		cb(null, uploadDir);
+	},
+	filename: (req, file, cb) => {
+		const safeName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+		const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}-${safeName}`;
+		cb(null, fileName);
+	},
 });
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 50 * 1024 * 1024 } // tối đa 50MB
-});
+// Limit: 50MB per file (adjust if needed)
+const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
 
-// =========================== UPLOAD FILE ===========================
-router.post("/upload", ensureAuth, upload.single("file"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "Không có file nào được gửi." });
-  }
+// POST /chat/upload
+// field name: `file`
+router.post("/chat/upload", upload.single("file"), (req, res) => {
+	try {
+		if (!req.file) return res.status(400).json({ success: false, error: "No file uploaded" });
 
-  const filePath = "/uploads/chat/" + req.file.filename;
+		// debug log
+		console.log("Chat upload received:", {
+			originalname: req.file.originalname,
+			filename: req.file.filename,
+			size: req.file.size,
+			mimetype: req.file.mimetype,
+		});
 
-  return res.json({
-    success: true,
-    filePath,
-    fileName: req.file.originalname,
-    size: req.file.size
-  });
+		// Serve path under /uploads (server.js already exposes /uploads)
+		const filePath = `/uploads/chat/${req.file.filename}`;
+
+		return res.json({ success: true, filePath, fileName: req.file.originalname });
+	} catch (err) {
+		console.error("Error on chat file upload:", err);
+		return res.status(500).json({ success: false, error: err?.message || "Upload failed" });
+	}
 });
 
 export default router;
+

@@ -93,7 +93,8 @@ export function initChatSocket(io) {
           avatarPath: sender.avatarPath || "/uploads/default-avatar.png",
           content,
           messageType,
-          fileUrl,
+          fileUrl: fileUrlFinal, // ensure broadcast contains the final file URL/path
+          fileName: messageType === "file" ? (payload.fileName || payload.originalName || null) : null,
           replyTo,
           createdAt: new Date().toISOString(),
         };

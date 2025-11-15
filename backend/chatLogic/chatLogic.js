@@ -25,15 +25,30 @@ export function initChatSocket(io) {
 
         // payload phải là object: { chatId, senderId, content, messageType?, fileUrl?, replyTo? }
         if (!payload || typeof payload !== "object") {
-          return socket.emit("errorMessage", { error: "Dữ liệu gửi không hợp lệ." });
+          return socket.emit("errorMessage", {
+            error: "Dữ liệu gửi không hợp lệ.",
+          });
         }
 
         // Lấy các trường (không dùng 'data' biến lạ)
-        const { chatId, senderId, content, messageType = "text", fileUrl = null, replyTo = null } = payload;
+        const {
+          chatId,
+          senderId,
+          content,
+          messageType = "text",
+          fileUrl = null,
+          replyTo = null,
+        } = payload;
 
-        if (!chatId || !senderId || !content) {
+        const fileUrlFinal =
+          messageType === "file" ? payload.filePath : fileUrl;
+
+        // chỉ bắt buộc content khi messageType === 'text'
+        if (!chatId || !senderId || (messageType === "text" && !content)) {
           console.warn("⚠️ Thiếu senderId/chatId/content:", payload);
-          return socket.emit("errorMessage", { error: "Thiếu thông tin người gửi hoặc nội dung." });
+          return socket.emit("errorMessage", {
+            error: "Thiếu thông tin người gửi hoặc nội dung.",
+          });
         }
 
         const messageId = randomUUID({ version: "v7" });
@@ -41,21 +56,33 @@ export function initChatSocket(io) {
         // Lưu tin nhắn vào bảng `message`
         await db.promise().query(
           `INSERT INTO message (id, chatId, senderId, content, messageType, fileUrl, replyTo)
-           VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, UUID_TO_BIN(?))`,
-          [messageId, chatId, senderId, content, messageType, fileUrl, replyTo]
+   VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, UUID_TO_BIN(?))`,
+          [
+            messageId,
+            chatId,
+            senderId,
+            content || null,
+            messageType,
+            fileUrlFinal,
+            replyTo,
+          ]
         );
 
         // Cập nhật lastMessage/lastMessageTime (nếu muốn)
-        await db.promise().query(
-          `UPDATE chat SET lastMessage = ?, lastMessageTime = NOW() WHERE id = UUID_TO_BIN(?)`,
-          [content, chatId]
-        );
+        await db
+          .promise()
+          .query(
+            `UPDATE chat SET lastMessage = ?, lastMessageTime = NOW() WHERE id = UUID_TO_BIN(?)`,
+            [content, chatId]
+          );
 
         // Lấy thông tin người gửi để trả về client
-        const [senderRows] = await db.promise().query(
-          `SELECT name, username, avatarPath FROM user WHERE id = UUID_TO_BIN(?)`,
-          [senderId]
-        );
+        const [senderRows] = await db
+          .promise()
+          .query(
+            `SELECT name, username, avatarPath FROM user WHERE id = UUID_TO_BIN(?)`,
+            [senderId]
+          );
 
         const sender = senderRows[0] || {};
         const message = {
@@ -68,7 +95,7 @@ export function initChatSocket(io) {
           messageType,
           fileUrl,
           replyTo,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         };
 
         // Gửi tin nhắn realtime tới tất cả thành viên phòng

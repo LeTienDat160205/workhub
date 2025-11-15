@@ -15,6 +15,7 @@ import infoRoutes from "./routes/info.js";
 import groupRoutes from "./routes/group.js";
 import chatRoutes from "./routes/chat.js";
 import taskRoutes from "./routes/task.js";
+import chatUploadRoutes from "./routes/chatUpload.js";
 
 // chat real time
 import { initChatSocket } from "./chatLogic/chatLogic.js";
@@ -51,6 +52,10 @@ app.use("/info", infoRoutes);
 app.use("/groups", groupRoutes);
 app.use("/chat", chatRoutes);
 app.use("/tasks", taskRoutes);
+app.use(chatUploadRoutes);
+app.use("/uploads", express.static("uploads"));
+
+
 
 // Khởi tạo socket.io
 import { createServer } from "http";

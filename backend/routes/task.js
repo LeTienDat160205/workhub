@@ -48,7 +48,7 @@ router.post("/", ensureAuth, async (req, res) => {
 
     const taskId = uuidv7();
 
-    // 1️⃣ Tạo task
+    // Tạo task
     const sqlTask = `
       INSERT INTO task (id, taskName, description, deadline, createdBy, groupId)
       VALUES (UUID_TO_BIN(?), ?, ?, ?, UUID_TO_BIN(?), UUID_TO_BIN(?))
@@ -64,7 +64,7 @@ router.post("/", ensureAuth, async (req, res) => {
         groupId,
       ]);
 
-    // 2️⃣ Giao cho nhiều người
+    // Giao cho nhiều người
     const sqlAssignee = `
       INSERT INTO task_assignee (id, taskId, userId)
       VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?))
@@ -75,7 +75,7 @@ router.post("/", ensureAuth, async (req, res) => {
       await db.promise().query(sqlAssignee, [assignId, taskId, uid]);
     }
 
-    // 3️⃣ Cập nhật số task của group
+    // Cập nhật số task của group
     await db.promise().query(
       `UPDATE \`group\`
        SET taskCount = (SELECT COUNT(*) FROM task WHERE groupId = UUID_TO_BIN(?))
@@ -83,13 +83,82 @@ router.post("/", ensureAuth, async (req, res) => {
       [groupId, groupId]
     );
 
-    return res.status(201).json({
-      success: true,
-      message: "Tạo công việc thành công.",
-      taskId,
-    });
+    // return res.status(201).json({
+    //   success: true,
+    //   message: "Tạo công việc thành công.",
+    //   taskId,
+    // });
+    return res.redirect(`/groups/${groupId}`);
   } catch (err) {
     console.error("POST /tasks error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/* ============================================================
+           LẤY DANH SÁCH CÔNG VIỆC ĐÃ GIAO (createdBy)
+============================================================ */
+router.get("/assigned", ensureAuth, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+
+    const sql = `
+      SELECT 
+        BIN_TO_UUID(t.id) AS id,
+        t.taskName,
+        t.description,
+        t.deadline,
+        t.status,
+        t.createdAt,
+        t.updatedAt,
+        BIN_TO_UUID(t.groupId) AS groupId,
+        g.groupName
+      FROM task t
+      LEFT JOIN \`group\` g ON t.groupId = g.id
+      WHERE t.createdBy = UUID_TO_BIN(?)
+      ORDER BY t.createdAt DESC
+    `;
+
+    const [rows] = await db.promise().query(sql, [userId]);
+    return res.json(rows);
+
+  } catch (err) {
+    console.error("GET /tasks/assigned error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/* ============================================================
+         LẤY DANH SÁCH CÔNG VIỆC ĐƯỢC GIAO CHO MÌNH
+============================================================ */
+router.get("/received", ensureAuth, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+
+    const sql = `
+      SELECT
+        BIN_TO_UUID(t.id) AS id,
+        t.taskName,
+        t.description,
+        t.deadline,
+        t.status,
+        t.createdAt,
+        t.updatedAt,
+        BIN_TO_UUID(t.groupId) AS groupId,
+        g.groupName,
+        ta.status AS assigneeStatus
+      FROM task_assignee ta
+      INNER JOIN task t ON ta.taskId = t.id
+      LEFT JOIN \`group\` g ON t.groupId = g.id
+      WHERE ta.userId = UUID_TO_BIN(?)
+      ORDER BY t.createdAt DESC
+    `;
+
+    const [rows] = await db.promise().query(sql, [userId]);
+    return res.json(rows);
+
+  } catch (err) {
+    console.error("GET /tasks/received error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });

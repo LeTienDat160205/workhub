@@ -519,7 +519,7 @@
 
                               const result = await res.json();
 
-                              // ✅ Kiểm tra phản hồi từ server
+                              // Kiểm tra phản hồi từ server
                               if (res.ok && result.success) {
                                 // Thành công
                                 showToast(result.message || "Đã thêm thành viên thành công.", "success");
@@ -719,6 +719,28 @@
                           });
 
                           // --- Thêm file ---
+
+                        </script>
+                        <script>
+                          async function createTask() {
+                            const res = await fetch("/tasks/create", {
+                              method: "POST",
+                              body: formData
+                            });
+
+                            const data = await res.json();
+
+                            if (data.success) {
+                              showToast("Tạo công việc thành công!", "success");
+
+                              const task = data.task;
+
+                              // Render vào UI
+                              renderNewTask(task);
+                            } else {
+                              showToast("Lỗi tạo công việc!", "error");
+                            }
+                          }
 
                         </script>
                       </div>

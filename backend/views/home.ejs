@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="/frontend/style.css">
 </head>
 
-<body>
+<body onload="loadTasks()">
   <div id="toast-container"></div>
   <div class="dashboard-frame">
     <!-- HEADER -->
@@ -280,8 +280,8 @@
         </div>
 
         <!-- Danh sách công việc -->
-        <div class="task-list" id="tasks-assigned">A</div>
-        <div class="task-list" id="tasks-received" style="display: none;">B</div>
+        <div class="task-list" id="tasks-assigned"></div>
+        <div class="task-list" id="tasks-received" style="display: none;"></div>
 
         <script>
           const assigned = document.getElementById('tasks-assigned');
@@ -296,6 +296,75 @@
             assigned.style.display = 'none';
             received.style.display = 'block';
           };
+        </script>
+
+        <script>
+          async function loadTasks() {
+            const taskAssignedList = document.getElementById("tasks-assigned");
+            const taskReceivedList = document.getElementById("tasks-received");
+
+            // Gọi API backend thật
+            const assignedRes = await fetch("/tasks/assigned");
+            const receivedRes = await fetch("/tasks/received");
+
+            const assignedTasks = await assignedRes.json();
+            const receivedTasks = await receivedRes.json();
+
+            renderTasks(assignedTasks, taskAssignedList, "assigned");
+            renderTasks(receivedTasks, taskReceivedList, "received");
+          }
+
+
+          function renderTasks(tasks, container, type) {
+            container.innerHTML = "";
+
+            tasks.forEach(task => {
+              const div = document.createElement("div");
+              div.classList.add("task-assigned");
+              div.style = "border: 1px solid black; justify-content: space-between; display: flex; padding: 8px; margin-bottom: 6px;";
+
+              // Vì /received có thêm trường assigneeStatus
+              const assigneeStatusHTML =
+                type === "received"
+                  ? `<div>Trạng thái cá nhân: <strong>${task.assigneeStatus || "Chưa cập nhật"}</strong></div>`
+                  : "";
+
+              div.innerHTML = `
+      <div class="task-info-left">
+        <div class="task-name">${task.taskName}</div>
+        <div class="task-description">${task.description}</div>
+      </div>
+
+      <div class="task-info-right" style="display: flex; gap: 20px;">
+        <div class="task-groupName">Nhóm
+          <div>${task.groupName || "Không thuộc nhóm"}</div>
+        </div>
+
+        <div class="task-owner">Trạng thái
+          <div>${task.status}</div>
+        </div>
+
+        <div class="task-time-status">
+          <div>Ngày giao: <span>${formatDate(task.createdAt)}</span></div>
+          <div>Deadline: <span>${formatDate(task.deadline)}</span></div>
+          ${assigneeStatusHTML}
+        </div>
+      </div>
+    `;
+
+              container.appendChild(div);
+            });
+          }
+
+          function formatDate(dateString) {
+            if (!dateString) return "";
+            const d = new Date(dateString);
+            return d.toLocaleDateString("vi-VN");
+          }
+
+
+          // Gọi hàm
+          loadTasks();
         </script>
       </div>
 

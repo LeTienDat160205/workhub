@@ -280,10 +280,10 @@
         </div>
 
         <!-- Danh sách công việc -->
-        <div class="task-list" id="tasks-assigned"></div>
-        <div class="task-list" id="tasks-received" style="display: none;"></div>
+        <div class="task-list" id="tasks-assigned">A</div>
+        <div class="task-list" id="tasks-received" style="display: none;">B</div>
 
-        <script>
+        <script>// chuyển đổi loại công việc
           const assigned = document.getElementById('tasks-assigned');
           const received = document.getElementById('tasks-received');
 
@@ -300,18 +300,25 @@
 
         <script>
           async function loadTasks() {
-            const taskAssignedList = document.getElementById("tasks-assigned");
-            const taskReceivedList = document.getElementById("tasks-received");
+            try {
+              const taskAssignedList = document.getElementById("tasks-assigned");
+              const taskReceivedList = document.getElementById("tasks-received");
 
-            // Gọi API backend thật
-            const assignedRes = await fetch("/tasks/assigned");
-            const receivedRes = await fetch("/tasks/received");
+              const assignedRes = await fetch("/groups/assignedTasks", { credentials: "same-origin" });
+              const receivedRes = await fetch("/groups/receivedTasks", { credentials: "same-origin" });
 
-            const assignedTasks = await assignedRes.json();
-            const receivedTasks = await receivedRes.json();
 
-            renderTasks(assignedTasks, taskAssignedList, "assigned");
-            renderTasks(receivedTasks, taskReceivedList, "received");
+              if (!assignedRes.ok) throw new Error("Assigned error: " + assignedRes.status);
+              if (!receivedRes.ok) throw new Error("Received error: " + receivedRes.status);
+
+              const assignedTasks = await assignedRes.json();
+              const receivedTasks = await receivedRes.json();
+
+              renderTasks(assignedTasks, taskAssignedList, "assigned");
+              renderTasks(receivedTasks, taskReceivedList, "received");
+            } catch (err) {
+              console.error("Lỗi load:", err);
+            }
           }
 
 
@@ -321,7 +328,7 @@
             tasks.forEach(task => {
               const div = document.createElement("div");
               div.classList.add("task-assigned");
-              div.style = "border: 1px solid black; justify-content: space-between; display: flex; padding: 8px; margin-bottom: 6px;";
+              div.style = "border:1px solid #ddd; border-radius:8px; padding:10px 12px; margin:6px 0; justify-content: space-between; display: flex;";
 
               // Vì /received có thêm trường assigneeStatus
               const assigneeStatusHTML =
@@ -331,22 +338,22 @@
 
               div.innerHTML = `
       <div class="task-info-left">
-        <div class="task-name">${task.taskName}</div>
+        <div class="task-name" style="font-weight: bold;">${task.taskName}</div>
         <div class="task-description">${task.description}</div>
       </div>
 
       <div class="task-info-right" style="display: flex; gap: 20px;">
-        <div class="task-groupName">Nhóm
+        <div class="task-groupName"><b>Nhóm</b>
           <div>${task.groupName || "Không thuộc nhóm"}</div>
         </div>
 
-        <div class="task-owner">Trạng thái
+        <div class="task-owner"><b>Trạng thái</b>
           <div>${task.status}</div>
         </div>
 
         <div class="task-time-status">
-          <div>Ngày giao: <span>${formatDate(task.createdAt)}</span></div>
-          <div>Deadline: <span>${formatDate(task.deadline)}</span></div>
+          <div><b>Ngày giao: </b><span>${formatDate(task.createdAt)}</span></div>
+          <div><b>Deadline: </b><span>${formatDate(task.deadline)}</span></div>
           ${assigneeStatusHTML}
         </div>
       </div>

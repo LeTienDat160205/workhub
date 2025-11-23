@@ -83,14 +83,14 @@ router.post("/", ensureAuth, async (req, res) => {
       [groupId, groupId]
     );
 
-    // return res.status(201).json({
-    //   success: true,
-    //   message: "Tạo công việc thành công.",
-    //   taskId,
-    // });
-    return res.redirect(`/groups/${groupId}`);
+    return res.status(201).json({
+      success: true,
+      message: "Tạo công việc thành công.",
+      taskId,
+    });
   } catch (err) {
-    console.error("POST /tasks error:", err);
+    // console.error("POST /tasks error:", err);
+    console.error("POST /groups error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -123,7 +123,8 @@ router.get("/assigned", ensureAuth, async (req, res) => {
     return res.json(rows);
 
   } catch (err) {
-    console.error("GET /tasks/assigned error:", err);
+    // console.error("GET /tasks/assigned error:", err);
+    console.error("GET /groups/assignedTasks error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -158,7 +159,8 @@ router.get("/received", ensureAuth, async (req, res) => {
     return res.json(rows);
 
   } catch (err) {
-    console.error("GET /tasks/received error:", err);
+    // console.error("GET /tasks/received error:", err);
+    console.error("GET /groups/receivedTasks error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });

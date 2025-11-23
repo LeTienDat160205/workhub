@@ -568,7 +568,8 @@
                         <div id="create-task-title" class="popup-title">
                           Tạo công việc
                         </div>
-                        <form id="taskForm" action="/tasks" method="POST"
+                        <!-- <form id="taskForm" action="/tasks" method="POST" -->
+                        <form id="taskForm" action="/groups/createTask" method="POST"
                           style="display: flex; flex-direction: column; gap: 18px; min-width: 260px;">
                           <input type="hidden" name="groupId" value="<%= group.id %>">
                           <input type="hidden" name="assignees" id="assigneesInputHidden">
@@ -580,8 +581,9 @@
                           </div>
                           <!-- Mô tả công việc -->
                           <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <label for="taskDesc" class="form-label" style="font-weight: 600;">Mô tả công việc</label>
-                            <textarea id="taskDesc" name="description" placeholder="Nhập mô tả công việc" rows="4"
+                            <label for="description" class="form-label" style="font-weight: 600;">Mô tả công
+                              việc</label>
+                            <textarea id="description" name="description" placeholder="Nhập mô tả công việc" rows="4"
                               class="form-input" style="padding: 10px 13px; resize: none;"></textarea>
                           </div>
                           <!-- Đính kèm tệp -->
@@ -666,6 +668,7 @@
                             }
                           });
                           // -----------------------------------------------------------
+                          // Load thêm member tương ứng trong group
                           let membersInGroup = [];
 
                           async function loadMembersForTask() {
@@ -718,28 +721,59 @@
                             document.getElementById("assigneesInputHidden").value = JSON.stringify(assignees);
                           });
 
-                          // --- Thêm file ---
+                          // --- Thêm file --- chưa làm
 
                         </script>
                         <script>
-                          async function createTask() {
-                            const res = await fetch("/tasks/create", {
-                              method: "POST",
-                              body: formData
+                          // document.getElementById("taskForm").addEventListener("submit", async function (e) {
+                          //   e.preventDefault();
+
+                          //   const form = e.target;
+                          //   const formData = new FormData(form);
+
+                          //   const res = await fetch("/groups/createTask", {
+                          //     method: "POST",
+                          //     body: formData
+                          //   });
+
+                          //   // const data = await res.json();
+
+                          //   if (res.ok) {
+                          //     showToast("Tạo công việc thành công!", "success");
+                          //   } else {
+                          //     showToast("Lỗi tạo công việc!", "error");
+                          //   }
+                          // });
+                          const taskForm = document.getElementById('taskForm');
+                          if (taskForm) {
+                            taskForm.addEventListener('submit', async function (e) {
+                              e.preventDefault();
+                              try {
+                                const form = new FormData();
+                                form.append("taskName", taskName.value);
+                                form.append("description", description.value);
+                                form.append("deadline", deadline.value);
+                                form.append("groupId", groupId);
+                                form.append("assignees", JSON.stringify(assignees));
+
+                                const res = await fetch("/groups/createTask", {
+                                  method: "POST",
+                                  body: form
+                                });
+
+                                const data = await res.json();
+                                if (!res.ok) {
+                                  showToast(data.error || 'Lỗi tạo công việc', 'error');
+                                } else {
+                                  showToast('Tạo công việc thành công!', 'success');
+                                }
+
+                                taskForm.reset();
+                                document.getElementById('popupTask').style.display = 'none';
+                              } catch (err) {
+                                alert(err.message || 'Lỗi khi tạo công việc');
+                              }
                             });
-
-                            const data = await res.json();
-
-                            if (data.success) {
-                              showToast("Tạo công việc thành công!", "success");
-
-                              const task = data.task;
-
-                              // Render vào UI
-                              renderNewTask(task);
-                            } else {
-                              showToast("Lỗi tạo công việc!", "error");
-                            }
                           }
 
                         </script>

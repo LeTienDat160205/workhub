@@ -14,7 +14,7 @@ import authRoutes from "./routes/auth.js";
 import infoRoutes from "./routes/info.js";
 import groupRoutes from "./routes/group.js";
 import chatRoutes from "./routes/chat.js";
-import taskRoutes from "./routes/task.js";
+// import taskRoutes from "./routes/task.js";
 import chatUploadRoutes from "./routes/chatUpload.js";
 
 // chat real time
@@ -51,7 +51,7 @@ app.use("/auth", authRoutes);
 app.use("/info", infoRoutes);
 app.use("/groups", groupRoutes);
 app.use("/chat", chatRoutes);
-app.use("/tasks", taskRoutes);
+// app.use("/tasks", taskRoutes);
 app.use(chatUploadRoutes);
 app.use("/uploads", express.static("uploads"));
 

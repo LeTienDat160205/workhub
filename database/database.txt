@@ -170,3 +170,20 @@ CREATE TABLE notification (
     FOREIGN KEY (userId) REFERENCES user(id),
     FOREIGN KEY (senderId) REFERENCES user(id)
 );
+
+-- Mở rộng ENUM chatType để thêm loại 'task'
+ALTER TABLE chat
+    MODIFY COLUMN chatType ENUM('private', 'group', 'task') NOT NULL;
+
+-- Thêm cột taskId để liên kết chat với task
+ALTER TABLE chat
+    ADD COLUMN taskId BINARY(16) NULL AFTER groupId;
+
+-- Tạo index để tăng tốc tìm chat theo task
+ALTER TABLE chat
+    ADD INDEX idx_chat_taskId (taskId);
+
+-- Thêm ràng buộc khóa ngoại
+ALTER TABLE chat
+    ADD CONSTRAINT fk_chat_task 
+        FOREIGN KEY (taskId) REFERENCES task(id) ON DELETE CASCADE;

@@ -8,13 +8,14 @@
   <link rel="stylesheet" href="/frontend/style.css">
 </head>
 
-<body>
+<body onload="loadTasks()">
   <div id="toast-container"></div>
   <div class="dashboard-frame">
     <!-- HEADER -->
     <div class="dashboard-header" style="margin-top: 0">
       <div class="logo-bar">
-        <a href="/" class="site-name">WorkHub</a>
+        <a href="/" class="site-name"
+          style="text-decoration: none; font-size: 35px; font-weight: 900; letter-spacing: 1.5px">WorkHub</a>
       </div>
       <div class="header-actions actions-cluster">
         <button class="icon-btn" title="Menu" aria-label="Menu">
@@ -218,7 +219,7 @@
                 <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"></line>
               </svg>
-              <input type="text" placeholder="Searchhh" />
+              <input type="text" placeholder="Search" />
             </div>
           </div>
           <div class="sidebar-list" id="groupList">
@@ -240,13 +241,13 @@
       <div class="main-content" id="mainContent">
         <div class="main-toolbar">
           <div class="task-tabs">
-            <button class="tab-btn active" tabindex="0">
+            <button class="tab-btn active" tabindex="0" id="btnAssigned">
               <svg viewBox="0 0 20 20">
                 <path d="M4 10l4 4 8-8" />
               </svg>
               Đã giao
             </button>
-            <button class="tab-btn" tabindex="0">
+            <button class="tab-btn" tabindex="0" id="btnReceived">
               <svg viewBox="0 0 20 20">
                 <circle cx="9" cy="9" r="7" />
                 <path d="M13 13l4 4" />
@@ -278,8 +279,176 @@
           </div>
         </div>
 
-        <!-- Nội dung dạng "giấy kẻ ngang" -->
-        <div class="content-task" id="paperArea">WorkHub</div>
+        <!-- Danh sách công việc -->
+        <div class="task-list" id="tasks-assigned">A</div>
+        <div class="task-list" id="tasks-received" style="display: none;">B</div>
+
+        <script>// chuyển đổi loại công việc
+          const assigned = document.getElementById('tasks-assigned');
+          const received = document.getElementById('tasks-received');
+
+          document.getElementById('btnAssigned').onclick = () => {
+            assigned.style.display = 'block';
+            received.style.display = 'none';
+          };
+
+          document.getElementById('btnReceived').onclick = () => {
+            assigned.style.display = 'none';
+            received.style.display = 'block';
+          };
+        </script>
+
+        <!-- Load cong viec -->
+        <script>
+          async function loadTasks() {
+            try {
+              const taskAssignedList = document.getElementById("tasks-assigned");
+              const taskReceivedList = document.getElementById("tasks-received");
+
+              const assignedRes = await fetch("/groups/assignedTasks", { credentials: "same-origin" });
+              const receivedRes = await fetch("/groups/receivedTasks", { credentials: "same-origin" });
+
+
+              if (!assignedRes.ok) throw new Error("Assigned error: " + assignedRes.status);
+              if (!receivedRes.ok) throw new Error("Received error: " + receivedRes.status);
+
+              const assignedTasks = await assignedRes.json();
+              const receivedTasks = await receivedRes.json();
+
+              renderTasks(assignedTasks, taskAssignedList, "assigned");
+              renderTasks(receivedTasks, taskReceivedList, "received");
+            } catch (err) {
+              console.error("Lỗi load:", err);
+            }
+          }
+
+
+          function renderTasks(tasks, container, type) {
+            container.innerHTML = "";
+
+            tasks.forEach(task => {
+
+              const div = document.createElement("div");
+              div.classList.add("task-assigned");
+              div.style = "border:1px solid #ddd; border-radius:8px; padding:10px 12px; margin:6px 0; justify-content: space-between; display: flex;";
+
+              // Vì /received có thêm trường assigneeStatus
+              const assigneeStatusHTML =
+                type === "received"
+                  ? `<div>Trạng thái cá nhân: <strong>${task.assigneeStatus || "Chưa cập nhật"}</strong></div>`
+                  : "";
+
+              div.innerHTML = `
+  <div class="task-info-left">
+    <div class="task-name" style="font-weight: bold;">${task.taskName}</div>
+    <div class="task-description">${task.description}</div>
+  </div>
+
+  <div class="task-info-right" style="display: flex; gap: 20px;">
+    <div class="task-groupName"><b>Nhóm</b>
+      <div>${task.groupName || "Không thuộc nhóm"}</div>
+    </div>
+
+    <div class="task-assignees" id="taskId">
+      <b>Người phụ trách</b>
+      <div id="assignees_${task.id}" class="assigneeWrap" 
+           style="margin-top:4px; min-width: 120px;">
+        <div style="color:var(--text-muted); font-size:0.9rem;">
+          Đang tải...
+        </div>
+      </div>
+    </div>
+
+    <div class="task-owner"><b>Trạng thái</b>
+      <div>${task.taskStatus || task.status || "Chưa có"}</div>
+    </div>
+
+    <div class="task-time-status">
+      <div><b>Ngày giao: </b><span>${formatDate(task.createdAt)}</span></div>
+      <div><b>Deadline: </b><span>${formatDate(task.deadline)}</span></div>
+      ${assigneeStatusHTML}
+    </div>
+  </div>
+`;
+
+
+              container.appendChild(div);
+              loadAssignees(task.id);
+            });
+          }
+
+          async function loadAssignees(taskId) {
+            const wrap = document.getElementById(`assignees_${taskId}`);
+            if (!wrap) return;
+
+            wrap.innerHTML = `
+    <div style="padding:4px;color:var(--text-muted);text-align:center;font-size:0.85rem">
+      Đang tải...
+    </div>
+  `;
+
+            try {
+              const res = await fetch(`/groups/${taskId}/assignees`, { credentials: "same-origin" });
+              if (!res.ok) throw new Error("Lỗi khi tải người phụ trách");
+
+              const assignees = await res.json();
+
+              if (assignees.length === 0) {
+                wrap.innerHTML = `<div style="color:var(--text-muted)">Không có</div>`;
+                return;
+              }
+
+              // ===== Avatar =====
+              const colors = ["#f87171", "#fb923c", "#facc15", "#4ade80", "#60a5fa", "#a78bfa", "#f472b6"];
+
+              const getAvatarHTML = (user) => {
+                if (user.avatarPath && user.avatarPath.trim() !== "") {
+                  return `<img src="${user.avatarPath}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">`;
+                }
+                const letter = user.name?.charAt(0).toUpperCase() || "?";
+                const key = `avatarColor_${user.userId}`;
+                let color = localStorage.getItem(key);
+                if (!color) {
+                  color = colors[Math.floor(Math.random() * colors.length)];
+                  localStorage.setItem(key, color);
+                }
+                return `
+        <div style="
+          width:28px;height:28px;border-radius:50%;
+          background:${color};color:white;display:flex;
+          align-items:center;justify-content:center;font-weight:600;
+        ">${letter}</div>`;
+              };
+
+              wrap.innerHTML = assignees
+                .map(u => `
+        <div style="display:flex;align-items:center;gap:6px;margin:4px 0;">
+          ${getAvatarHTML(u)}
+          <div style="font-size:0.9rem;">
+            <div>${u.name}</div>
+            <div style="font-size:0.8rem;color:var(--text-muted)">
+              ${u.assigneeStatus === "completed" ? "✔ Hoàn thành" : "⏳ Đang làm"}
+            </div>
+          </div>
+        </div>
+      `)
+                .join("");
+
+            } catch (err) {
+              console.error("❌ loadAssignees error:", err);
+              wrap.innerHTML = `<div style="color:#ef4444">Lỗi tải dữ liệu</div>`;
+            }
+          }
+
+          function formatDate(dateString) {
+            if (!dateString) return "";
+            const d = new Date(dateString);
+            return d.toLocaleDateString("vi-VN");
+          }
+
+          // Gọi hàm
+          loadTasks();
+        </script>
       </div>
 
       <!-- RIGHT PANEL STACK -->
@@ -748,7 +917,7 @@
                         id="address" style="flex: 1; padding: 10px 13px" />
                     </div>
                   </div>
-                  <div class="wh-btnEditProfile" style="margin-top: 10px;">
+                  <div class="wh-btnEditProfile" style="margin-top: 10px; text-align: center;">
                     <button class="btn" type="button" id="editProfileBtn"
                       style="background: var(--secondary)">Sửa</button>
                     <button class="btn" type="submit" id="saveProfileBtn"
@@ -802,7 +971,12 @@
                           Cập nhật mật khẩu để bảo vệ tài khoản.
                         </div>
                       </div>
-                      <button class="wh-btn wh-primary">Đổi Mật Khẩu</button>
+                      <button class="wh-btn wh-primary" id="changePassword">Đổi Mật Khẩu</button>
+                      <script>
+                        document.getElementById("changePassword").addEventListener("click", () => {
+                          window.location.href = "/info/changePassword";
+                        });
+                      </script>
                     </div>
                     <hr style="border: 0; border-top: 1px solid var(--border-color)" />
                     <div class="wh-row wh-between">
@@ -1210,5 +1384,5 @@
         </script>
       </div>
 </body>
-
+<!-- home cũ -->
 </html>

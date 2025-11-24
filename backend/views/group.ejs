@@ -721,7 +721,50 @@
                             document.getElementById("assigneesInputHidden").value = JSON.stringify(assignees);
                           });
 
-                          // --- Thêm file --- chưa làm
+                          // --- Thêm file: render preview và cho phép xoá ---
+                          const attachmentsInput = document.getElementById('attachments');
+                          const fileList = document.getElementById('fileList');
+                          function renderFileList() {
+                            fileList.innerHTML = '';
+                            const files = attachmentsInput.files || [];
+                            if (!files.length) return;
+                            Array.from(files).forEach((f, idx) => {
+                              const item = document.createElement('div');
+                              item.style = 'display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;border:1px solid var(--border-color);background:var(--surface)';
+                              const left = document.createElement('div');
+                              left.style = 'display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden';
+                              const name = document.createElement('span');
+                              name.style = 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;';
+                              name.textContent = f.name;
+                              left.appendChild(name);
+                              const right = document.createElement('div');
+                              right.style = 'display:flex;gap:8px;align-items:center';
+                              const size = document.createElement('span');
+                              size.style = 'color:var(--text-muted);font-size:0.85rem';
+                              size.textContent = (f.size/1024).toFixed(1) + ' KB';
+                              const removeBtn = document.createElement('button');
+                              removeBtn.type = 'button';
+                              removeBtn.textContent = 'Xoá';
+                              removeBtn.className = 'btn';
+                              removeBtn.style = 'background:#ef4444;color:white;padding:6px;border-radius:6px;border:none';
+                              removeBtn.addEventListener('click', () => {
+                                // Create a DataTransfer to remove the file from the FileList
+                                const dt = new DataTransfer();
+                                Array.from(attachmentsInput.files).forEach((file, i) => {
+                                  if (i !== idx) dt.items.add(file);
+                                });
+                                attachmentsInput.files = dt.files;
+                                renderFileList();
+                              });
+                              right.appendChild(size);
+                              right.appendChild(removeBtn);
+                              item.appendChild(left);
+                              item.appendChild(right);
+                              fileList.appendChild(item);
+                            });
+                          }
+
+                          attachmentsInput.addEventListener('change', renderFileList);
 
                         </script>
                         <script>
@@ -756,9 +799,14 @@
                                 form.append("groupId", groupId);
                                 form.append("assignees", JSON.stringify(assignees));
 
+                                // Append selected files (if any)
+                                const files = attachmentsInput.files || [];
+                                Array.from(files).forEach(f => form.append('attachments', f));
+
                                 const res = await fetch("/groups/createTask", {
                                   method: "POST",
-                                  body: form
+                                  body: form,
+                                  credentials: 'same-origin'
                                 });
 
                                 const data = await res.json();

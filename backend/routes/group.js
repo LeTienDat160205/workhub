@@ -3,7 +3,30 @@ import db from "../config/db.js";
 import { v7 as uuidv7 } from "uuid";
 import { randomUUID } from "crypto";
 import multer from "multer";
-const upload = multer();
+import fs from "fs";
+import path from "path";
+
+// Ensure uploads/tasks directory exists
+const TASK_UPLOAD_DIR = path.join(process.cwd(), "uploads", "tasks");
+try {
+  fs.mkdirSync(TASK_UPLOAD_DIR, { recursive: true });
+} catch (err) {
+  console.error("Could not create upload directory", TASK_UPLOAD_DIR, err);
+}
+
+// Multer storage for task attachments
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, TASK_UPLOAD_DIR);
+  },
+  filename: function (req, file, cb) {
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9_.()-]/g, "_");
+    const name = `${Date.now()}-${Math.random().toString(36).slice(2,8)}-${safeName}`;
+    cb(null, name);
+  }
+});
+
+const upload = multer({ storage });
 
 const router = express.Router();
 
@@ -70,7 +93,20 @@ router.get("/my-groups", ensureAuth, async (req, res) => {
 /* ============================================================
                       TẠO CÔNG VIỆC
 ============================================================ */
-router.post("/createTask", ensureAuth, upload.none(), async (req, res) => {
+// Use a wrapper to catch multer errors and return JSON instead of an HTML error page
+router.post("/createTask",
+  ensureAuth,
+  (req, res, next) => {
+    upload.array('attachments')(req, res, function (err) {
+      if (err) {
+        console.error('Multer upload error:', err);
+        // return JSON so client.parse won't fail on HTML error page
+        return res.status(400).json({ error: 'File upload error', details: err.message || String(err) });
+      }
+      next();
+    });
+  },
+  async (req, res) => {
   try {
     let { taskName, description, deadline, groupId, assignees } = req.body;
 
@@ -138,15 +174,41 @@ router.post("/createTask", ensureAuth, upload.none(), async (req, res) => {
       [groupId, groupId]
     );
 
+    // Nếu có file đính kèm => lưu metadata vào bảng `file`
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      const insertFileSql = `
+        INSERT INTO file (id, taskId, userId, fileName, fileType, fileSize, filePath)
+        VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?)
+      `;
+
+      for (const f of req.files) {
+        const fileId = uuidv7();
+        const fileName = f.originalname;
+        const fileType = f.mimetype || null;
+        const fileSize = f.size || 0;
+        // store relative path for serving later
+        const relPath = path.join('/uploads/tasks', path.basename(f.path)).replace(/\\/g, '/');
+        try {
+          await db.promise().query(insertFileSql, [fileId, taskId, createdBy, fileName, fileType, fileSize, relPath]);
+        } catch (err) {
+          console.error('Failed to insert file metadata', err);
+        }
+      }
+    }
+
     return res.status(201).json({
       success: true,
       message: "Tạo công việc thành công.",
       taskId,
     });
   } catch (err) {
-    // console.error("POST /tasks error:", err);
     console.error("POST /groups error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    // If headers already sent, fallback to ending the response
+    try {
+      if (!res.headersSent) return res.status(500).json({ error: "Internal server error" });
+    } catch (e) {
+      console.error('Error sending 500 response', e);
+    }
   }
 });
 
@@ -333,6 +395,66 @@ router.get("/:taskId/assignees", ensureAuth, async (req, res) => {
   } catch (err) {
     console.error("GET /groups/:taskId/assignees error:", err);
     res.status(500).json({ error: "Lỗi khi tải người phụ trách." });
+  }
+});
+
+// =============================== Lấy danh sách file đính kèm của task ===============================
+router.get("/:taskId/files", ensureAuth, async (req, res) => {
+  try {
+    const { taskId } = req.params;
+
+    const sql = `
+      SELECT 
+        BIN_TO_UUID(id) AS fileId,
+        fileName,
+        fileType,
+        fileSize,
+        filePath,
+        createdAt
+      FROM file
+      WHERE taskId = UUID_TO_BIN(?)
+      ORDER BY createdAt ASC
+    `;
+
+    const [rows] = await db.promise().query(sql, [taskId]);
+    res.json(rows || []);
+
+  } catch (err) {
+    console.error("GET /groups/:taskId/files error:", err);
+    res.status(500).json({ error: "Lỗi khi tải file đính kèm." });
+  }
+});
+
+// =============================== Cập nhật trạng thái người phụ trách task ===============================
+router.put("/:taskId/assignees/:userId/status", ensureAuth, async (req, res) => {
+  try {
+    const { taskId, userId } = req.params;
+    const { status } = req.body;
+
+    if (!status || !['assigned', 'in_progress', 'done', 'completed'].includes(status)) {
+      return res.status(400).json({ error: "Trạng thái không hợp lệ." });
+    }
+
+    // Map frontend status to DB status
+    const dbStatus = status === 'completed' ? 'done' : (status === 'in_progress' ? 'in_progress' : 'assigned');
+
+    const sql = `
+      UPDATE task_assignee
+      SET status = ?
+      WHERE taskId = UUID_TO_BIN(?) AND userId = UUID_TO_BIN(?)
+    `;
+
+    const [result] = await db.promise().query(sql, [dbStatus, taskId, userId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Không tìm thấy người phụ trách hoặc công việc." });
+    }
+
+    res.json({ success: true, message: "Cập nhật trạng thái thành công." });
+
+  } catch (err) {
+    console.error("PUT /groups/:taskId/assignees/:userId/status error:", err);
+    res.status(500).json({ error: "Lỗi khi cập nhật trạng thái." });
   }
 });
 

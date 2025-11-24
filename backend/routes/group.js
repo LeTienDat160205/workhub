@@ -158,20 +158,21 @@ router.get("/assignedTasks", ensureAuth, async (req, res) => {
     const userId = req.session.user.id;
 
     const sql = `
-      SELECT 
-        BIN_TO_UUID(t.id) AS id,
-        t.taskName,
-        t.description,
-        t.deadline,
-        t.status,
-        t.createdAt,
-        t.updatedAt,
-        BIN_TO_UUID(t.groupId) AS groupId,
-        g.groupName
-      FROM task t
-      LEFT JOIN \`group\` g ON t.groupId = g.id
-      WHERE t.createdBy = UUID_TO_BIN(?)
-      ORDER BY t.createdAt DESC
+SELECT 
+    BIN_TO_UUID(t.id) AS id,
+    t.taskName,
+    t.description,
+    t.deadline,
+    t.status AS taskStatus,
+    t.createdAt,
+    t.updatedAt,
+    BIN_TO_UUID(t.groupId) AS groupId,
+    g.groupName
+FROM task t
+LEFT JOIN \`group\` g ON t.groupId = g.id
+WHERE t.createdBy = UUID_TO_BIN(?)
+
+ORDER BY t.createdAt DESC;
     `;
 
     const [rows] = await db.promise().query(sql, [userId]);
@@ -192,22 +193,23 @@ router.get("/receivedTasks", ensureAuth, async (req, res) => {
     const userId = req.session.user.id;
 
     const sql = `
-      SELECT
-        BIN_TO_UUID(t.id) AS id,
-        t.taskName,
-        t.description,
-        t.deadline,
-        t.status,
-        t.createdAt,
-        t.updatedAt,
-        BIN_TO_UUID(t.groupId) AS groupId,
-        g.groupName,
-        ta.status AS assigneeStatus
-      FROM task_assignee ta
-      INNER JOIN task t ON ta.taskId = t.id
-      LEFT JOIN \`group\` g ON t.groupId = g.id
-      WHERE ta.userId = UUID_TO_BIN(?)
-      ORDER BY t.createdAt DESC
+SELECT
+    BIN_TO_UUID(t.id) AS id,
+    t.taskName,
+    t.description,
+    t.deadline,
+    t.status AS taskStatus,
+    t.createdAt,
+    t.updatedAt,
+    BIN_TO_UUID(t.groupId) AS groupId,
+    g.groupName
+FROM task_assignee ta
+INNER JOIN task t ON ta.taskId = t.id
+LEFT JOIN \`group\` g ON t.groupId = g.id
+
+WHERE ta.userId = UUID_TO_BIN(?)
+
+ORDER BY t.createdAt DESC;
     `;
 
     const [rows] = await db.promise().query(sql, [userId]);
@@ -308,6 +310,32 @@ router.get("/:id/members", ensureAuth, async (req, res) => {
     res.status(500).json({ error: "Lỗi khi tải danh sách thành viên." });
   }
 });
+
+// =============================== Lấy danh sách người phụ trách của task ===============================
+router.get("/:taskId/assignees", ensureAuth, async (req, res) => {
+  try {
+    const { taskId } = req.params;
+
+    const sql = `
+      SELECT 
+        BIN_TO_UUID(u.id) AS userId,
+        u.name,
+        u.avatarPath,
+        ta.status AS assigneeStatus
+      FROM task_assignee ta
+      JOIN user u ON ta.userId = u.id
+      WHERE ta.taskId = UUID_TO_BIN(?)
+    `;
+
+    const [rows] = await db.promise().query(sql, [taskId]);
+    res.json(rows);
+
+  } catch (err) {
+    console.error("GET /groups/:taskId/assignees error:", err);
+    res.status(500).json({ error: "Lỗi khi tải người phụ trách." });
+  }
+});
+
 
 // ========================== XÓA NHÓM ==========================
 router.delete("/:id/delete", ensureAuth, async (req, res) => {

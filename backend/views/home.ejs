@@ -298,6 +298,7 @@
           };
         </script>
 
+        <!-- Load cong viec -->
         <script>
           async function loadTasks() {
             try {
@@ -326,6 +327,7 @@
             container.innerHTML = "";
 
             tasks.forEach(task => {
+
               const div = document.createElement("div");
               div.classList.add("task-assigned");
               div.style = "border:1px solid #ddd; border-radius:8px; padding:10px 12px; margin:6px 0; justify-content: space-between; display: flex;";
@@ -337,30 +339,105 @@
                   : "";
 
               div.innerHTML = `
-      <div class="task-info-left">
-        <div class="task-name" style="font-weight: bold;">${task.taskName}</div>
-        <div class="task-description">${task.description}</div>
-      </div>
+  <div class="task-info-left">
+    <div class="task-name" style="font-weight: bold;">${task.taskName}</div>
+    <div class="task-description">${task.description}</div>
+  </div>
 
-      <div class="task-info-right" style="display: flex; gap: 20px;">
-        <div class="task-groupName"><b>Nhóm</b>
-          <div>${task.groupName || "Không thuộc nhóm"}</div>
-        </div>
+  <div class="task-info-right" style="display: flex; gap: 20px;">
+    <div class="task-groupName"><b>Nhóm</b>
+      <div>${task.groupName || "Không thuộc nhóm"}</div>
+    </div>
 
-        <div class="task-owner"><b>Trạng thái</b>
-          <div>${task.status}</div>
-        </div>
-
-        <div class="task-time-status">
-          <div><b>Ngày giao: </b><span>${formatDate(task.createdAt)}</span></div>
-          <div><b>Deadline: </b><span>${formatDate(task.deadline)}</span></div>
-          ${assigneeStatusHTML}
+    <div class="task-assignees" id="taskId">
+      <b>Người phụ trách</b>
+      <div id="assignees_${task.id}" class="assigneeWrap" 
+           style="margin-top:4px; min-width: 120px;">
+        <div style="color:var(--text-muted); font-size:0.9rem;">
+          Đang tải...
         </div>
       </div>
-    `;
+    </div>
+
+    <div class="task-owner"><b>Trạng thái</b>
+      <div>${task.taskStatus || task.status || "Chưa có"}</div>
+    </div>
+
+    <div class="task-time-status">
+      <div><b>Ngày giao: </b><span>${formatDate(task.createdAt)}</span></div>
+      <div><b>Deadline: </b><span>${formatDate(task.deadline)}</span></div>
+      ${assigneeStatusHTML}
+    </div>
+  </div>
+`;
+
 
               container.appendChild(div);
+              loadAssignees(task.id);
             });
+          }
+
+          async function loadAssignees(taskId) {
+            const wrap = document.getElementById(`assignees_${taskId}`);
+            if (!wrap) return;
+
+            wrap.innerHTML = `
+    <div style="padding:4px;color:var(--text-muted);text-align:center;font-size:0.85rem">
+      Đang tải...
+    </div>
+  `;
+
+            try {
+              const res = await fetch(`/groups/${taskId}/assignees`, { credentials: "same-origin" });
+              if (!res.ok) throw new Error("Lỗi khi tải người phụ trách");
+
+              const assignees = await res.json();
+
+              if (assignees.length === 0) {
+                wrap.innerHTML = `<div style="color:var(--text-muted)">Không có</div>`;
+                return;
+              }
+
+              // ===== Avatar =====
+              const colors = ["#f87171", "#fb923c", "#facc15", "#4ade80", "#60a5fa", "#a78bfa", "#f472b6"];
+
+              const getAvatarHTML = (user) => {
+                if (user.avatarPath && user.avatarPath.trim() !== "") {
+                  return `<img src="${user.avatarPath}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">`;
+                }
+                const letter = user.name?.charAt(0).toUpperCase() || "?";
+                const key = `avatarColor_${user.userId}`;
+                let color = localStorage.getItem(key);
+                if (!color) {
+                  color = colors[Math.floor(Math.random() * colors.length)];
+                  localStorage.setItem(key, color);
+                }
+                return `
+        <div style="
+          width:28px;height:28px;border-radius:50%;
+          background:${color};color:white;display:flex;
+          align-items:center;justify-content:center;font-weight:600;
+        ">${letter}</div>`;
+              };
+
+              wrap.innerHTML = assignees
+                .map(u => `
+        <div style="display:flex;align-items:center;gap:6px;margin:4px 0;">
+          ${getAvatarHTML(u)}
+          <div style="font-size:0.9rem;">
+            <div>${u.name}</div>
+            <div style="font-size:0.8rem;color:var(--text-muted)">
+              ${u.assigneeStatus === "completed" ? "✔ Hoàn thành" : "⏳ Đang làm"}
+            </div>
+          </div>
+        </div>
+      `)
+                .join("");
+
+            } catch (err) {
+              console.error("❌ loadAssignees error:", err);
+              wrap.innerHTML = `<div style="color:#ef4444">Lỗi tải dữ liệu</div>`;
+            }
           }
 
           function formatDate(dateString) {
@@ -368,7 +445,6 @@
             const d = new Date(dateString);
             return d.toLocaleDateString("vi-VN");
           }
-
 
           // Gọi hàm
           loadTasks();

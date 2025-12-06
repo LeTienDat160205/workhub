@@ -14,8 +14,10 @@ import authRoutes from "./routes/auth.js";
 import infoRoutes from "./routes/info.js";
 import groupRoutes from "./routes/group.js";
 import chatRoutes from "./routes/chat.js";
-// import taskRoutes from "./routes/task.js";
+import taskRoutes from "./routes/task.js";
 import chatUploadRoutes from "./routes/chatUpload.js";
+// routes thong bao
+import notificationRoutes from "./routes/notification.js";
 
 // chat real time
 import { initChatSocket } from "./chatLogic/chatLogic.js";
@@ -51,7 +53,9 @@ app.use("/auth", authRoutes);
 app.use("/info", infoRoutes);
 app.use("/groups", groupRoutes);
 app.use("/chat", chatRoutes);
-// app.use("/tasks", taskRoutes);
+app.use("/notification", notificationRoutes);
+
+app.use("/tasks", taskRoutes);
 app.use(chatUploadRoutes);
 app.use("/uploads", express.static("uploads"));
 
@@ -62,6 +66,9 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 const server = createServer(app);
 const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
+// CHO PHÉP ROUTER LẤY socket.io
+app.set("io", io);
+
 // Tạo logic chat real time
 initChatSocket(io);
 

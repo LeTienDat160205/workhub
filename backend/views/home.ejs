@@ -261,7 +261,7 @@
               <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"></line>
             </svg>
-            <input type="text" placeholder="Search" />
+            <input type="text" id="taskSearchInput" placeholder="Search" />
           </div>
 
           <div class="">
@@ -280,8 +280,8 @@
         </div>
 
         <!-- Danh sách công việc -->
-        <div class="task-list" id="tasks-assigned">A</div>
-        <div class="task-list" id="tasks-received" style="display: none;">B</div>
+        <div class="task-list" id="tasks-assigned"></div>
+        <div class="task-list" id="tasks-received" style="display: none;"></div>
 
         <script>// chuyển đổi loại công việc
           const assigned = document.getElementById('tasks-assigned');
@@ -669,6 +669,78 @@
 
           // Gọi hàm
           loadTasks();
+
+          // --- SEARCH TASKS ---
+const taskSearchInput = document.getElementById("taskSearchInput");
+
+taskSearchInput.addEventListener("input", function () {
+    const keyword = this.value.trim().toLowerCase();
+
+    // lấy tất cả task (assigned + received)
+    document.querySelectorAll(".task-assigned").forEach(task => {
+
+        // tên task nằm trong col1 -> div đầu tiên
+        const taskNameEl = task.querySelector("div div:nth-child(1)");
+        const taskName = taskNameEl ? taskNameEl.textContent.trim().toLowerCase() : "";
+
+        // kiểm tra match
+        if (taskName.includes(keyword)) {
+            task.style.display = "grid";  // giữ nguyên layout
+        } else {
+            task.style.display = "none";
+        }
+    });
+});
+
+// ========== FILTER TASKS BY STATUS ==========
+document.querySelectorAll(".task-sub li a").forEach(option => {
+    option.addEventListener("click", () => {
+
+        const filterText = option.textContent.trim(); // lấy text: "Đã hoàn thành", "Đang làm", "Chưa nhận", ...
+
+        // Gọi hàm lọc
+        filterTasks(filterText);
+    });
+});
+
+
+function filterTasks(filterText) {
+    const allTasks = document.querySelectorAll(".task-assigned");
+
+    allTasks.forEach(task => {
+
+        // Lấy phần trạng thái hiển thị trong HTML
+        const statusEl = task.querySelector('[id^="task_status_"] div:nth-child(2)');
+        if (!statusEl) return;
+
+        const statusText = statusEl.textContent.trim(); // ví dụ: "Đã hoàn thành"
+
+        // RULES:
+        // Tất cả          → luôn hiện
+        // Đã hoàn thành  → match "Đã hoàn thành"
+        // Đang làm       → match "Đang làm"
+        // Chưa nhận      → match "Chưa làm"
+        
+        let show = false;
+
+        if (filterText === "Tất cả") {
+            show = true;
+        }
+        else if (filterText === "Đã hoàn thành" && statusText.includes("Hoàn thành")) {
+            show = true;
+        }
+        else if (filterText === "Đang làm" && statusText.includes("Đang làm")) {
+            show = true;
+        }
+        else if (filterText === "Chưa nhận" && statusText.includes("Chưa làm")) {
+            show = true;
+        }
+
+        task.style.display = show ? "grid" : "none";
+    });
+}
+
+          
         </script>
       </div>
 
@@ -941,7 +1013,7 @@
               <div>
                 <input class="name" type="text" name="name" value="<%= user.name || '' %>" readonly>
               </div>
-            </div> 
+            </div>
 
             <input type="hidden" name="csrf_token" value="" />
             <div class="form-row" style="display: flex; align-items: center; gap: 10px">
@@ -1373,86 +1445,43 @@
             });
           });
 
-                // Right panels
-      const notifPanel = document.getElementById("notifPanel");
-      const notifPanelContent = document.getElementById("notifPanelContent");
-      const calendarPanel = document.getElementById("calendarPanel");
-      const calendarPanelContent = document.getElementById(
-        "calendarPanelContent"
-      );
-      const closeNotifPanel = document.getElementById("closeNotifPanel");
-      const closeCalendarPanel =
-        document.getElementById("closeCalendarPanel");
-      const btnNotif = document.getElementById("btnNotif");
-      const btnCalendar = document.getElementById("btnCalendar");
+          // Right panels
+          const notifPanel = document.getElementById("notifPanel");
+          const notifPanelContent = document.getElementById("notifPanelContent");
+          const calendarPanel = document.getElementById("calendarPanel");
+          const calendarPanelContent = document.getElementById(
+            "calendarPanelContent"
+          );
+          const closeNotifPanel = document.getElementById("closeNotifPanel");
+          const closeCalendarPanel =
+            document.getElementById("closeCalendarPanel");
+          const btnNotif = document.getElementById("btnNotif");
+          const btnCalendar = document.getElementById("btnCalendar");
 
-      let panelOrder = [];
-      function showPanel(panel) {
-        if (panelOrder.includes(panel)) {
-          closePanel(panel);
-          return;
-        }
-        panelOrder = [panel, ...panelOrder];
-        if (panelOrder.length > 2) panelOrder = panelOrder.slice(0, 2);
+          let panelOrder = [];
+          function showPanel(panel) {
+            if (panelOrder.includes(panel)) {
+              closePanel(panel);
+              return;
+            }
+            panelOrder = [panel, ...panelOrder];
+            if (panelOrder.length > 2) panelOrder = panelOrder.slice(0, 2);
 
-        notifPanel.classList.remove("top", "bottom", "show");
-        calendarPanel.classList.remove("top", "bottom", "show");
+            notifPanel.classList.remove("top", "bottom", "show");
+            calendarPanel.classList.remove("top", "bottom", "show");
 
-        async function renderNotif() {
-  try {
-    const res = await fetch("http://localhost:3000/notification", {
-      method: "GET",
-      credentials: "include",   // vì backend dùng session
-      headers: { "Content-Type": "application/json" }
-    });
-
-    const data = await res.json();
-
-    // Nếu lỗi hoặc không có data
-    if (!Array.isArray(data) || data.length === 0) {
-      notifPanelContent.innerHTML = `
-        <div class="notif-list">
-          <div class="notif-item">Không có thông báo nào</div>
-        </div>
-      `;
-      return;
-    }
-
-    // Format thời gian
-    const formatDate = (iso) => new Date(iso).toLocaleString("vi-VN");
-
-    // Render danh sách thông báo
-    const html = data
-      .map(notif => `
-        <div class="notif-item">
-          <div class="notif-dot"></div>
-          <div>
-            <div class="notif-message">${notif.message}</div>
-            <div class="notif-time">${formatDate(notif.createdAt)}</div>
-          </div>
-        </div>
-      `)
-      .join("");
-
-    notifPanelContent.innerHTML = `
-      <div class="notif-list">
-        ${html}
-      </div>
-    `;
-
-  } catch (error) {
-    console.error("Lỗi lấy thông báo:", error);
-
-    notifPanelContent.innerHTML = `
-      <div class="notif-list">
-        <div class="notif-item">Lỗi kết nối server</div>
-      </div>
-    `;
-  }
-}
-
-        function renderCalendar() {
-          calendarPanelContent.innerHTML = `
+            function renderNotif() {
+              notifPanelContent.innerHTML = `
+            <div class="notif-list">
+              <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+              <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+              <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+              <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
+            </div>
+          `;
+            }
+            function renderCalendar() {
+              calendarPanelContent.innerHTML = `
             <div class="calendar-card" id="calendarCard">
               <div class="calendar-head">
                 <div>
@@ -1467,129 +1496,129 @@
               <div class="calendar-grid" id="calGrid"></div>
             </div>
           `;
-          setTimeout(initCalendar, 0);
-        }
-
-        if (panelOrder.length === 1) {
-          if (panelOrder[0] === "notif") {
-            notifPanel.classList.add("show", "top");
-            renderNotif();
-          } else {
-            calendarPanel.classList.add("show", "top");
-            renderCalendar();
-          }
-        } else {
-          if (panelOrder[0] === "notif" && panelOrder[1] === "calendar") {
-            notifPanel.classList.add("show", "top");
-            calendarPanel.classList.add("show", "bottom");
-            renderNotif();
-          } else {
-            calendarPanel.classList.add("show", "top");
-            notifPanel.classList.add("show", "bottom");
-            renderCalendar();
-          }
-        }
-      }
-      function closePanel(panel) {
-        panelOrder = panelOrder.filter((p) => p !== panel);
-        notifPanel.classList.remove("top", "bottom", "show");
-        calendarPanel.classList.remove("top", "bottom", "show");
-        if (panelOrder.length === 1) {
-          if (panelOrder[0] === "notif") {
-            notifPanel.classList.add("show", "top");
-          } else {
-            calendarPanel.classList.add("show", "top");
-          }
-        }
-      }
-      btnNotif.onclick = () => showPanel("notif");
-      btnCalendar.onclick = () => showPanel("calendar");
-      closeNotifPanel &&
-        (closeNotifPanel.onclick = () => closePanel("notif"));
-      closeCalendarPanel &&
-        (closeCalendarPanel.onclick = () => closePanel("calendar"));
-      document.addEventListener("mousedown", (e) => {
-        if (
-          notifPanel.classList.contains("show") &&
-          !notifPanel.contains(e.target) &&
-          !btnNotif.contains(e.target)
-        )
-          closePanel("notif");
-        if (
-          calendarPanel.classList.contains("show") &&
-          !calendarPanel.contains(e.target) &&
-          !btnCalendar.contains(e.target)
-        )
-          closePanel("calendar");
-      });
-
-      function initCalendar() {
-        const calGrid = document.getElementById("calGrid");
-        const titleDay = document.getElementById("titleDay");
-        const subMonth = document.getElementById("subMonth");
-        const prevMth = document.getElementById("prevMth");
-        const nextMth = document.getElementById("nextMth");
-
-        let view = new Date();
-        function headText(d) {
-          return new Intl.DateTimeFormat("vi-VN", {
-            weekday: "short",
-            month: "short",
-            day: "2-digit",
-          }).format(d);
-        }
-        function buildCalendar(date) {
-          const y = date.getFullYear(),
-            m = date.getMonth();
-          titleDay.textContent = headText(new Date());
-          subMonth.textContent = new Intl.DateTimeFormat("vi-VN", {
-            month: "long",
-            year: "numeric",
-          })
-            .format(new Date(y, m, 1))
-            .toUpperCase();
-          const first = new Date(y, m, 1);
-          const start = (first.getDay() + 6) % 7; // Monday first
-          const days = new Date(y, m + 1, 0).getDate();
-          const prevDays = new Date(y, m, 0).getDate();
-          const parts = [];
-          ["T2", "T3", "T4", "T5", "T6", "T7", "CN"].forEach((d) =>
-            parts.push(`<div class="dow">${d}</div>`)
-          );
-          for (let i = 0; i < 42; i++) {
-            let label,
-              cls = "cell";
-            if (i < start) {
-              label = prevDays - start + i + 1;
-              cls += " faded";
-            } else if (i < start + days) {
-              label = i - start + 1;
-            } else {
-              label = i - (start + days) + 1;
-              cls += " faded";
+              setTimeout(initCalendar, 0);
             }
-            const today = new Date();
-            if (
-              y === today.getFullYear() &&
-              m === today.getMonth() &&
-              label === today.getDate() &&
-              !cls.includes("faded")
-            )
-              cls += " today";
-            parts.push(`<div class="${cls}">${label}</div>`);
+
+            if (panelOrder.length === 1) {
+              if (panelOrder[0] === "notif") {
+                notifPanel.classList.add("show", "top");
+                renderNotif();
+              } else {
+                calendarPanel.classList.add("show", "top");
+                renderCalendar();
+              }
+            } else {
+              if (panelOrder[0] === "notif" && panelOrder[1] === "calendar") {
+                notifPanel.classList.add("show", "top");
+                calendarPanel.classList.add("show", "bottom");
+                renderNotif();
+              } else {
+                calendarPanel.classList.add("show", "top");
+                notifPanel.classList.add("show", "bottom");
+                renderCalendar();
+              }
+            }
           }
-          calGrid.innerHTML = parts.join("");
-        }
-        prevMth.addEventListener("click", () => {
-          view.setMonth(view.getMonth() - 1);
-          buildCalendar(view);
-        });
-        nextMth.addEventListener("click", () => {
-          view.setMonth(view.getMonth() + 1);
-          buildCalendar(view);
-        });
-        buildCalendar(view);
-      }
+          function closePanel(panel) {
+            panelOrder = panelOrder.filter((p) => p !== panel);
+            notifPanel.classList.remove("top", "bottom", "show");
+            calendarPanel.classList.remove("top", "bottom", "show");
+            if (panelOrder.length === 1) {
+              if (panelOrder[0] === "notif") {
+                notifPanel.classList.add("show", "top");
+              } else {
+                calendarPanel.classList.add("show", "top");
+              }
+            }
+          }
+          btnNotif.onclick = () => showPanel("notif");
+          btnCalendar.onclick = () => showPanel("calendar");
+          closeNotifPanel &&
+            (closeNotifPanel.onclick = () => closePanel("notif"));
+          closeCalendarPanel &&
+            (closeCalendarPanel.onclick = () => closePanel("calendar"));
+          document.addEventListener("mousedown", (e) => {
+            if (
+              notifPanel.classList.contains("show") &&
+              !notifPanel.contains(e.target) &&
+              !btnNotif.contains(e.target)
+            )
+              closePanel("notif");
+            if (
+              calendarPanel.classList.contains("show") &&
+              !calendarPanel.contains(e.target) &&
+              !btnCalendar.contains(e.target)
+            )
+              closePanel("calendar");
+          });
+
+          function initCalendar() {
+            const calGrid = document.getElementById("calGrid");
+            const titleDay = document.getElementById("titleDay");
+            const subMonth = document.getElementById("subMonth");
+            const prevMth = document.getElementById("prevMth");
+            const nextMth = document.getElementById("nextMth");
+
+            let view = new Date();
+            function headText(d) {
+              return new Intl.DateTimeFormat("vi-VN", {
+                weekday: "short",
+                month: "short",
+                day: "2-digit",
+              }).format(d);
+            }
+            function buildCalendar(date) {
+              const y = date.getFullYear(),
+                m = date.getMonth();
+              titleDay.textContent = headText(new Date());
+              subMonth.textContent = new Intl.DateTimeFormat("vi-VN", {
+                month: "long",
+                year: "numeric",
+              })
+                .format(new Date(y, m, 1))
+                .toUpperCase();
+              const first = new Date(y, m, 1);
+              const start = (first.getDay() + 6) % 7; // Monday first
+              const days = new Date(y, m + 1, 0).getDate();
+              const prevDays = new Date(y, m, 0).getDate();
+              const parts = [];
+              ["T2", "T3", "T4", "T5", "T6", "T7", "CN"].forEach((d) =>
+                parts.push(`<div class="dow">${d}</div>`)
+              );
+              for (let i = 0; i < 42; i++) {
+                let label,
+                  cls = "cell";
+                if (i < start) {
+                  label = prevDays - start + i + 1;
+                  cls += " faded";
+                } else if (i < start + days) {
+                  label = i - start + 1;
+                } else {
+                  label = i - (start + days) + 1;
+                  cls += " faded";
+                }
+                const today = new Date();
+                if (
+                  y === today.getFullYear() &&
+                  m === today.getMonth() &&
+                  label === today.getDate() &&
+                  !cls.includes("faded")
+                )
+                  cls += " today";
+                parts.push(`<div class="${cls}">${label}</div>`);
+              }
+              calGrid.innerHTML = parts.join("");
+            }
+            prevMth.addEventListener("click", () => {
+              view.setMonth(view.getMonth() - 1);
+              buildCalendar(view);
+            });
+            nextMth.addEventListener("click", () => {
+              view.setMonth(view.getMonth() + 1);
+              buildCalendar(view);
+            });
+            buildCalendar(view);
+          }
 
           //Đăng xuất với hộp thoại xác nhận
           const logoutBtn = document.getElementById("Logout");
@@ -1929,6 +1958,7 @@
           return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
       </script>
+
 
 </body>
 

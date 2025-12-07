@@ -1225,6 +1225,18 @@
         document.addEventListener("DOMContentLoaded", loadMembers);
       </script>
 
+      <script>
+  document.getElementById("memberSearchRight").addEventListener("input", (e) => {
+    const keyword = e.target.value.toLowerCase();
+
+    document.querySelectorAll("#membersWrapRight .member-item").forEach(member => {
+      const name = member.querySelector("div div").textContent.toLowerCase();
+      member.style.display = name.includes(keyword) ? "flex" : "none";
+    });
+  });
+</script>
+
+
       <!-- javascript xem, nhắn tin, xóa thành viên -->
       <script>
         const memberMenu = document.getElementById("memberMenu");

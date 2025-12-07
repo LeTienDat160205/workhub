@@ -229,9 +229,13 @@ SELECT
     t.createdAt,
     t.updatedAt,
     BIN_TO_UUID(t.groupId) AS groupId,
-    g.groupName
+    g.groupName,
+    BIN_TO_UUID(t.createdBy) AS creatorId,
+    u_creator.name AS creatorName,
+    u_creator.avatarPath AS creatorAvatar
 FROM task t
 LEFT JOIN \`group\` g ON t.groupId = g.id
+   LEFT JOIN user u_creator ON t.createdBy = u_creator.id
 WHERE t.createdBy = UUID_TO_BIN(?)
 
 ORDER BY t.createdAt DESC;
@@ -264,10 +268,14 @@ SELECT
     t.createdAt,
     t.updatedAt,
     BIN_TO_UUID(t.groupId) AS groupId,
-    g.groupName
+    g.groupName,
+    BIN_TO_UUID(t.createdBy) AS creatorId,
+    u_creator.name AS creatorName,
+    u_creator.avatarPath AS creatorAvatar
 FROM task_assignee ta
 INNER JOIN task t ON ta.taskId = t.id
 LEFT JOIN \`group\` g ON t.groupId = g.id
+   LEFT JOIN user u_creator ON t.createdBy = u_creator.id
 
 WHERE ta.userId = UUID_TO_BIN(?)
 

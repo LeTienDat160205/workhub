@@ -610,22 +610,23 @@
                             <input id="deadline" name="deadline" type="date" required class="form-input"
                               style="flex: 1; padding: 10px 13px;" />
                           </div>
-                          <!-- Gán người thực hiện -->
-                          <div style="display: flex; flex-direction: column; gap: 8px;">
+                         <!-- Gán người thực hiện -->
+                          <div style="display: flex; flex-direction: column; gap: 12px;">
                             <label for="assigneeInput" class="form-label" style="font-weight: 600;">Thêm người thực
                               hiện</label>
-                            <div style="display: flex;">
-                              <select id="assigneeSelect" class="form-input"></select>
-                              <button id="addMemberForTask" type="button">Thêm</button>
-                              <!-- <button id="addMemberForTask" type="button"
-                                style="background-color: #4caf50; color: white;  border-radius: 6px; border: none; cursor: pointer;">Thêm</button> -->
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                              <select id="assigneeSelect" class="form-input" style="flex: 1; height: 30px;"></select>
+                              <button id="addMemberForTask" type="button"
+                                style="padding: 8px 14px; background: var(--primary); color: white; border-radius: 6px; border: none; cursor: pointer;">
+                                + Thêm
+                              </button>
                             </div>
                             <!-- Danh sách người được chọn -->
                             <div id="assigneeList"
-                              style="display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+                              style="display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--surface);">
                             </div>
                           </div>
-                          <div style="display: flex; justify-content: flex-end; gap: 12px">
+                          <div style="display: flex; justify-content: flex-end; gap: 12px;">
                             <button type="button" class="btn" id="cancelTaskBtn"
                               style="background: #9e9e9e">Huỷ</button>
                             <button type="submit" class="btn" id="createTaskBtn">Tạo</button>
@@ -667,8 +668,9 @@
                               closeTask();
                             }
                           });
-                          // -----------------------------------------------------------
-                          // Load thêm member tương ứng trong group
+
+                          // ------------------------ LOAD MEMBER TRONG GROUP ------------------------
+
                           let membersInGroup = [];
 
                           async function loadMembersForTask() {
@@ -677,6 +679,7 @@
                             renderAssigneeSelect();
                           }
                           loadMembersForTask();
+
                           function renderAssigneeSelect() {
                             const select = document.getElementById("assigneeSelect");
                             select.innerHTML = `<option value="">-- Chọn người thực hiện --</option>`;
@@ -688,9 +691,48 @@
                               select.appendChild(option);
                             });
                           }
-                          //--------------------------------------------------------------------------------
 
-                          let assignees = [];
+                          // ------------------------ HÀM TẠO AVATAR ------------------------
+
+                          const colors = ["#f87171", "#fb923c", "#facc15", "#4ade80", "#60a5fa", "#a78bfa", "#f472b6"];
+
+                          function renderAvatar(member) {
+                            if (member.avatarPath && member.avatarPath.trim() !== "") {
+                              // Có avatar thật
+                              return `
+      <img src="${member.avatarPath}" 
+           style="width:32px;height:32px;border-radius:50%;object-fit:cover">
+    `;
+                            }
+
+                            // Không có avatar → tạo avatar chữ cái đầu
+                            const key = `avatarColor_${member.userId}`;
+                            let bg = localStorage.getItem(key);
+                            if (!bg) {
+                              bg = colors[Math.floor(Math.random() * colors.length)];
+                              localStorage.setItem(key, bg);
+                            }
+
+                            const letter = member.name ? member.name.trim().charAt(0).toUpperCase() : "?";
+
+                            return `
+    <div style="
+      width: 32px; height: 32px; 
+      border-radius: 50%; 
+      background:${bg};
+      color: white;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:600;
+    ">
+      ${letter}
+    </div>
+  `;
+                          }
+
+                          // ------------------------ QUẢN LÝ DANH SÁCH ASSIGNEES ------------------------
+
+                          let assignees = [];  // ← CHỈ DÙNG ARRAY
+                          const hiddenInput = document.getElementById("assigneesInputHidden");
 
                           document.getElementById("addMemberForTask").addEventListener("click", () => {
                             const select = document.getElementById("assigneeSelect");
@@ -700,25 +742,67 @@
                             const member = membersInGroup.find(m => m.userId == userId);
                             if (!member) return;
 
-                            assignees.push(member.userId);
+                            // Tránh trùng
+                            if (assignees.includes(userId)) return;
 
+                            // Thêm user
+                            assignees.push(userId);
+
+                            // Render giao diện
                             const container = document.getElementById("assigneeList");
 
                             const div = document.createElement("div");
                             div.classList.add("member-item");
-                            div.style.display = "flex";
-                            div.style.alignItems = "center";
-                            div.style.gap = "10px";
+                            div.id = "assignee_" + userId;
+                            div.style = `
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding: 8px 12px;
+        border:1px solid var(--border-color);
+        border-radius:8px;
+        background:var(--bg);
+    `;
+
                             div.innerHTML = `
-                              <img src="${member.avatarPath || '/uploads/default-avatar.png'}"
-                                style="width:32px;height:32px;border-radius:50%">
-                              <span>${member.name}</span>
-                            `;
+        <div style="display:flex; align-items:center; gap:10px;">
+            ${renderAvatar(member)}
+            <span style="font-weight:500">${member.name}</span>
+        </div>
+
+        <button class="removeAssignee" data-id="${userId}"
+            style="background:#ef4444;color:white;padding:4px 10px;border:none;border-radius:6px;cursor:pointer;">
+            Xoá
+        </button>
+    `;
 
                             container.appendChild(div);
 
-                            // cập nhật gửi đi backend
-                            document.getElementById("assigneesInputHidden").value = JSON.stringify(assignees);
+                            // Cập nhật hidden input
+                            hiddenInput.value = JSON.stringify(assignees);
+                          });
+
+                          // ------------------------ XOÁ ASSIGNEE ------------------------
+
+                          document.getElementById("assigneeList").addEventListener("click", (e) => {
+                            if (e.target.classList.contains("removeAssignee")) {
+                              const id = e.target.dataset.id;
+
+                              // Xóa khỏi array
+                              assignees = assignees.filter(uid => uid !== id);
+
+                              // Xóa khỏi UI
+                              const div = document.getElementById("assignee_" + id);
+                              if (div) div.remove();
+
+                              hiddenInput.value = JSON.stringify(assignees);
+                            }
+                          });
+
+                          // ------------------------ TRƯỚC KHI SUBMIT FORM ------------------------
+
+                          document.querySelector("form").addEventListener("submit", () => {
+                            hiddenInput.value = JSON.stringify(assignees);
                           });
 
                           // --- Thêm file: render preview và cho phép xoá ---
@@ -741,7 +825,7 @@
                               right.style = 'display:flex;gap:8px;align-items:center';
                               const size = document.createElement('span');
                               size.style = 'color:var(--text-muted);font-size:0.85rem';
-                              size.textContent = (f.size/1024).toFixed(1) + ' KB';
+                              size.textContent = (f.size / 1024).toFixed(1) + ' KB';
                               const removeBtn = document.createElement('button');
                               removeBtn.type = 'button';
                               removeBtn.textContent = 'Xoá';

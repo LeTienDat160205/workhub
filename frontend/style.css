@@ -573,6 +573,33 @@ body {
   background-size: 100% 1.2rem;
 }
 
+/* Thanh cuộn nhỏ, màu xám, bo tròn */
+.task-list::-webkit-scrollbar {
+  width: 6px;     /* độ rộng */
+}
+
+.task-list::-webkit-scrollbar-track {
+  background: #f2f2f2; /* nền trắng nhạt */
+}
+
+.task-list::-webkit-scrollbar-thumb {
+  background: #bcbcbc; /* màu xám nhạt */
+  border-radius: 10px; /* bo tròn */
+}
+
+.task-list::-webkit-scrollbar-thumb:hover {
+  background: #9e9e9e; /* đậm hơn chút khi hover */
+}
+
+[data-theme="dark"] .task-list::-webkit-scrollbar-thumb {
+  background: #7a7a7a;
+}
+[data-theme="dark"] .task-list::-webkit-scrollbar-track {
+  background: #101010;
+}
+
+
+
 /* RIGHT PANEL STACK */
 .right-panel-stack {
   position: fixed;
@@ -1216,6 +1243,27 @@ select.form-input {
   flex-direction: column;
   overflow-y: auto;
   background: var(--bg);
+}
+
+/* Thanh cuộn nhỏ, màu xám, bo tròn */
+.wh-main::-webkit-scrollbar {
+  width: 6px;     /* độ rộng */
+}
+.wh-main::-webkit-scrollbar-track {
+  background: #f2f2f2; /* nền trắng nhạt */
+}
+.wh-main::-webkit-scrollbar-thumb {
+  background: #bcbcbc; /* màu xám nhạt */
+  border-radius: 10px; /* bo tròn */
+}
+.wh-main::-webkit-scrollbar-thumb:hover {
+  background: #9e9e9e; /* đậm hơn chút khi hover */
+}
+[data-theme="dark"] .wh-main::-webkit-scrollbar-thumb {
+  background: #7a7a7a;
+}
+[data-theme="dark"] .wh-main::-webkit-scrollbar-track {
+  background: #101010;
 }
 
 .wh-topbar {

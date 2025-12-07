@@ -49,6 +49,7 @@ router.post("/", ensureAuth, async (req, res) => {
     const taskId = uuidv7();
 
     // Tạo task
+
     const sqlTask = `
       INSERT INTO task (id, taskName, description, deadline, createdBy, groupId)
       VALUES (UUID_TO_BIN(?), ?, ?, ?, UUID_TO_BIN(?), UUID_TO_BIN(?))

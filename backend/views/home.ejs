@@ -324,6 +324,25 @@
 
           const CURRENT_USER_ID = "<%= user.id || user._id || '' %>";
 
+          // Normalize creator info from different task shapes
+          function getCreatorInfo(task) {
+            if (!task) return { name: '', avatar: '' };
+
+            // Accept owner object variants
+            const ownerObj = task.owner || task.ownerInfo || (task._doc && (task._doc.owner || task._doc.createdBy));
+            if (ownerObj && typeof ownerObj === 'object') {
+              return {
+                name: ownerObj.name || ownerObj.username || ownerObj.fullName || ownerObj.ownerName || ownerObj.createdBy || '',
+                avatar: ownerObj.avatarPath || ownerObj.avatar || ownerObj.ownerAvatar || ''
+              };
+            }
+
+            // Fallback to top-level fields
+            const name = task.ownerName || task.creatorName || task.createdBy || task.owner || '';
+            const avatar = task.ownerAvatar || task.creatorAvatar || task.avatar || '';
+            return { name, avatar };
+          }
+
           function renderTasks(tasks, container, type) {
             container.innerHTML = "";
 
@@ -343,9 +362,8 @@
       background:var(--surface);
     `;
 
-              const creatorName = task.ownerName || task.createdBy || '';
-              const creatorAvatar = task.ownerAvatar || '';
-              const groupName = task.groupName || 'Không thuộc nhóm';
+              const { name: creatorName, avatar: creatorAvatar } = getCreatorInfo(task);
+              const groupName = task.groupName || task.group?.name || 'Không thuộc nhóm';
 
               /*1. TASK NAME + DESCRIPTION*/
               const col1 = document.createElement('div');
@@ -391,11 +409,11 @@
               creatorInfo.style = "display:flex;flex-direction:column;gap:4px;min-width:0;flex:1";
 
               creatorInfo.innerHTML = `
-      <div style="font-size:14px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      <div style="font-size:20px;font-weight:600;color:var(--text); white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
         ${groupName}
       </div>
 
-      <div style="font-size:20px;font-weight:600;color:var(--text); white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      <div style="font-size:14px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
         ${creatorName}
       </div>
     `;
@@ -1704,7 +1722,7 @@
           const submitBtn = document.getElementById('submitFileBtn');
           const submitInput = document.getElementById('submitFileInput');
 
-          const userName = task.ownerName || task.owner || task.createdBy || 'Người tạo';
+          const userName = task.ownerName || task.owner || task.createdBy || task.creatorName || 'Người tạo';
           // helper to set value for inputs or textContent for other elements
           function setTextOrValue(el, text) {
             if (!el) return;

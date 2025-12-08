@@ -1771,7 +1771,9 @@
                   <input type="file" id="submitFileInput" style="display:none" />
                 </div>
                 <div id="submitProductFiles"
-                  style="min-height:30px;display:flex;flex-direction:column;gap:6px;align-items:center"></div>
+                  style="min-height:30px;display:flex;flex-direction:column;gap:6px;align-items:center">
+                </div>
+                <div id="sanpham"></div>
               </div>
 
               <div style="display:flex;justify-content:center;margin-top:10px">
@@ -1814,6 +1816,11 @@
           const acceptBtn = document.getElementById('acceptTaskBtn');
           const submitBtn = document.getElementById('submitFileBtn');
           const submitInput = document.getElementById('submitFileInput');
+          // ID của người tạo task
+          const creatorId = task.createdBy;
+
+          // ID của tất cả assignees
+          const assigneeIds = (task.assignees || []).map(a => a.userId || a.id);
 
           const userName = task.ownerName || task.owner || task.createdBy || task.creatorName || 'Người tạo';
           // helper to set value for inputs or textContent for other elements
@@ -1842,7 +1849,7 @@
           setTextOrValue(startEl, task.createdAt ? new Date(task.createdAt).toLocaleDateString('vi-VN') : '');
           setTextOrValue(deadlineEl, task.deadline ? new Date(task.deadline).toLocaleDateString('vi-VN') : '');
 
-          // Fetch and render creator attachments from server
+          // Lấy và hiển thị tệp đính kèm của người tạo từ máy chủ
           (async () => {
             creatorAttachmentsEl.innerHTML = '<span style="font-size:0.85rem;color:var(--text-muted)">Đang tải file...</span>';
             try {
@@ -1856,26 +1863,43 @@
                 files.forEach((f, idx) => {
                   const wrap = document.createElement('div');
                   wrap.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border:1px solid var(--border-color);border-radius:6px;background:var(--surface)';
+
                   const left = document.createElement('div');
                   left.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px';
+
                   const aLink = document.createElement('a');
                   aLink.href = f.filePath || '#';
                   aLink.textContent = f.fileName || `File ${idx + 1}`;
                   aLink.target = '_blank';
                   aLink.rel = 'noopener noreferrer';
+
                   left.appendChild(aLink);
+
                   const dlBtn = document.createElement('button');
                   dlBtn.type = 'button';
                   dlBtn.textContent = 'Tải';
                   dlBtn.style.cssText = 'padding:6px 8px;border-radius:6px;border:none;background:#111827;color:white;cursor:pointer';
-                  dlBtn.onclick = () => {
-                    // open link in new tab to trigger download
-                    window.open(f.filePath || '#', '_blank');
-                  };
+                  dlBtn.onclick = () => window.open(f.filePath || '#', '_blank');
+
                   wrap.appendChild(left);
                   wrap.appendChild(dlBtn);
-                  creatorAttachmentsEl.appendChild(wrap);
+
+                  // PHÂN LOẠI FILE
+                  const isCreatorFile = f.userId === creatorId;
+                  const isProductFile = assigneeIds.includes(f.userId);
+
+                  if (isCreatorFile) {
+                    creatorAttachmentsEl.appendChild(wrap);
+                  }
+                  else if (isProductFile) {
+                    submitProductFiles.appendChild(wrap);
+                  }
+                  else {
+                    // fallback: nếu không thuộc creator hay assignee thì vẫn cho vào creatorAttachments
+                    creatorAttachmentsEl.appendChild(wrap);
+                  }
                 });
+
               }
             } catch (err) {
               console.error('Error fetching files:', err);
@@ -1883,16 +1907,16 @@
             }
           })();
 
-          // Clear submit product files area
+          // Xóa khu vực gửi tệp sản phẩm
           submitProductFiles.innerHTML = '';
 
           // chat placeholder text
           chatPlaceholder.textContent = 'Chat chưa khả dụng';
 
-          // Accept (Nhận): download attachments and set personal status to in_progress
+          // Chấp nhận (Nhận): tải xuống tệp đính kèm và đặt trạng thái cá nhân thành in_progress
           acceptBtn.onclick = async () => {
             try {
-              // Fetch files and trigger downloads
+              // Lấy tệp và kích hoạt tải xuống
               const filesRes = await fetch(`/groups/${taskId}/files`, { credentials: 'same-origin' });
               const files = filesRes.ok ? await filesRes.json() : [];
               files.forEach(f => {
@@ -1914,54 +1938,118 @@
 
           // Submit (Gửi file): open file input and upload then mark completed
           submitBtn.onclick = () => submitInput.click();
-          submitInput.onchange = async () => {
-            const file = submitInput.files && submitInput.files[0];
-            if (!file) return;
-            // show uploading placeholder
-            const uploading = document.createElement('div');
-            uploading.textContent = `Đang tải lên ${file.name} ...`;
-            submitProductFiles.appendChild(uploading);
-            try {
-              const fd = new FormData();
-              fd.append('file', file);
-              fd.append('taskId', taskId);
-              if (CURRENT_USER_ID) fd.append('userId', CURRENT_USER_ID);
 
-              // POST to server - backend endpoint must exist to accept this
-              const res = await fetch(`/groups/${taskId}/submit`, { method: 'POST', body: fd, credentials: 'same-origin' });
-              const data = await res.json().catch(() => ({}));
-              if (!res.ok) throw new Error(data.error || 'Lỗi khi gửi file');
+          // === FILE SẢN PHẨM ===
+          let selectedProductFiles = []; // lưu file tạm trước khi nộp
 
-              // show uploaded file link if provided by server, else show name
-              uploading.innerHTML = '';
-              const link = document.createElement('a');
-              link.textContent = (data.file && data.file.name) || file.name;
-              link.href = (data.file && (data.file.url || data.file.path)) || '#';
-              if (link.href !== '#') { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
-              uploading.appendChild(link);
+          // MỞ INPUT FILE
+          submitBtn.onclick = () => submitInput.click();
 
-              // mark assignee completed
-              if (CURRENT_USER_ID) await updateAssigneeStatus(taskId, CURRENT_USER_ID, 'completed');
-              if (typeof showToast === 'function') showToast('Gửi file thành công');
-              // clear input
-              submitInput.value = '';
-            } catch (err) {
-              console.error('❌ submit file error:', err);
-              uploading.remove();
-              alert(err.message || 'Lỗi khi gửi file');
-            }
+          // KHI CHỌN FILE
+          submitInput.onchange = () => {
+            const files = Array.from(submitInput.files);
+            if (!files.length) return;
+
+            selectedProductFiles = files;           // lưu file
+            submitProductFiles.innerHTML = "";      // reset giao diện
+
+            files.forEach((file, index) => {
+              const item = document.createElement("div");
+              item.className = "product-file-item";
+
+              const info = document.createElement("div");
+              info.className = "product-file-info";
+
+              const name = document.createElement("div");
+              name.className = "product-file-name";
+              name.textContent = file.name;
+
+              const size = document.createElement("div");
+              size.className = "product-file-size";
+              size.textContent = (file.size / 1024).toFixed(1) + " KB";
+
+              info.appendChild(name);
+              info.appendChild(size);
+
+              const removeBtn = document.createElement("button");
+              removeBtn.className = "product-file-remove";
+              removeBtn.textContent = "Xóa";
+
+              // XÓA FILE ĐÃ CHỌN
+              removeBtn.onclick = () => {
+                selectedProductFiles.splice(index, 1);
+                item.remove();
+              };
+
+              item.appendChild(info);
+              item.appendChild(removeBtn);
+              submitProductFiles.appendChild(item);
+            });
           };
 
-          // Confirm button: mark current user completed (final confirmation)
-          const confirmBtn = document.getElementById('confirmTaskBtn');
+
+
+          // === XÁC NHẬN NỘP FILE ===
+
+          const confirmBtn = document.getElementById("confirmTaskBtn");
+
           if (confirmBtn) {
             confirmBtn.onclick = async () => {
               try {
-                if (CURRENT_USER_ID) await updateAssigneeStatus(taskId, CURRENT_USER_ID, 'completed');
-                if (typeof showToast === 'function') showToast('Xác nhận thành công');
+                if (!selectedProductFiles.length) {
+                  alert("Bạn chưa chọn file sản phẩm");
+                  return;
+                }
+
+                // Upload từng file
+                for (const file of selectedProductFiles) {
+                  const fd = new FormData();
+                  fd.append("file", file);
+                  fd.append("taskId", taskId);
+                  if (CURRENT_USER_ID) fd.append("userId", CURRENT_USER_ID);
+
+                  const res = await fetch(`/groups/${taskId}/submit`, {
+                    method: "POST",
+                    body: fd,
+                    credentials: "same-origin"
+                  });
+
+                  const data = await res.json().catch(() => ({}));
+                  if (!res.ok) throw new Error(data.error || "Lỗi upload file");
+
+                  // Hiển thị file đã nộp sau khi upload thành công
+                  const uploaded = document.createElement("div");
+                  uploaded.className = "product-file-item";
+
+                  const info = document.createElement("div");
+                  info.className = "product-file-info";
+
+                  const link = document.createElement("a");
+                  link.className = "product-file-name";
+                  link.textContent = data.file?.name || file.name;
+                  link.href = data.file?.url || data.file?.path || "#";
+                  if (link.href !== "#") link.target = "_blank";
+
+                  info.appendChild(link);
+                  uploaded.appendChild(info);
+
+                  submitProductFiles.appendChild(uploaded);
+                }
+
+                // Reset sau khi gửi xong
+                selectedProductFiles = [];
+                submitInput.value = "";
+
+                // Cập nhật trạng thái thành completed
+                if (CURRENT_USER_ID)
+                  await updateAssigneeStatus(taskId, CURRENT_USER_ID, "completed");
+
+                if (typeof showToast === "function")
+                  showToast("Nộp file thành công");
+
               } catch (err) {
-                console.error('❌ confirmTask error:', err);
-                alert(err.message || 'Lỗi khi xác nhận');
+                console.error("❌ confirmTask error:", err);
+                alert(err.message || "Lỗi khi xác nhận");
               }
             };
           }

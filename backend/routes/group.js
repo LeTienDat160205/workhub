@@ -414,6 +414,7 @@ router.get("/:taskId/files", ensureAuth, async (req, res) => {
     const sql = `
       SELECT 
         BIN_TO_UUID(id) AS fileId,
+        BIN_TO_UUID(userId) AS userId,
         fileName,
         fileType,
         fileSize,
@@ -430,6 +431,56 @@ router.get("/:taskId/files", ensureAuth, async (req, res) => {
   } catch (err) {
     console.error("GET /groups/:taskId/files error:", err);
     res.status(500).json({ error: "Lỗi khi tải file đính kèm." });
+  }
+});
+
+// =============================== NỘP FILE SẢN PHẨM CHO TASK ===============================
+// POST /groups/:taskId/submit
+router.post('/:taskId/submit', ensureAuth, (req, res, next) => {
+  // use multer single-file handler but return JSON on error
+  upload.single('file')(req, res, function (err) {
+    if (err) {
+      console.error('Multer upload error (submit):', err);
+      return res.status(400).json({ error: 'File upload error', details: err.message || String(err) });
+    }
+    next();
+  });
+}, async (req, res) => {
+  try {
+    const { taskId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // who is submitting
+    const userId = req.session.user && req.session.user.id;
+
+    const f = req.file;
+    const fileId = uuidv7();
+    const fileName = f.originalname;
+    const fileType = f.mimetype || null;
+    const fileSize = f.size || 0;
+    const relPath = path.join('/uploads/tasks', path.basename(f.path)).replace(/\\/g, '/');
+
+    const insertFileSql = `
+      INSERT INTO file (id, taskId, userId, fileName, fileType, fileSize, filePath)
+      VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?)
+    `;
+
+    try {
+      await db.promise().query(insertFileSql, [fileId, taskId, userId, fileName, fileType, fileSize, relPath]);
+    } catch (err) {
+      console.error('Failed to insert submitted file metadata', err);
+      // don't fail the whole request if DB insert fails, but inform client
+      return res.status(500).json({ error: 'Lỗi khi lưu metadata file' });
+    }
+
+    // return minimal file info expected by frontend
+    return res.json({ success: true, file: { id: fileId, name: fileName, path: relPath, url: relPath } });
+  } catch (err) {
+    console.error('POST /groups/:taskId/submit error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 

@@ -800,6 +800,59 @@
         </div>
       </div>
 
+      <script>
+        function renderNotif(notifs) {
+          const notifList = document.getElementById("notifPanelContent");
+          notifList.innerHTML = "";
+
+          if (!notifs || notifs.length === 0) {
+            notifList.innerHTML = `
+            <div class="notif-empty">Không có thông báo</div>
+        `;
+            return;
+          }
+
+          notifs.forEach(notif => {
+            const div = document.createElement("div");
+            div.classList.add("notif-item");
+
+            // Nếu chưa đọc → thêm class highlight
+            if (!notif.isRead) div.classList.add("unread");
+
+            div.innerHTML = `
+            <div class="notif-dot"></div>
+            <div class="notif-content">
+                <div class="notif-message">${notif.message}</div>
+                <div class="notif-time">${formatNotifTime(notif.createdAt)}</div>
+            </div>
+        `;
+
+            // Khi click vào thông báo
+            div.addEventListener("click", async () => {
+              // Đánh dấu đã đọc
+              if (!notif.isRead) {
+                await fetch(`/groups/notifications/${notif.id}/read`, {
+                  method: "POST"
+                });
+              }
+
+              // Nếu thông báo liên quan đến task → chuyển đến trang task
+              if (notif.type === "task" && notif.referenceId) {
+                window.location.href = `/tasks/${notif.referenceId}`;
+              }
+            });
+
+            notifList.appendChild(div);
+          });
+        }
+
+        async function loadNotifs() {
+          const res = await fetch("/groups/notifications");
+          const data = await res.json();
+          renderNotif(data);
+        }
+      </script>
+
       <!-- POPUP TẠO NHÓM -->
       <div class="popup-overlay" id="popupGroup" aria-hidden="true">
         <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
@@ -1496,16 +1549,6 @@
             notifPanel.classList.remove("top", "bottom", "show");
             calendarPanel.classList.remove("top", "bottom", "show");
 
-            function renderNotif() {
-              notifPanelContent.innerHTML = `
-            <div class="notif-list">
-              <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
-              <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
-              <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
-              <div class="notif-item"><div class="notif-dot"></div>Nội dung thông báo</div>
-            </div>
-          `;
-            }
             function renderCalendar() {
               calendarPanelContent.innerHTML = `
             <div class="calendar-card" id="calendarCard">
@@ -1557,7 +1600,10 @@
               }
             }
           }
-          btnNotif.onclick = () => showPanel("notif");
+          btnNotif.onclick = () => {
+            showPanel("notif");
+            loadNotifs();
+          };
           btnCalendar.onclick = () => showPanel("calendar");
           closeNotifPanel &&
             (closeNotifPanel.onclick = () => closePanel("notif"));

@@ -52,9 +52,7 @@ router.post("/", ensureAuth, async (req, res) => {
       return res.status(400).json({ error: "Danh sách assignees rỗng" });
     }
 
-    const taskId = uuidv7();
-    const notiId = uuidv7();
-    
+ 
 
     // 2) GÁN TASK + GỬI THÔNG BÁO
     const sqlAssignee = `

@@ -55,7 +55,7 @@ app.use("/groups", groupRoutes);
 app.use("/chat", chatRoutes);
 app.use("/notification", notificationRoutes);
 
-app.use("/tasks", taskRoutes);
+// app.use("/tasks", taskRoutes);
 app.use(chatUploadRoutes);
 app.use("/uploads", express.static("uploads"));
 

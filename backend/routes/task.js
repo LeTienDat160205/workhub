@@ -54,14 +54,6 @@ router.post("/", ensureAuth, async (req, res) => {
 
     const taskId = uuidv7();
     const notiId = uuidv7();
-
-
-    const sqlTask = `
-      INSERT INTO task (id, taskName, description, deadline, createdBy, groupId)
-      VALUES (UUID_TO_BIN(?), ?, ?, ?, UUID_TO_BIN(?), UUID_TO_BIN(?))
-      `,
-      [taskId, taskName, description || null, deadline || null, createdBy, groupId]
-    );
     
 
     // 2) GÁN TASK + GỬI THÔNG BÁO

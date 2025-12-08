@@ -451,8 +451,8 @@
   gap:6px;
 `;
               col3.appendChild(assigneesWrap);
-  
-              
+
+
 
               /*4. TRẠNG THÁI*/
               const col4 = document.createElement("div");
@@ -518,7 +518,7 @@
               loadAssignees(taskId, assigneesWrap);
             });
           }
-          
+
           // cập nhật trạng thái
           async function loadAssignees(taskId, container) {
             if (!container) return;
@@ -689,76 +689,76 @@
           loadTasks();
 
           // --- SEARCH TASKS ---
-const taskSearchInput = document.getElementById("taskSearchInput");
+          const taskSearchInput = document.getElementById("taskSearchInput");
 
-taskSearchInput.addEventListener("input", function () {
-    const keyword = this.value.trim().toLowerCase();
+          taskSearchInput.addEventListener("input", function () {
+            const keyword = this.value.trim().toLowerCase();
 
-    // lấy tất cả task (assigned + received)
-    document.querySelectorAll(".task-assigned").forEach(task => {
+            // lấy tất cả task (assigned + received)
+            document.querySelectorAll(".task-assigned").forEach(task => {
 
-        // tên task nằm trong col1 -> div đầu tiên
-        const taskNameEl = task.querySelector("div div:nth-child(1)");
-        const taskName = taskNameEl ? taskNameEl.textContent.trim().toLowerCase() : "";
+              // tên task nằm trong col1 -> div đầu tiên
+              const taskNameEl = task.querySelector("div div:nth-child(1)");
+              const taskName = taskNameEl ? taskNameEl.textContent.trim().toLowerCase() : "";
 
-        // kiểm tra match
-        if (taskName.includes(keyword)) {
-            task.style.display = "grid";  // giữ nguyên layout
-        } else {
-            task.style.display = "none";
-        }
-    });
-});
+              // kiểm tra match
+              if (taskName.includes(keyword)) {
+                task.style.display = "grid";  // giữ nguyên layout
+              } else {
+                task.style.display = "none";
+              }
+            });
+          });
 
-// ========== FILTER TASKS BY STATUS ==========
-document.querySelectorAll(".task-sub li a").forEach(option => {
-    option.addEventListener("click", () => {
+          // ========== FILTER TASKS BY STATUS ==========
+          document.querySelectorAll(".task-sub li a").forEach(option => {
+            option.addEventListener("click", () => {
 
-        const filterText = option.textContent.trim(); // lấy text: "Đã hoàn thành", "Đang làm", "Chưa nhận", ...
+              const filterText = option.textContent.trim(); // lấy text: "Đã hoàn thành", "Đang làm", "Chưa nhận", ...
 
-        // Gọi hàm lọc
-        filterTasks(filterText);
-    });
-});
+              // Gọi hàm lọc
+              filterTasks(filterText);
+            });
+          });
 
 
-function filterTasks(filterText) {
-    const allTasks = document.querySelectorAll(".task-assigned");
+          function filterTasks(filterText) {
+            const allTasks = document.querySelectorAll(".task-assigned");
 
-    allTasks.forEach(task => {
+            allTasks.forEach(task => {
 
-        // Lấy phần trạng thái hiển thị trong HTML
-        const statusEl = task.querySelector('[id^="task_status_"] div:nth-child(2)');
-        if (!statusEl) return;
+              // Lấy phần trạng thái hiển thị trong HTML
+              const statusEl = task.querySelector('[id^="task_status_"] div:nth-child(2)');
+              if (!statusEl) return;
 
-        const statusText = statusEl.textContent.trim(); // ví dụ: "Đã hoàn thành"
+              const statusText = statusEl.textContent.trim(); // ví dụ: "Đã hoàn thành"
 
-        // RULES:
-        // Tất cả          → luôn hiện
-        // Đã hoàn thành  → match "Đã hoàn thành"
-        // Đang làm       → match "Đang làm"
-        // Chưa nhận      → match "Chưa làm"
-        
-        let show = false;
+              // RULES:
+              // Tất cả          → luôn hiện
+              // Đã hoàn thành  → match "Đã hoàn thành"
+              // Đang làm       → match "Đang làm"
+              // Chưa nhận      → match "Chưa làm"
 
-        if (filterText === "Tất cả") {
-            show = true;
-        }
-        else if (filterText === "Đã hoàn thành" && statusText.includes("Hoàn thành")) {
-            show = true;
-        }
-        else if (filterText === "Đang làm" && statusText.includes("Đang làm")) {
-            show = true;
-        }
-        else if (filterText === "Chưa nhận" && statusText.includes("Chưa làm")) {
-            show = true;
-        }
+              let show = false;
 
-        task.style.display = show ? "grid" : "none";
-    });
-}
+              if (filterText === "Tất cả") {
+                show = true;
+              }
+              else if (filterText === "Đã hoàn thành" && statusText.includes("Hoàn thành")) {
+                show = true;
+              }
+              else if (filterText === "Đang làm" && statusText.includes("Đang làm")) {
+                show = true;
+              }
+              else if (filterText === "Chưa nhận" && statusText.includes("Chưa làm")) {
+                show = true;
+              }
 
-          
+              task.style.display = show ? "grid" : "none";
+            });
+          }
+
+
         </script>
       </div>
 
@@ -923,6 +923,14 @@ function filterTasks(filterText) {
                   }
                 }
                 window.addEventListener('DOMContentLoaded', loadGroups);
+
+                document.querySelector('.sidebar-search input').addEventListener('input', e => {
+                  const keyword = e.target.value.toLowerCase();
+                  document.querySelectorAll('.group-card').forEach(card => {
+                    const name = card.querySelector('.group-title').textContent.toLowerCase();
+                    card.style.display = name.includes(keyword) ? '' : 'none';
+                  });
+                });
 
                 // Xử lý submit tạo nhóm
                 const groupForm = document.getElementById('groupForm');
@@ -1702,7 +1710,8 @@ function filterTasks(filterText) {
         <div class="popup-content" role="dialog" aria-modal="true"
           style="width:760px; max-width:95vw; max-height:90vh; overflow:auto; padding:16px; box-sizing:border-box;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <div style="flex:1;text-align:center;font-weight:700;font-size: 20px;color: #22c55e;">Trao đổi công việc</div>  
+            <div style="flex:1;text-align:center;font-weight:700;font-size: 20px;color: #22c55e;">Trao đổi công việc
+            </div>
             <button class="close-btn" id="closeTaskDetailBtn" aria-label="Đóng" style="font-size:30px;">&times;</button>
           </div>
           <div style="height: 25px;"></div>
@@ -1715,13 +1724,17 @@ function filterTasks(filterText) {
                   style="width:72px;height:72px;border-radius:50%;background:#cbd5e1;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0;">
                 </div>
                 <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
-                  <input id="detailGroupName" readonly style="padding:8px;border:1px solid var(--border-color);border-radius:6px;background:transparent;font-weight:600" />
-                  <input id="detailUserName" readonly style="padding:8px;border:1px solid var(--border-color);border-radius:6px;background:transparent;font-weight:600" />
+                  <input id="detailGroupName" readonly
+                    style="padding:8px;border:1px solid var(--border-color);border-radius:6px;background:transparent;font-weight:600" />
+                  <input id="detailUserName" readonly
+                    style="padding:8px;border:1px solid var(--border-color);border-radius:6px;background:transparent;font-weight:600" />
                 </div>
               </div>
 
               <div>
-                <input id="detailTaskName" readonly style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:6px;background:var(--surface);font-weight:700" value="-" />
+                <input id="detailTaskName" readonly
+                  style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:6px;background:var(--surface);font-weight:700"
+                  value="-" />
               </div>
 
               <div>
@@ -1731,18 +1744,24 @@ function filterTasks(filterText) {
 
               <div style="display:flex;align-items:center;gap:8px">
                 <div style="display:flex;gap:6px;align-items:center">
-                  <input type="text" id="detailStart" readonly style="padding:6px;border:1px solid var(--border-color);border-radius:6px;width:150px" placeholder="Ngày tạo" />
+                  <input type="text" id="detailStart" readonly
+                    style="padding:6px;border:1px solid var(--border-color);border-radius:6px;width:150px"
+                    placeholder="Ngày tạo" />
                 </div>
                 <div style="display:flex;gap:6px;align-items:center">
-                  <input type="text" id="detailDeadline" readonly style="padding:6px;border:1px solid var(--border-color);border-radius:6px;width:150px" placeholder="Deadline" />
+                  <input type="text" id="detailDeadline" readonly
+                    style="padding:6px;border:1px solid var(--border-color);border-radius:6px;width:150px"
+                    placeholder="Deadline" />
                 </div>
               </div>
 
               <!-- Creator attachments list (rendered by openTaskDetail) -->
-              <div id="creatorAttachments" style="display:flex;flex-direction:column;gap:6px;width:100%;margin-top:6px"></div>
+              <div id="creatorAttachments" style="display:flex;flex-direction:column;gap:6px;width:100%;margin-top:6px">
+              </div>
 
               <div style="display:flex;justify-content:center;margin-top:6px">
-                <button class="btn" id="acceptTaskBtn" type="button" style="background:#2563eb;color:white;padding:8px 18px">Nhận công việc</button>
+                <button class="btn" id="acceptTaskBtn" type="button"
+                  style="background:#2563eb;color:white;padding:8px 18px">Nhận công việc</button>
               </div>
 
               <div style="display:flex;flex-direction:column;gap:6px">
@@ -1751,11 +1770,13 @@ function filterTasks(filterText) {
                   <button class="btn" id="submitFileBtn" type="button">Chọn file</button>
                   <input type="file" id="submitFileInput" style="display:none" />
                 </div>
-                <div id="submitProductFiles" style="min-height:30px;display:flex;flex-direction:column;gap:6px;align-items:center"></div>
+                <div id="submitProductFiles"
+                  style="min-height:30px;display:flex;flex-direction:column;gap:6px;align-items:center"></div>
               </div>
 
               <div style="display:flex;justify-content:center;margin-top:10px">
-                <button class="btn" id="confirmTaskBtn" style="background:#16a34a;color:white;padding:8px 20px">Xác nhận</button>
+                <button class="btn" id="confirmTaskBtn" style="background:#16a34a;color:white;padding:8px 20px">Xác
+                  nhận</button>
               </div>
             </div>
 
@@ -1827,7 +1848,7 @@ function filterTasks(filterText) {
             try {
               const filesRes = await fetch(`/groups/${taskId}/files`, { credentials: 'same-origin' });
               const files = filesRes.ok ? await filesRes.json() : [];
-              
+
               creatorAttachmentsEl.innerHTML = '';
               if (files.length === 0) {
                 creatorAttachmentsEl.innerHTML = '<span style="font-size:0.85rem;color:var(--text-muted)">Không có file</span>';
@@ -1839,7 +1860,7 @@ function filterTasks(filterText) {
                   left.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px';
                   const aLink = document.createElement('a');
                   aLink.href = f.filePath || '#';
-                  aLink.textContent = f.fileName || `File ${idx+1}`;
+                  aLink.textContent = f.fileName || `File ${idx + 1}`;
                   aLink.target = '_blank';
                   aLink.rel = 'noopener noreferrer';
                   left.appendChild(aLink);

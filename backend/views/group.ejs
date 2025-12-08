@@ -610,7 +610,7 @@
                             <input id="deadline" name="deadline" type="date" required class="form-input"
                               style="flex: 1; padding: 10px 13px;" />
                           </div>
-                         <!-- Gán người thực hiện -->
+                          <!-- Gán người thực hiện -->
                           <div style="display: flex; flex-direction: column; gap: 12px;">
                             <label for="assigneeInput" class="form-label" style="font-weight: 600;">Thêm người thực
                               hiện</label>
@@ -1290,7 +1290,7 @@
         <div class="member-item" data-userid="${m.userId}" style="display: flex; align-items: center; gap: 8px; padding: 6px 0;">
           <div class="avatar">${getAvatarHTML(m)}</div>
           <div style="flex:1">
-            <div style="font-weight:600;color:var(--text)">${m.name}</div>
+            <div style="font-weight:600;color:var(--text)" class="member-title">${m.name}</div>
             <div style="font-size:0.9rem;color:var(--text-muted)">
               ${m.roleInGroup === "leader" ? "👑 Trưởng nhóm" : "👤 Thành viên"}
             </div>
@@ -1307,18 +1307,26 @@
         }
 
         document.addEventListener("DOMContentLoaded", loadMembers);
+
+        document.querySelector('.search-members input').addEventListener('input', e => {
+          const keyword = e.target.value.toLowerCase();
+          document.querySelectorAll('.member-item').forEach(card => {
+            const name = card.querySelector('.member-title').textContent.toLowerCase();
+            card.style.display = name.includes(keyword) ? '' : 'none';
+          });
+        });
       </script>
 
       <script>
-  document.getElementById("memberSearchRight").addEventListener("input", (e) => {
-    const keyword = e.target.value.toLowerCase();
+        document.getElementById("memberSearchRight").addEventListener("input", (e) => {
+          const keyword = e.target.value.toLowerCase();
 
-    document.querySelectorAll("#membersWrapRight .member-item").forEach(member => {
-      const name = member.querySelector("div div").textContent.toLowerCase();
-      member.style.display = name.includes(keyword) ? "flex" : "none";
-    });
-  });
-</script>
+          document.querySelectorAll("#membersWrapRight .member-item").forEach(member => {
+            const name = member.querySelector("div div").textContent.toLowerCase();
+            member.style.display = name.includes(keyword) ? "flex" : "none";
+          });
+        });
+      </script>
 
 
       <!-- javascript xem, nhắn tin, xóa thành viên -->

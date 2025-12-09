@@ -358,7 +358,6 @@ router.get("/notifications", ensureAuth, async (req, res) => {
   res.json(rows);
 });
 
-
 // =============================== Vào trang nhóm (render group.ejs) ===============================
 router.get("/:id", ensureAuth, async (req, res) => {
   try {
@@ -502,53 +501,76 @@ router.get("/:taskId/files", ensureAuth, async (req, res) => {
 
 // =============================== NỘP FILE SẢN PHẨM CHO TASK ===============================
 // POST /groups/:taskId/submit
-router.post('/:taskId/submit', ensureAuth, (req, res, next) => {
-  // use multer single-file handler but return JSON on error
-  upload.single('file')(req, res, function (err) {
-    if (err) {
-      console.error('Multer upload error (submit):', err);
-      return res.status(400).json({ error: 'File upload error', details: err.message || String(err) });
-    }
-    next();
-  });
-}, async (req, res) => {
-  try {
-    const { taskId } = req.params;
+router.post(
+  "/:taskId/submit",
+  ensureAuth,
+  (req, res, next) => {
+    // use multer single-file handler but return JSON on error
+    upload.single("file")(req, res, function (err) {
+      if (err) {
+        console.error("Multer upload error (submit):", err);
+        return res.status(400).json({
+          error: "File upload error",
+          details: err.message || String(err),
+        });
+      }
+      next();
+    });
+  },
+  async (req, res) => {
+    try {
+      const { taskId } = req.params;
 
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
 
-    // who is submitting
-    const userId = req.session.user && req.session.user.id;
+      // who is submitting
+      const userId = req.session.user && req.session.user.id;
 
-    const f = req.file;
-    const fileId = uuidv7();
-    const fileName = f.originalname;
-    const fileType = f.mimetype || null;
-    const fileSize = f.size || 0;
-    const relPath = path.join('/uploads/tasks', path.basename(f.path)).replace(/\\/g, '/');
+      const f = req.file;
+      const fileId = uuidv7();
+      const fileName = f.originalname;
+      const fileType = f.mimetype || null;
+      const fileSize = f.size || 0;
+      const relPath = path
+        .join("/uploads/tasks", path.basename(f.path))
+        .replace(/\\/g, "/");
 
-    const insertFileSql = `
+      const insertFileSql = `
       INSERT INTO file (id, taskId, userId, fileName, fileType, fileSize, filePath)
       VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?)
     `;
 
-    try {
-      await db.promise().query(insertFileSql, [fileId, taskId, userId, fileName, fileType, fileSize, relPath]);
-    } catch (err) {
-      console.error('Failed to insert submitted file metadata', err);
-      // don't fail the whole request if DB insert fails, but inform client
-      return res.status(500).json({ error: 'Lỗi khi lưu metadata file' });
-    }
+      try {
+        await db
+          .promise()
+          .query(insertFileSql, [
+            fileId,
+            taskId,
+            userId,
+            fileName,
+            fileType,
+            fileSize,
+            relPath,
+          ]);
+      } catch (err) {
+        console.error("Failed to insert submitted file metadata", err);
+        // don't fail the whole request if DB insert fails, but inform client
+        return res.status(500).json({ error: "Lỗi khi lưu metadata file" });
+      }
 
-    // return minimal file info expected by frontend
-    return res.json({ success: true, file: { id: fileId, name: fileName, path: relPath, url: relPath } });
-  } catch (err) {
-    console.error('POST /groups/:taskId/submit error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+      // return minimal file info expected by frontend
+      return res.json({
+        success: true,
+        file: { id: fileId, name: fileName, path: relPath, url: relPath },
+      });
+    } catch (err) {
+      console.error("POST /groups/:taskId/submit error:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
   }
-});
+);
 
 // =============================== Cập nhật trạng thái người phụ trách task ===============================
 router.put(
@@ -872,18 +894,19 @@ router.post("/:id/leave", ensureAuth, async (req, res) => {
   }
 });
 
-
 router.post("/notifications/:id/read", ensureAuth, async (req, res) => {
   const { id } = req.params;
 
-  await db.promise().query(`
+  await db.promise().query(
+    `
     UPDATE notification
     SET isRead = TRUE
     WHERE id = UUID_TO_BIN(?)
-  `, [id]);
+  `,
+    [id]
+  );
 
   res.json({ success: true });
 });
-
 
 export default router;

@@ -41,13 +41,7 @@
             <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"></line>
           </svg>
         </button>
-        <button class="icon-btn" id="btnNotif" title="Thông báo" aria-label="Thông báo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path>
-            <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
-          </svg>
-        </button>
-        <!-- account -->
+      <!-- account -->
         <div class="user-account" id="openProfile" title="Account" style="position: relative">
           <div style="position: relative">
             <div id="avatarWrapper"
@@ -942,77 +936,7 @@
           <div class="right-section" id="calendarPanelContent"></div>
         </div>
 
-        <div class="right-panel half" id="notifPanel">
-          <div class="panel-head">
-            <span class="panel-title">
-              <svg width="20" height="20" style="vertical-align: middle; margin-right: 6px" fill="none"
-                stroke="currentColor">
-                <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path>
-                <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
-              </svg>
-              Thông báo
-            </span>
-            <button class="close-panel" id="closeNotifPanel" title="Đóng">
-              &times;
-            </button>
-          </div>
-          <div class="right-section" id="notifPanelContent"></div>
-        </div>
-      </div>
-
-      <script>
-        function renderNotif(notifs) {
-          const notifList = document.getElementById("notifPanelContent");
-          notifList.innerHTML = "";
-
-          if (!notifs || notifs.length === 0) {
-            notifList.innerHTML = `
-            <div class="notif-empty">Không có thông báo</div>
-        `;
-            return;
-          }
-
-          notifs.forEach(notif => {
-            const div = document.createElement("div");
-            div.classList.add("notif-item");
-
-            // Nếu chưa đọc → thêm class highlight
-            if (!notif.isRead) div.classList.add("unread");
-
-            div.innerHTML = `
-            <div class="notif-dot"></div>
-            <div class="notif-content">
-                <div class="notif-message">${notif.message}</div>
-                <div class="notif-time">${formatNotifTime(notif.createdAt)}</div>
-            </div>
-        `;
-
-            // Khi click vào thông báo
-            div.addEventListener("click", async () => {
-              // Đánh dấu đã đọc
-              if (!notif.isRead) {
-                await fetch(`/groups/notifications/${notif.id}/read`, {
-                  method: "POST"
-                });
-              }
-
-              // Nếu thông báo liên quan đến task → chuyển đến trang task
-              if (notif.type === "task" && notif.referenceId) {
-                window.location.href = `/tasks/${notif.referenceId}`;
-              }
-            });
-
-            notifList.appendChild(div);
-          });
-        }
-
-        async function loadNotifs() {
-          const res = await fetch("/groups/notifications");
-          const data = await res.json();
-          renderNotif(data);
-        }
-      </script>
-
+      
       <!-- POPUP TẠO NHÓM -->
       <div class="popup-overlay" id="popupGroup" aria-hidden="true">
         <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
@@ -1044,26 +968,7 @@
                     Tạo nhóm
                   </button>
                 </div>
-              </form>
-
-              <!-- hiển thị thông báo  -->
-              <script>
-                function showToast(message, type = 'success') {
-                  const container = document.getElementById('toast-container');
-                  if (!container) return;
-                  const toast = document.createElement('div');
-                  toast.className = `toast ${type}`;
-                  toast.textContent = message;
-
-                  container.appendChild(toast);
-                  setTimeout(() => toast.classList.add('show'), 100);
-                  setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 300);
-                  }, 4000);
-                }
-              </script>
-
+            </form>
               <!-- javascript hiện cửa sổ tạo nhóm -->
               <script>
                 const popupGroup = document.getElementById('popupGroup');
@@ -1685,16 +1590,9 @@
           });
 
           // Right panels
-          const notifPanel = document.getElementById("notifPanel");
-          const notifPanelContent = document.getElementById("notifPanelContent");
-          const calendarPanel = document.getElementById("calendarPanel");
-          const calendarPanelContent = document.getElementById(
-            "calendarPanelContent"
-          );
-          const closeNotifPanel = document.getElementById("closeNotifPanel");
-          const closeCalendarPanel =
-            document.getElementById("closeCalendarPanel");
-          const btnNotif = document.getElementById("btnNotif");
+        const calendarPanel = document.getElementById("calendarPanel");
+          const calendarPanelContent = document.getElementById("calendarPanelContent");
+          const closeCalendarPanel =document.getElementById("closeCalendarPanel");
           const btnCalendar = document.getElementById("btnCalendar");
 
           let panelOrder = [];
@@ -1705,8 +1603,7 @@
             }
             panelOrder = [panel, ...panelOrder];
             if (panelOrder.length > 2) panelOrder = panelOrder.slice(0, 2);
-
-            notifPanel.classList.remove("top", "bottom", "show");
+            
             calendarPanel.classList.remove("top", "bottom", "show");
 
             function renderCalendar() {
@@ -1727,63 +1624,14 @@
           `;
               setTimeout(initCalendar, 0);
             }
-
-            if (panelOrder.length === 1) {
-              if (panelOrder[0] === "notif") {
-                notifPanel.classList.add("show", "top");
-                renderNotif();
-              } else {
-                calendarPanel.classList.add("show", "top");
-                renderCalendar();
-              }
-            } else {
-              if (panelOrder[0] === "notif" && panelOrder[1] === "calendar") {
-                notifPanel.classList.add("show", "top");
-                calendarPanel.classList.add("show", "bottom");
-                renderNotif();
-              } else {
-                calendarPanel.classList.add("show", "top");
-                notifPanel.classList.add("show", "bottom");
-                renderCalendar();
-              }
-            }
-          }
           function closePanel(panel) {
-            panelOrder = panelOrder.filter((p) => p !== panel);
-            notifPanel.classList.remove("top", "bottom", "show");
+          panelOrder = panelOrder.filter((p) => p !== panel);
             calendarPanel.classList.remove("top", "bottom", "show");
             if (panelOrder.length === 1) {
-              if (panelOrder[0] === "notif") {
-                notifPanel.classList.add("show", "top");
-              } else {
-                calendarPanel.classList.add("show", "top");
+              calendarPanel.classList.add("show", "top");
               }
             }
-          }
-          btnNotif.onclick = () => {
-            showPanel("notif");
-            loadNotifs();
-          };
-          btnCalendar.onclick = () => showPanel("calendar");
-          closeNotifPanel &&
-            (closeNotifPanel.onclick = () => closePanel("notif"));
-          closeCalendarPanel &&
-            (closeCalendarPanel.onclick = () => closePanel("calendar"));
-          document.addEventListener("mousedown", (e) => {
-            if (
-              notifPanel.classList.contains("show") &&
-              !notifPanel.contains(e.target) &&
-              !btnNotif.contains(e.target)
-            )
-              closePanel("notif");
-            if (
-              calendarPanel.classList.contains("show") &&
-              !calendarPanel.contains(e.target) &&
-              !btnCalendar.contains(e.target)
-            )
-              closePanel("calendar");
-          });
-
+          
           function initCalendar() {
             const calGrid = document.getElementById("calGrid");
             const titleDay = document.getElementById("titleDay");
@@ -2586,6 +2434,7 @@ function setupTaskSendMessage(chatId) {
     input.value = "";
     loadTaskMessages(chatId);
   };
+}
 }
 </script>
 

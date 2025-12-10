@@ -206,12 +206,13 @@ router.post(
         [groupId, groupId]
       );
 
-      // Nếu có file đính kèm => lưu metadata vào bảng `file`
+      // Nếu có file đính kèm => lưu metadata vào bảng `file` và trả về danh sách file vừa upload
+      const uploadedFiles = [];
       if (req.files && Array.isArray(req.files) && req.files.length > 0) {
         const insertFileSql = `
-        INSERT INTO file (id, taskId, userId, fileName, fileType, fileSize, filePath)
-        VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?)
-      `;
+          INSERT INTO file (id, taskId, userId, fileName, fileType, fileSize, filePath, fileCategory)
+          VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?, 'attachment')
+        `;
 
         for (const f of req.files) {
           const fileId = uuidv7();
@@ -234,6 +235,7 @@ router.post(
                 fileSize,
                 relPath,
               ]);
+            uploadedFiles.push({ id: fileId, fileName, filePath: relPath, fileType, fileSize });
           } catch (err) {
             console.error("Failed to insert file metadata", err);
           }
@@ -244,6 +246,7 @@ router.post(
         success: true,
         message: "Tạo công việc thành công.",
         taskId,
+        files: uploadedFiles
       });
     } catch (err) {
       console.error("POST /groups error:", err);
@@ -295,6 +298,29 @@ ORDER BY t.createdAt DESC;
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
+    // ==================== LẤY ASSIGNEES CHO 1 TASK (dùng bởi client: /groups/:taskId/assignees)
+    router.get('/:taskId/assignees', ensureAuth, async (req, res) => {
+      try {
+        const { taskId } = req.params;
+        const sql = `
+          SELECT
+            BIN_TO_UUID(ta.userId) AS userId,
+            ta.status AS assigneeStatus,
+            u.name,
+            u.avatarPath
+          FROM task_assignee ta
+          LEFT JOIN user u ON ta.userId = u.id
+          WHERE ta.taskId = UUID_TO_BIN(?)
+          ORDER BY ta.id ASC
+        `;
+        const [rows] = await db.promise().query(sql, [taskId]);
+        res.json(rows || []);
+      } catch (err) {
+        console.error('GET /groups/:taskId/assignees error:', err);
+        res.status(500).json({ error: 'Lỗi khi tải assignees' });
+      }
+    });
 
 /* ============================================================
          LẤY DANH SÁCH CÔNG VIỆC ĐƯỢC GIAO CHO MÌNH
@@ -473,130 +499,8 @@ router.get("/:taskId/assignees", ensureAuth, async (req, res) => {
   }
 });
 
-// =============================== Lấy danh sách file đính kèm của task ===============================
-router.get("/:taskId/files", ensureAuth, async (req, res) => {
-  try {
-    const { taskId } = req.params;
+//
 
-    const sql = `
-      SELECT 
-        BIN_TO_UUID(id) AS fileId,
-        BIN_TO_UUID(userId) AS userId,
-        fileName,
-        fileType,
-        fileSize,
-        filePath,
-        createdAt
-      FROM file
-      WHERE taskId = UUID_TO_BIN(?)
-      ORDER BY createdAt ASC
-    `;
-
-    const [rows] = await db.promise().query(sql, [taskId]);
-    res.json(rows || []);
-  } catch (err) {
-    console.error("GET /groups/:taskId/files error:", err);
-    res.status(500).json({ error: "Lỗi khi tải file đính kèm." });
-  }
-});
-
-// =============================== NỘP FILE SẢN PHẨM CHO TASK ===============================
-// POST /groups/:taskId/submit
-router.post('/:taskId/submit', ensureAuth, (req, res, next) => {
-  // use multer single-file handler but return JSON on error
-  upload.single('file')(req, res, function (err) {
-    if (err) {
-      console.error('Multer upload error (submit):', err);
-      return res.status(400).json({ error: 'File upload error', details: err.message || String(err) });
-    }
-    next();
-  });
-}, async (req, res) => {
-  try {
-    const { taskId } = req.params;
-
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-
-    // who is submitting
-    const userId = req.session.user && req.session.user.id;
-
-    const f = req.file;
-    const fileId = uuidv7();
-    const fileName = f.originalname;
-    const fileType = f.mimetype || null;
-    const fileSize = f.size || 0;
-    const relPath = path.join('/uploads/tasks', path.basename(f.path)).replace(/\\/g, '/');
-
-    const insertFileSql = `
-      INSERT INTO file (id, taskId, userId, fileName, fileType, fileSize, filePath)
-      VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?)
-    `;
-
-    try {
-      await db.promise().query(insertFileSql, [fileId, taskId, userId, fileName, fileType, fileSize, relPath]);
-    } catch (err) {
-      console.error('Failed to insert submitted file metadata', err);
-      // don't fail the whole request if DB insert fails, but inform client
-      return res.status(500).json({ error: 'Lỗi khi lưu metadata file' });
-    }
-
-    // return minimal file info expected by frontend
-    return res.json({ success: true, file: { id: fileId, name: fileName, path: relPath, url: relPath } });
-  } catch (err) {
-    console.error('POST /groups/:taskId/submit error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// =============================== Cập nhật trạng thái người phụ trách task ===============================
-router.put(
-  "/:taskId/assignees/:userId/status",
-  ensureAuth,
-  async (req, res) => {
-    try {
-      const { taskId, userId } = req.params;
-      const { status } = req.body;
-
-      if (
-        !status ||
-        !["assigned", "in_progress", "done", "completed"].includes(status)
-      ) {
-        return res.status(400).json({ error: "Trạng thái không hợp lệ." });
-      }
-
-      // Map frontend status to DB status
-      const dbStatus =
-        status === "completed"
-          ? "done"
-          : status === "in_progress"
-          ? "in_progress"
-          : "assigned";
-
-      const sql = `
-      UPDATE task_assignee
-      SET status = ?
-      WHERE taskId = UUID_TO_BIN(?) AND userId = UUID_TO_BIN(?)
-    `;
-
-      const [result] = await db
-        .promise()
-        .query(sql, [dbStatus, taskId, userId]);
-
-      if (result.affectedRows === 0) {
-        return res
-          .status(404)
-          .json({ error: "Không tìm thấy người phụ trách hoặc công việc." });
-      }
-
-      res.json({ success: true, message: "Cập nhật trạng thái thành công." });
-    } catch (err) {
-      console.error("PUT /groups/:taskId/assignees/:userId/status error:", err);
-      res.status(500).json({ error: "Lỗi khi cập nhật trạng thái." });
-    }
-  }
-);
 
 // ========================== XÓA NHÓM ==========================
 router.delete("/:id/delete", ensureAuth, async (req, res) => {

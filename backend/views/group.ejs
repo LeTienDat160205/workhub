@@ -898,6 +898,8 @@
                                   showToast(data.error || 'Lỗi tạo công việc', 'error');
                                 } else {
                                   showToast('Tạo công việc thành công!', 'success');
+                                  // Redirect to home so the new task (and its attachments) are loaded
+                                  window.location.href = '/';
                                 }
 
                                 taskForm.reset();

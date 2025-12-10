@@ -548,7 +548,7 @@ body {
   height: 100%;
 }
 
-[data-theme="dark"] .group-chat{
+[data-theme="dark"] .group-chat {
   background-size: 100% 1.2rem;
 }
 
@@ -575,25 +575,31 @@ body {
 
 /* Thanh cuộn nhỏ, màu xám, bo tròn */
 .task-list::-webkit-scrollbar {
-  width: 6px;     /* độ rộng */
+  width: 6px;
+  /* độ rộng */
 }
 
 .task-list::-webkit-scrollbar-track {
-  background: #f2f2f2; /* nền trắng nhạt */
+  background: #f2f2f2;
+  /* nền trắng nhạt */
 }
 
 .task-list::-webkit-scrollbar-thumb {
-  background: #bcbcbc; /* màu xám nhạt */
-  border-radius: 10px; /* bo tròn */
+  background: #bcbcbc;
+  /* màu xám nhạt */
+  border-radius: 10px;
+  /* bo tròn */
 }
 
 .task-list::-webkit-scrollbar-thumb:hover {
-  background: #9e9e9e; /* đậm hơn chút khi hover */
+  background: #9e9e9e;
+  /* đậm hơn chút khi hover */
 }
 
 [data-theme="dark"] .task-list::-webkit-scrollbar-thumb {
   background: #7a7a7a;
 }
+
 [data-theme="dark"] .task-list::-webkit-scrollbar-track {
   background: #101010;
 }
@@ -1247,21 +1253,31 @@ select.form-input {
 
 /* Thanh cuộn nhỏ, màu xám, bo tròn */
 .wh-main::-webkit-scrollbar {
-  width: 6px;     /* độ rộng */
+  width: 6px;
+  /* độ rộng */
 }
+
 .wh-main::-webkit-scrollbar-track {
-  background: #f2f2f2; /* nền trắng nhạt */
+  background: #f2f2f2;
+  /* nền trắng nhạt */
 }
+
 .wh-main::-webkit-scrollbar-thumb {
-  background: #bcbcbc; /* màu xám nhạt */
-  border-radius: 10px; /* bo tròn */
+  background: #bcbcbc;
+  /* màu xám nhạt */
+  border-radius: 10px;
+  /* bo tròn */
 }
+
 .wh-main::-webkit-scrollbar-thumb:hover {
-  background: #9e9e9e; /* đậm hơn chút khi hover */
+  background: #9e9e9e;
+  /* đậm hơn chút khi hover */
 }
+
 [data-theme="dark"] .wh-main::-webkit-scrollbar-thumb {
   background: #7a7a7a;
 }
+
 [data-theme="dark"] .wh-main::-webkit-scrollbar-track {
   background: #101010;
 }
@@ -1713,23 +1729,29 @@ select.form-input {
 .outputChat::-webkit-scrollbar {
   width: 8px;
 }
+
 .outputChat::-webkit-scrollbar-track {
   background: #f0f0f0;
 }
+
 .outputChat::-webkit-scrollbar-thumb {
   background: #b0b0b0;
   border-radius: 4px;
 }
+
 .outputChat::-webkit-scrollbar-thumb:hover {
   background: #8c8c8c;
 }
+
 /* 🌙 Khi ở chế độ tối */
 [data-theme="dark"] .outputChat::-webkit-scrollbar-track {
   background: #1f1f1f;
 }
+
 [data-theme="dark"] .outputChat::-webkit-scrollbar-thumb {
   background: #555;
 }
+
 [data-theme="dark"] .outputChat::-webkit-scrollbar-thumb:hover {
   background: #777;
 }
@@ -2048,3 +2070,46 @@ select.form-input {
   cursor: pointer;
   border: none;
 }
+
+///
+
+#creatorAttachments {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 280px;
+  padding: 6px 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+#creatorAttachments {
+  display: flex;
+  flex-direction: column;
+  max-width: 180px;
+  overflow: hidden;
+}
+
+#creatorAttachments {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+#creatorAttachments {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.product-file-remove {
+  background: #ef4444;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+

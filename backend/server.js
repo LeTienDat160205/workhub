@@ -58,7 +58,8 @@ app.use("/notification", notificationRoutes);
 // app.use("/tasks", taskRoutes);
 app.use(chatUploadRoutes);
 app.use("/uploads", express.static("uploads"));
-
+// Mount task API routes under /tasks (do not shadow with static)
+app.use("/tasks", taskRoutes);
 
 
 // Khởi tạo socket.io

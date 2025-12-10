@@ -208,6 +208,23 @@
       </div>
     </div>
 
+    <!-- POPUP XÁC NHẬN XÓA CÔNG VIỆC -->
+    <div class="popup-overlay" id="confirmDelete" style="display:none;" aria-hidden="true">
+      <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="confirmDelete-title">
+        <div class="popup-header">
+          <div id="confirmDelete-title" class="popup-title" style="color:red ;">Xóa công việc</div>
+          <button class="close-btn" id="confirmDeleteClose" aria-label="Đóng">&times;</button>
+        </div>
+        <div style="margin-top:12px">
+          <p>Bạn chắc chắn muốn xóa công việc này? Hành động này không thể hoàn tác.</p>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+            <button class="btn" id="confirmDeleteNo" type="button" style="background:#9e9e9e">Hủy</button>
+            <button class="btn" id="confirmDeleteYes" type="button" style="background:#ef4444;color:white">Xóa</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- BODY -->
     <div class="dashboard-body" id="dashboardBody">
       <!-- SIDEBAR -->
@@ -349,6 +366,9 @@
             tasks.forEach(task => {
               const taskId = task.id || task._id || (task._doc && (task._doc._id || task._doc.id)) || '';
               const div = document.createElement("div");
+
+              // tag the DOM node so we can find it when removing after delete
+              div.setAttribute('data-task-id', taskId);
               div.classList.add("task-assigned");
               div.style = `
       border:1px solid #e6e9ee;
@@ -356,7 +376,7 @@
       padding:16px;
       margin:10px 0;
       display:grid;
-      grid-template-columns: 1.6fr 1.4fr 1fr 0.7fr 1fr;
+      grid-template-columns: 1.6fr 1.4fr 1fr 0.7fr 1fr 0.05fr;
       gap:20px;
       align-items:start;
       background:var(--surface);
@@ -452,16 +472,14 @@
 `;
               col3.appendChild(assigneesWrap);
 
-
-
               /*4. TRẠNG THÁI*/
               const col4 = document.createElement("div");
               col4.style = "display:flex;flex-direction:column;align-items:center;gap:8px";
               col4.id = `task_status_${taskId}`;
 
-              // Map task.status (pending | in_progress | completed) to localized label + color
+              // Map task.status (pending | in_progress | done) to localized label + color
               const taskStatusMap = {
-                completed: { label: 'Đã hoàn thành', color: '#22c55e' },
+                done: { label: 'Đã hoàn thành', color: '#22c55e' },
                 in_progress: { label: 'Đang làm', color: 'var(--primary)' },
                 pending: { label: 'Chưa làm', color: '#f59e0b' }
               };
@@ -501,12 +519,34 @@
       </div>
     `;
 
+              /* 6. Xóa công việc (nếu là người tạo) */
+              const col6 = document.createElement("div");
+              col6.style = "display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:0";
+
+              // Nếu người hiện tại là người tạo task -> hiển thị nút Xóa
+              try {
+                const creatorId = task.creatorId || task.createdBy || task.ownerId || task.owner || '';
+                const isCreator = String(creatorId) === String(CURRENT_USER_ID || '');
+                if (isCreator) {
+                  const delBtn = document.createElement('button');
+                  delBtn.textContent = 'Xóa công việc';
+                  delBtn.style = 'margin-top:8px;padding:8px 10px;background:#ef4444;color:white;border:none;border-radius:8px;cursor:pointer;';
+                  delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // open modal confirm; actual deletion happens in modal handler
+                    openConfirmDelete(taskId);
+                  });
+                  col6.appendChild(delBtn);
+                }
+              } catch (e) { console.debug('delete button render error', e); }
+
               /*ADD TO WRAPPER*/
               div.appendChild(col1);
               div.appendChild(col2);
               div.appendChild(col3);
               div.appendChild(col4);
               div.appendChild(col5);
+              div.appendChild(col6);
               container.appendChild(div);
 
               div.style.cursor = "pointer";
@@ -516,6 +556,59 @@
               });
 
               loadAssignees(taskId, assigneesWrap);
+            });
+          }
+
+          // ===== xóa công việc =====
+          let _pendingDeleteTaskId = null;
+          const confirmDeleteOverlay = document.getElementById('confirmDelete');
+          const confirmDeleteYes = document.getElementById('confirmDeleteYes');
+          const confirmDeleteNo = document.getElementById('confirmDeleteNo');
+          const confirmDeleteClose = document.getElementById('confirmDeleteClose');
+
+          function openConfirmDelete(taskId) {
+            _pendingDeleteTaskId = taskId;
+            if (confirmDeleteOverlay) {
+              confirmDeleteOverlay.style.display = 'flex';
+              confirmDeleteOverlay.classList.add('active');
+              confirmDeleteOverlay.setAttribute('aria-hidden', 'false');
+            }
+          }
+
+          function closeConfirmDelete() {
+            _pendingDeleteTaskId = null;
+            if (confirmDeleteOverlay) {
+              confirmDeleteOverlay.style.display = 'none';
+              confirmDeleteOverlay.classList.remove('active');
+              confirmDeleteOverlay.setAttribute('aria-hidden', 'true');
+            }
+          }
+
+          if (confirmDeleteNo) confirmDeleteNo.addEventListener('click', () => closeConfirmDelete());
+          if (confirmDeleteClose) confirmDeleteClose.addEventListener('click', () => closeConfirmDelete());
+
+          if (confirmDeleteYes) confirmDeleteYes.addEventListener('click', async () => {
+            if (!_pendingDeleteTaskId) return closeConfirmDelete();
+            try {
+              const res = await deleteTask(_pendingDeleteTaskId);
+              if (res && res.success) {
+                const el = document.querySelector(`.task-assigned[data-task-id="${_pendingDeleteTaskId}"]`);
+                if (el) el.remove();
+                if (typeof showToast === 'function') showToast('Đã xóa công việc');
+              }
+            } catch (e) {
+              console.error('confirmDelete error', e);
+            } finally {
+              closeConfirmDelete();
+            }
+          });
+
+          if (confirmDeleteOverlay) {
+            confirmDeleteOverlay.addEventListener('click', (e) => {
+              if (e.target === confirmDeleteOverlay) closeConfirmDelete();
+            });
+            document.addEventListener('keydown', (e) => {
+              if (e.key === 'Escape' && confirmDeleteOverlay.classList.contains('active')) closeConfirmDelete();
             });
           }
 
@@ -565,9 +658,10 @@
               };
 
               // Thay toàn bộ mapping trạng thái ở đây
+              // trạng thái riêng 
               const getStatus = (status) => {
                 switch (status) {
-                  case "completed":
+                  case "done":
                     return { icon: "  ✔", label: "Hoàn thành", color: "#22c55e" }; // xanh lá
                   case "in_progress":
                     return { icon: "  ⏳", label: "Đang làm", color: "#3b82f6" }; // xanh dương
@@ -576,18 +670,18 @@
                 }
               };
 
-              // Compute aggregated task status from assignees
+              // Tính toán trạng thái chung của nhiệm vụ từ những người được giao nhiệm vụ.
               let overall = 'pending';
               if (Array.isArray(assignees) && assignees.length > 0) {
-                const allCompleted = assignees.every(a => a.assigneeStatus === 'completed');
+                const allDone = assignees.every(a => a.assigneeStatus === 'done');
                 const anyInProgress = assignees.some(a => a.assigneeStatus === 'in_progress');
-                if (allCompleted) overall = 'completed';
+                if (allDone) overall = 'done';
                 else if (anyInProgress) overall = 'in_progress';
                 else overall = 'pending';
               }
 
               const statusMap = {
-                completed: { label: 'Đã hoàn thành', color: '#22c55e' },
+                done: { label: 'Đã hoàn thành', color: '#22c55e' },
                 in_progress: { label: 'Đang làm', color: 'var(--primary)' },
                 pending: { label: 'Chưa làm', color: '#f59e0b' }
               };
@@ -605,13 +699,14 @@
                 const st = getStatus(u.assigneeStatus);
                 const isCurrent = String(u.userId || u.id || u.user_id || '') === String(CURRENT_USER_ID || '');
 
-                // action button for current user: Pending -> Nhận (in_progress), in_progress -> Hoàn thành (completed)
+                // action button for current user: Pending -> Nhận (in_progress), in_progress -> Hoàn thành (done)
                 let actionBtn = '';
                 if (isCurrent) {
                   if (!u.assigneeStatus || u.assigneeStatus === 'pending') {
                     actionBtn = `<button onclick="updateAssigneeStatus('${taskId}', '${u.userId || u.id}', 'in_progress')" style="padding:6px 8px;border-radius:6px;border:none;background:#2563eb;color:white;font-weight:600;cursor:pointer">Nhận</button>`;
                   } else if (u.assigneeStatus === 'in_progress') {
-                    actionBtn = '';
+                    // allow current in-progress user to mark as done directly from list
+                    actionBtn = `<button onclick="updateAssigneeStatus('${taskId}', '${u.userId || u.id}', 'done')" style="padding:6px 8px;border-radius:6px;border:none;background:#16a34a;color:white;font-weight:600;cursor:pointer">Hoàn thành</button>`;
                   }
                 }
 
@@ -656,25 +751,75 @@
             }
           }
 
-          // Update assignee status for a given task and user
+          // Cập nhật trạng thái người được giao nhiệm vụ cho một tác vụ và người dùng cụ thể.
           async function updateAssigneeStatus(taskId, userId, status) {
             if (!taskId || !userId || !status) return;
             try {
-              const res = await fetch(`/groups/${taskId}/assignees/${userId}/status`, {
+              console.debug('updateAssigneeStatus ->', { taskId, userId, status });
+              const res = await fetch(`/tasks/${taskId}/assignees/${userId}/status`, {
                 method: 'PUT',
                 credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status })
               });
-              const data = await res.json().catch(() => ({}));
-              if (!res.ok) throw new Error(data.error || 'Lỗi cập nhật trạng thái');
-              // success -> reload assignees list
+              let data = {};
+              try { data = await res.json(); } catch (e) { /* ignore json parse errors */ }
+              if (!res.ok) {
+                console.warn('updateAssigneeStatus failed', res.status, data);
+                if (typeof showToast === 'function') showToast(data.error || 'Lỗi cập nhật trạng thái', 'error');
+              } else {
+                if (typeof showToast === 'function') showToast(data.message || 'Cập nhật trạng thái thành công');
+              }
+
+              // Luôn làm mới giao diện người được giao nhiệm vụ để người dùng thấy được trạng thái hiện tại.
               const containerEl = document.getElementById(`assignees_${taskId}`);
               if (containerEl) loadAssignees(taskId, containerEl);
-              if (typeof showToast === 'function') showToast(data.message || 'Cập nhật trạng thái thành công');
+
+              // Debounced full task list refresh so the list view updates too
+              if (!window._loadTasksTimer) window._loadTasksTimer = null;
+              if (window._loadTasksTimer) clearTimeout(window._loadTasksTimer);
+              window._loadTasksTimer = setTimeout(() => {
+                try { if (typeof loadTasks === 'function') loadTasks(); } catch (e) { console.debug('loadTasks call failed', e); }
+              }, 250);
+
+              // Đồng thời yêu cầu máy chủ tính toán lại trạng thái chung
+              try {
+                const g = await fetch(`/tasks/${taskId}/status`, {
+                  method: 'PUT',
+                  credentials: 'same-origin',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({})
+                });
+                if (!g.ok) console.debug('Global status update returned', g.status);
+              } catch (e) {
+                console.debug('Global status update error', e);
+              }
+
             } catch (err) {
               console.error('❌ updateAssigneeStatus error:', err);
               alert(err.message || 'Lỗi khi cập nhật trạng thái');
+            }
+          }
+
+          // Xóa task (gọi tới backend DELETE /tasks/:taskId)
+          async function deleteTask(taskId) {
+            if (!taskId) return { success: false };
+            try {
+              const res = await fetch(`/tasks/${taskId}`, {
+                method: 'DELETE',
+                credentials: 'same-origin'
+              });
+              let data = {};
+              try { data = await res.json(); } catch (e) { }
+              if (!res.ok) {
+                if (typeof showToast === 'function') showToast(data.error || 'Lỗi xóa công việc', 'error');
+                return { success: false, error: data.error };
+              }
+              return { success: true, data };
+            } catch (err) {
+              console.error('❌ deleteTask error:', err);
+              if (typeof showToast === 'function') showToast('Lỗi xóa công việc', 'error');
+              return { success: false, error: err.message };
             }
           }
 
@@ -744,7 +889,7 @@
               if (filterText === "Tất cả") {
                 show = true;
               }
-              else if (filterText === "Đã hoàn thành" && statusText.includes("Hoàn thành")) {
+              else if (filterText === "Đã hoàn thành" && statusText.includes("Đã hoàn thành")) {
                 show = true;
               }
               else if (filterText === "Đang làm" && statusText.includes("Đang làm")) {
@@ -1745,7 +1890,6 @@
             });
           }
 
-
         </script>
       </div>
 
@@ -1776,18 +1920,15 @@
                     style="padding:8px;border:1px solid var(--border-color);border-radius:6px;background:transparent;font-weight:600" />
                 </div>
               </div>
-
               <div>
                 <input id="detailTaskName" readonly
                   style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:6px;background:var(--surface);font-weight:700"
                   value="-" />
               </div>
-
               <div>
                 <textarea id="detailDescription" readonly rows="5"
                   style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:var(--text);resize:vertical"></textarea>
               </div>
-
               <div style="display:flex;align-items:center;gap:8px">
                 <div style="display:flex;gap:6px;align-items:center">
                   <input type="text" id="detailStart" readonly
@@ -1804,12 +1945,10 @@
               <!-- Creator attachments list (rendered by openTaskDetail) -->
               <div id="creatorAttachments" style="display:flex;flex-direction:column;gap:6px;width:100%;margin-top:6px">
               </div>
-
               <div style="display:flex;justify-content:center;margin-top:6px">
                 <button class="btn" id="acceptTaskBtn" type="button"
                   style="background:#2563eb;color:white;padding:8px 18px">Nhận công việc</button>
               </div>
-
               <div style="display:flex;flex-direction:column;gap:6px">
                 <div style="font-weight:700;text-align:center">File sản phẩm</div>
                 <div style="display:flex;gap:8px;justify-content:center">
@@ -1821,7 +1960,6 @@
                 </div>
                 <div id="sanpham"></div>
               </div>
-
               <div style="display:flex;justify-content:center;margin-top:10px">
                 <button class="btn" id="confirmTaskBtn" style="background:#16a34a;color:white;padding:8px 20px">Xác
                   nhận</button>
@@ -1841,14 +1979,22 @@
       </div>
 
       <script>
-        // Modal behavior: chat left, creator info right; attachments from task.attachments; accept/submit actions
+        // ===================== OPEN TASK DETAIL =====================
+
+        // Hàm mở modal chi tiết công việc
         function openTaskDetail(task) {
+
           const modal = document.getElementById('taskDetailModal');
           if (!modal) return;
 
-          // normalize task id (some APIs return _id)
-          const taskId = task.id || task._id || (task._doc && (task._doc._id || task._doc.id)) || '';
+          // Chuẩn hoá taskId (vì đôi khi backend trả id hoặc _id)
+          const taskId =
+            task.id ||
+            task._id ||
+            (task._doc && (task._doc._id || task._doc.id)) ||
+            '';
 
+          // Lấy các element giao diện
           const avatarEl = document.getElementById('detailAvatar');
           const nameEl = document.getElementById('detailUserName');
           const groupEl = document.getElementById('detailGroupName');
@@ -1858,278 +2004,369 @@
           const deadlineEl = document.getElementById('detailDeadline');
           const creatorAttachmentsEl = document.getElementById('creatorAttachments');
           const submitProductFiles = document.getElementById('submitProductFiles');
-          const chatPlaceholder = document.getElementById('chatPlaceholder');
+
           const acceptBtn = document.getElementById('acceptTaskBtn');
           const submitBtn = document.getElementById('submitFileBtn');
           const submitInput = document.getElementById('submitFileInput');
-          // ID của người tạo task
+          const chatPlaceholder = document.getElementById('chatPlaceholder');
+
           const creatorId = task.createdBy;
+          const assigneeIds = (task.assignees || []).map(x => x.userId || x.id);
 
-          // ID của tất cả assignees
-          const assigneeIds = (task.assignees || []).map(a => a.userId || a.id);
-
-          const userName = task.ownerName || task.owner || task.createdBy || task.creatorName || 'Người tạo';
-          // helper to set value for inputs or textContent for other elements
+          // Helper set text
           function setTextOrValue(el, text) {
             if (!el) return;
-            try {
-              if ('value' in el) el.value = text || '';
-              else el.textContent = text || '';
-            } catch (e) { el.textContent = text || ''; }
+            if ('value' in el) el.value = text || '';
+            else el.textContent = text || '';
           }
-          setTextOrValue(nameEl, userName);
-          setTextOrValue(groupEl, task.groupName || task.group || task.teamName || '');
 
+          const userName = task.ownerName || task.creatorName || "Người tạo";
+          setTextOrValue(nameEl, userName);
+          setTextOrValue(groupEl, task.groupName || '');
+
+          // Avatar
           if (task.ownerAvatar) {
-            avatarEl.innerHTML = '';
-            const img = document.createElement('img');
+            avatarEl.innerHTML = "";
+            const img = document.createElement("img");
             img.src = task.ownerAvatar;
-            img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover';
+            img.style = "width:100%;height:100%;border-radius:50%;object-fit:cover";
             avatarEl.appendChild(img);
           } else {
-            avatarEl.textContent = (userName || '?').charAt(0).toUpperCase();
+            avatarEl.textContent = userName.charAt(0).toUpperCase();
           }
 
-          setTextOrValue(taskNameEl, task.taskName || task.name || 'Tên công việc');
+          // Nội dung task
+          setTextOrValue(taskNameEl, task.taskName || task.name || '');
           setTextOrValue(descEl, task.description || '');
           setTextOrValue(startEl, task.createdAt ? new Date(task.createdAt).toLocaleDateString('vi-VN') : '');
           setTextOrValue(deadlineEl, task.deadline ? new Date(task.deadline).toLocaleDateString('vi-VN') : '');
 
-          // Lấy và hiển thị tệp đính kèm của người tạo từ máy chủ
+          // ======================================
+          // 1️⃣ LẤY FILE ĐÍNH KÈM — ATTACHMENTS
+          // ======================================
           (async () => {
-            creatorAttachmentsEl.innerHTML = '<span style="font-size:0.85rem;color:var(--text-muted)">Đang tải file...</span>';
+            creatorAttachmentsEl.innerHTML = `<span style="font-size:0.85rem;color:var(--text-muted)">Đang tải file...</span>`;
+
             try {
-              const filesRes = await fetch(`/groups/${taskId}/files`, { credentials: 'same-origin' });
-              const files = filesRes.ok ? await filesRes.json() : [];
+              const res = await fetch(`/tasks/${taskId}/files`, { credentials: "include" });
+              const files = res.ok ? await res.json() : [];
 
-              creatorAttachmentsEl.innerHTML = '';
-              if (files.length === 0) {
-                creatorAttachmentsEl.innerHTML = '<span style="font-size:0.85rem;color:var(--text-muted)">Không có file</span>';
-              } else {
-                files.forEach((f, idx) => {
-                  const wrap = document.createElement('div');
-                  wrap.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border:1px solid var(--border-color);border-radius:6px;background:var(--surface)';
+              creatorAttachmentsEl.innerHTML = "";
 
-                  const left = document.createElement('div');
-                  left.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px';
-
-                  const aLink = document.createElement('a');
-                  aLink.href = f.filePath || '#';
-                  aLink.textContent = f.fileName || `File ${idx + 1}`;
-                  aLink.target = '_blank';
-                  aLink.rel = 'noopener noreferrer';
-
-                  left.appendChild(aLink);
-
-                  const dlBtn = document.createElement('button');
-                  dlBtn.type = 'button';
-                  dlBtn.textContent = 'Tải';
-                  dlBtn.style.cssText = 'padding:6px 8px;border-radius:6px;border:none;background:#111827;color:white;cursor:pointer';
-                  dlBtn.onclick = () => window.open(f.filePath || '#', '_blank');
-
-                  wrap.appendChild(left);
-                  wrap.appendChild(dlBtn);
-
-                  // PHÂN LOẠI FILE
-                  const isCreatorFile = f.userId === creatorId;
-                  const isProductFile = assigneeIds.includes(f.userId);
-
-                  if (isCreatorFile) {
-                    creatorAttachmentsEl.appendChild(wrap);
-                  }
-                  else if (isProductFile) {
-                    submitProductFiles.appendChild(wrap);
-                  }
-                  else {
-                    // fallback: nếu không thuộc creator hay assignee thì vẫn cho vào creatorAttachments
-                    creatorAttachmentsEl.appendChild(wrap);
-                  }
-                });
-
+              if (!files.length) {
+                creatorAttachmentsEl.innerHTML = `<span class="empty">Không có file</span>`;
+                return;
               }
+
+              files.forEach(f => {
+                const item = document.createElement("div");
+                item.className = "file_item";
+
+                item.innerHTML = `
+          <a href="${f.filePath}" class="file_link" target="_blank">📎 ${f.fileName}</a>
+          <div class="file_time">${new Date(f.createdAt).toLocaleString()}</div>
+        `;
+
+                creatorAttachmentsEl.appendChild(item);
+              });
+
             } catch (err) {
-              console.error('Error fetching files:', err);
-              creatorAttachmentsEl.innerHTML = '<span style="font-size:0.85rem;color:#ef4444">Lỗi khi tải file</span>';
+              console.error("Lỗi tải tệp đính kèm:", err);
+              creatorAttachmentsEl.innerHTML = `<span class="error">Lỗi tải file</span>`;
             }
           })();
 
-          // Xóa khu vực gửi tệp sản phẩm
-          submitProductFiles.innerHTML = '';
+          // ======================================
+          // 2️⃣ LẤY FILE NỘP — SUBMISSIONS
+          // ======================================
+          (async () => {
+            submitProductFiles.innerHTML = `<span style="font-size:0.85rem;color:var(--text-muted)">Đang tải file...</span>`;
 
-          // chat placeholder text
-          chatPlaceholder.textContent = 'Chat chưa khả dụng';
+            try {
+              const res = await fetch(`/tasks/${taskId}/submissions`, { credentials: "include" });
+              const files = res.ok ? await res.json() : [];
 
-          // Chấp nhận (Nhận): tải xuống tệp đính kèm và đặt trạng thái cá nhân thành in_progress
+              submitProductFiles.innerHTML = "";
+
+              if (!files.length) {
+                submitProductFiles.innerHTML = `<span class="empty">Chưa có file nộp</span>`;
+                return;
+              }
+
+              files.forEach(f => {
+                const item = document.createElement("div");
+                item.className = "file_item";
+
+                item.innerHTML = `
+          <a href="${f.filePath}" class="file_link" target="_blank">📄 ${f.fileName}</a>
+          <div class="file_time">${new Date(f.createdAt).toLocaleString()}</div>
+        `;
+
+                submitProductFiles.appendChild(item);
+              });
+
+            } catch (err) {
+              console.error("Lỗi tải file nộp:", err);
+              submitProductFiles.innerHTML = `<span class="error">Lỗi tải file</span>`;
+            }
+          })();
+
+          // ======================================
+          // 3️⃣ NÚT NHẬN CÔNG VIỆC
+          // ======================================
           acceptBtn.onclick = async () => {
             try {
-              // Lấy tệp và kích hoạt tải xuống
-              const filesRes = await fetch(`/groups/${taskId}/files`, { credentials: 'same-origin' });
-              const files = filesRes.ok ? await filesRes.json() : [];
+              // Lấy file đính kèm để tải về
+              const res = await fetch(`/tasks/${taskId}/files`, { credentials: "include" });
+              const files = res.ok ? await res.json() : [];
+
               files.forEach(f => {
-                if (f.filePath) window.open(f.filePath, '_blank');
+                if (f.filePath) window.open(f.filePath, "_blank");
               });
-              if (CURRENT_USER_ID) await updateAssigneeStatus(taskId, CURRENT_USER_ID, 'in_progress');
-              if (typeof showToast === 'function') showToast('Bạn đã nhận công việc');
+
+              // Cập nhật trạng thái riêng: nhận task (use existing helper to update UI)
+              if (CURRENT_USER_ID) {
+                await updateAssigneeStatus(taskId, CURRENT_USER_ID, 'in_progress');
+
+                // Cập nhật trạng thái chung
+                const globalRes = await fetch(`/tasks/${taskId}/status`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({}),
+                  credentials: "include"
+                });
+                if (!globalRes.ok) console.warn('Warning: global status update failed');
+              }
+
+              showToast("Bạn đã nhận công việc");
             } catch (err) {
-              console.error('❌ acceptTask error:', err);
-              alert(err.message || 'Lỗi khi nhận công việc');
+              console.error(err);
+              alert("Lỗi nhận công việc");
             }
           };
 
-          // creatorAttachBtn will scroll to attachments list
-          const creatorAttachBtn = document.getElementById('creatorAttachBtn');
-          if (creatorAttachBtn) creatorAttachBtn.onclick = () => {
-            if (creatorAttachmentsEl) creatorAttachmentsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          };
+          // ======================================
+          // 4️⃣ UPLOAD FILE SẢN PHẨM
+          // ======================================
+          let selectedProductFiles = [];
 
-          // Submit (Gửi file): open file input and upload then mark completed
           submitBtn.onclick = () => submitInput.click();
 
-          // === FILE SẢN PHẨM ===
-          let selectedProductFiles = []; // lưu file tạm trước khi nộp
-
-          // MỞ INPUT FILE
-          submitBtn.onclick = () => submitInput.click();
-
-          // KHI CHỌN FILE
           submitInput.onchange = () => {
             const files = Array.from(submitInput.files);
             if (!files.length) return;
 
-            selectedProductFiles = files;           // lưu file
-            submitProductFiles.innerHTML = "";      // reset giao diện
+            selectedProductFiles = files;
+            submitProductFiles.innerHTML = "";
 
             files.forEach((file, index) => {
-              const item = document.createElement("div");
-              item.className = "product-file-item";
+              const wrap = document.createElement("div");
+              wrap.className = "product-file-item";
 
-              const info = document.createElement("div");
-              info.className = "product-file-info";
+              wrap.innerHTML = `
+        <div class="product-file-info">
+          <div class="product-file-name">${file.name}</div>
+          <div class="product-file-size">${(file.size / 1024).toFixed(1)} KB</div>
+        </div>
+        <button class="product-file-remove">Xóa</button>
+      `;
 
-              const name = document.createElement("div");
-              name.className = "product-file-name";
-              name.textContent = file.name;
-
-              const size = document.createElement("div");
-              size.className = "product-file-size";
-              size.textContent = (file.size / 1024).toFixed(1) + " KB";
-
-              info.appendChild(name);
-              info.appendChild(size);
-
-              const removeBtn = document.createElement("button");
-              removeBtn.className = "product-file-remove";
-              removeBtn.textContent = "Xóa";
-
-              // XÓA FILE ĐÃ CHỌN
-              removeBtn.onclick = () => {
+              wrap.querySelector(".product-file-remove").onclick = () => {
                 selectedProductFiles.splice(index, 1);
-                item.remove();
+                wrap.remove();
               };
 
-              item.appendChild(info);
-              item.appendChild(removeBtn);
-              submitProductFiles.appendChild(item);
+              submitProductFiles.appendChild(wrap);
             });
           };
 
-
-
-          // === XÁC NHẬN NỘP FILE ===
-
+          // ======================================
+          // 5️⃣ NỘP FILE
+          // ======================================
           const confirmBtn = document.getElementById("confirmTaskBtn");
 
-          if (confirmBtn) {
-            confirmBtn.onclick = async () => {
-              try {
-                if (!selectedProductFiles.length) {
-                  alert("Bạn chưa chọn file sản phẩm");
-                  return;
-                }
+          confirmBtn.onclick = async () => {
+            if (!selectedProductFiles.length) {
+              return alert("Bạn chưa chọn file sản phẩm");
+            }
 
-                // Upload từng file
-                for (const file of selectedProductFiles) {
-                  const fd = new FormData();
-                  fd.append("file", file);
-                  fd.append("taskId", taskId);
-                  if (CURRENT_USER_ID) fd.append("userId", CURRENT_USER_ID);
+            try {
+              for (const file of selectedProductFiles) {
+                const fd = new FormData();
+                fd.append("file", file);
+                fd.append("taskId", taskId);
+                if (CURRENT_USER_ID) fd.append("userId", CURRENT_USER_ID);
 
-                  const res = await fetch(`/groups/${taskId}/submit`, {
-                    method: "POST",
-                    body: fd,
-                    credentials: "same-origin"
-                  });
+                const res = await fetch(`/tasks/${taskId}/submit`, {
+                  method: "POST",
+                  body: fd,
+                  credentials: "include"
+                });
 
-                  const data = await res.json().catch(() => ({}));
-                  if (!res.ok) throw new Error(data.error || "Lỗi upload file");
+                const data = await res.json();
 
-                  // Hiển thị file đã nộp sau khi upload thành công
-                  const uploaded = document.createElement("div");
-                  uploaded.className = "product-file-item";
+                const wrap = document.createElement("div");
+                wrap.className = "product-file-item";
 
-                  const info = document.createElement("div");
-                  info.className = "product-file-info";
+                wrap.innerHTML = `
+          <a href="${data.file.url}" target="_blank" class="product-file-name">
+            ${data.file.name}
+          </a>
+        `;
 
-                  const link = document.createElement("a");
-                  link.className = "product-file-name";
-                  link.textContent = data.file?.name || file.name;
-                  link.href = data.file?.url || data.file?.path || "#";
-                  if (link.href !== "#") link.target = "_blank";
-
-                  info.appendChild(link);
-                  uploaded.appendChild(info);
-
-                  submitProductFiles.appendChild(uploaded);
-                }
-
-                // Reset sau khi gửi xong
-                selectedProductFiles = [];
-                submitInput.value = "";
-
-                // Cập nhật trạng thái thành completed
-                if (CURRENT_USER_ID)
-                  await updateAssigneeStatus(taskId, CURRENT_USER_ID, "completed");
-
-                if (typeof showToast === "function")
-                  showToast("Nộp file thành công");
-
-              } catch (err) {
-                console.error("❌ confirmTask error:", err);
-                alert(err.message || "Lỗi khi xác nhận");
+                submitProductFiles.appendChild(wrap);
               }
-            };
-          }
 
-          modal.style.display = 'flex';
-          modal.setAttribute('aria-hidden', 'false');
-          document.getElementById('closeTaskDetailBtn').onclick = closeTaskDetail;
+              submitInput.value = "";
+              selectedProductFiles = [];
 
-          modal.addEventListener('click', function onOutside(e) {
+              // Cập nhật trạng thái riêng: đã hoàn thành (use helper to update UI)
+              if (CURRENT_USER_ID) {
+                await updateAssigneeStatus(taskId, CURRENT_USER_ID, 'done');
+
+                // Cập nhật trạng thái chung
+                const globalRes = await fetch(`/tasks/${taskId}/status`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({}),
+                  credentials: "include"
+                });
+                if (!globalRes.ok) console.warn('Warning: global status update failed');
+              }
+
+              showToast("Nộp file thành công");
+
+            } catch (err) {
+              console.error(err);
+              alert("Lỗi khi nộp file");
+            }
+          };
+
+          // ======================================
+          // SHOW MODAL
+          // ======================================
+          modal.style.display = "flex";
+          modal.setAttribute("aria-hidden", "false");
+
+          const closeBtn = document.getElementById("closeTaskDetailBtn");
+          closeBtn.onclick = closeTaskDetail;
+
+          modal.addEventListener("click", function onOutside(e) {
             if (e.target === modal) {
-              modal.removeEventListener('click', onOutside);
+              modal.removeEventListener("click", onOutside);
               closeTaskDetail();
             }
           });
 
-          function escHandler(e) {
-            if (e.key === 'Escape') {
-              document.removeEventListener('keydown', escHandler);
+          document.addEventListener("keydown", function esc(e) {
+            if (e.key === "Escape") {
+              document.removeEventListener("keydown", esc);
               closeTaskDetail();
             }
-          }
-          document.addEventListener('keydown', escHandler);
+          });
         }
 
+        // Đóng modal
         function closeTaskDetail() {
-          const modal = document.getElementById('taskDetailModal');
-          if (!modal) return;
-          modal.style.display = 'none';
-          modal.setAttribute('aria-hidden', 'true');
+          const modal = document.getElementById("taskDetailModal");
+          modal.style.display = "none";
+          modal.setAttribute("aria-hidden", "true");
         }
 
-        function escapeHtml(str) {
-          return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        // Người được giao bấm Nhận công việc
+        async function acceptTask(taskId, userId, sampleFileUrl) {
+          try {
+            // Tải file mẫu nếu có
+            if (sampleFileUrl) {
+              const a = document.createElement("a");
+              a.href = sampleFileUrl;
+              a.download = "";
+              a.click();
+            }
+
+            // Cập nhật trạng thái riêng thành "in_progress"
+            await fetch(`/tasks/${taskId}/assignees/${userId}/status`, {
+              method: "PUT",
+              credentials: 'include',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: "in_progress" })
+            });
+
+            // Cập nhật trạng thái chung
+            await updateTaskGlobalStatus(taskId);
+
+            openTaskDetail({ id: taskId });
+
+          } catch (err) {
+            console.error("Lỗi nhận công việc:", err);
+            alert("Lỗi nhận công việc");
+          }
         }
+
+        // Người được giao nộp file sản phẩm
+        async function submitTaskProduct(taskId, userId, fileInput) {
+          try {
+            const file = fileInput.files[0];
+            if (!file) return alert("Hãy chọn file sản phẩm!");
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            // Upload file sản phẩm
+            await fetch(`/tasks/${taskId}/assignees/${userId}/submit`, {
+              method: "POST",
+              body: formData
+            });
+
+            // Cập nhật trạng thái riêng thành "done"
+            await fetch(`/tasks/${taskId}/assignees/${userId}/status`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: "done" })
+            });
+
+            // Cập nhật trạng thái chung
+            await updateTaskGlobalStatus(taskId);
+
+            openTaskDetail({ id: taskId });
+
+          } catch (err) {
+            console.error("Lỗi nộp bài:", err);
+            alert("Lỗi nộp bài");
+          }
+        }
+
+        // Hàm cập nhật trạng thái chung của Task
+        async function updateTaskGlobalStatus(taskId) {
+          try {
+            // Lấy danh sách trạng thái từng người
+            const res = await fetch(`/tasks/${taskId}/assignees`);
+            const assignees = await res.json();
+
+            const statuses = assignees.map(a => a.status);
+
+            let globalStatus = "pending";
+
+            if (statuses.some(s => s === "in_progress")) {
+              globalStatus = "in_progress";
+            }
+
+            if (statuses.every(s => s === "done")) {
+              globalStatus = "done";
+            }
+
+            // Cập nhật trạng thái chung
+            await fetch(`/tasks/${taskId}/status`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: globalStatus })
+            });
+
+          } catch (err) {
+            console.error("Lỗi cập nhật trạng thái chung:", err);
+          }
+        }
+
       </script>
 
 

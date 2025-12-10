@@ -384,7 +384,6 @@ router.get("/notifications", ensureAuth, async (req, res) => {
   res.json(rows);
 });
 
-
 // =============================== Vào trang nhóm (render group.ejs) ===============================
 router.get("/:id", ensureAuth, async (req, res) => {
   try {
@@ -776,18 +775,19 @@ router.post("/:id/leave", ensureAuth, async (req, res) => {
   }
 });
 
-
 router.post("/notifications/:id/read", ensureAuth, async (req, res) => {
   const { id } = req.params;
 
-  await db.promise().query(`
+  await db.promise().query(
+    `
     UPDATE notification
     SET isRead = TRUE
     WHERE id = UUID_TO_BIN(?)
-  `, [id]);
+  `,
+    [id]
+  );
 
   res.json({ success: true });
 });
-
 
 export default router;

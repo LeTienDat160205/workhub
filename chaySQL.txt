@@ -1,0 +1,3 @@
+USE team_task_management;
+ALTER TABLE chat MODIFY chatType ENUM('private','group','task') NOT NULL;
+ALTER TABLE chat ADD COLUMN taskId BINARY(16) NULL AFTER groupId;

@@ -69,6 +69,7 @@ router.post("/", ensureAuth, async (req, res) => {
       VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), UUID_TO_BIN(?), ?, 'task', UUID_TO_BIN(?))
     `,
       [notiId, userId, senderId, message, type, referenceId]
+      [notiId, userId, senderId, message, type, referenceId]
     );
 
 
@@ -81,6 +82,7 @@ router.post("/", ensureAuth, async (req, res) => {
       await db.promise().query(sqlAssignee, [assignId, taskId, uid]);
 
       // Lưu thông báo
+
 
       const message = `Bạn được giao công việc: ${taskName}`;
 
@@ -415,6 +417,48 @@ router.delete('/:taskId', ensureAuth, async (req, res) => {
   } catch (err) {
     console.error('DELETE /tasks/:taskId error:', err);
     res.status(500).json({ error: 'Lỗi khi xóa task.' });
+  }
+});
+
+//============================CHAT TASK=============================
+// LẤY HOẶC TẠO CHAT CHO TASK
+router.get("/task/:taskId/chat", ensureAuth, async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const userId = req.session.user.id;
+
+    // 1) Kiểm tra đã có chat chưa
+    const [rows] = await db
+      .promise()
+      .query(
+        `SELECT BIN_TO_UUID(id) AS chatId FROM chat WHERE taskId = UUID_TO_BIN(?) LIMIT 1`,
+        [taskId]
+      );
+
+    if (rows.length > 0) {
+      return res.json({ chatId: rows[0].chatId });
+    }
+
+    // 2) Nếu chưa → tạo chat mới
+    const newChatId = uuidv7();
+
+    await db.promise().query(
+      `INSERT INTO chat (id, chatType, name, taskId, createdBy)
+       VALUES (UUID_TO_BIN(?), 'task', ?, UUID_TO_BIN(?), UUID_TO_BIN(?))`,
+      [newChatId, "Chat task", taskId, userId]
+    );
+
+    // 3) Thêm user vào chat
+    await db.promise().query(
+      `INSERT INTO chat_member (chatId, userId, role)
+       VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), 'member')`,
+      [newChatId, userId]
+    );
+
+    res.json({ chatId: newChatId });
+  } catch (err) {
+    console.error("Task chat error:", err);
+    res.status(500).json({ error: "Lỗi task chat" });
   }
 });
 

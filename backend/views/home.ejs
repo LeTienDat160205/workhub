@@ -9,6 +9,36 @@
 </head>
 
 <body onload="loadTasks()">
+  <!-- Popup thông báo -->
+<div id="homeNotifPopup"
+     style="
+        display:none;
+        position:fixed;
+        top:80px;
+        right:20px;
+        width:380px;
+        background:white;
+        border-radius:12px;
+        box-shadow:0 6px 20px rgba(0,0,0,0.25);
+        z-index:9999;
+        overflow:hidden;
+     ">
+
+    <div style="background:white; padding:20px; max-height:500px; overflow-y:auto;">
+        <h3 style="margin-top:0;">Thông báo</h3>
+
+        <div id="homeNotifList" class="notif-content">
+            <!-- JS sẽ load thông báo vào đây -->
+        </div>
+
+        <button id="homeCloseNotifBtn"
+                style="margin-top:12px;padding:8px 12px;background:#333;color:white;border:none;border-radius:6px;float:right;">
+            Đóng
+        </button>
+    </div>
+</div>
+
+
   <div id="toast-container"></div>
   <div class="dashboard-frame">
     <!-- HEADER -->
@@ -41,12 +71,18 @@
             <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"></line>
           </svg>
         </button>
-        <button class="icon-btn" id="btnNotif" title="Thông báo" aria-label="Thông báo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path>
-            <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
-          </svg>
-        </button>
+       <button class="icon-btn" id="notifbutton" title="Thông báo" aria-label="Thông báo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path>
+        <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
+    </svg>
+
+    
+</button>
+
+
+
+
         <!-- account -->
         <div class="user-account" id="openProfile" title="Account" style="position: relative">
           <div style="position: relative">
@@ -950,7 +986,7 @@
                 <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path>
                 <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
               </svg>
-              Thông báoo
+              Thông báo
             </span>
             <button class="close-panel" id="closeNotifPanel" title="Đóng">
               &times;
@@ -996,10 +1032,20 @@
                 });
               }
 
-              // Nếu thông báo liên quan đến task → chuyển đến trang task
-              if (notif.type === "task" && notif.referenceId) {
-                window.location.href = `/tasks/${notif.referenceId}`;
-              }
+              // Khi click vào thông báo
+div.addEventListener("click", async () => {
+
+    // Đánh dấu đã đọc
+    if (!notif.isRead) {
+        await fetch(`/groups/notifications/${notif.id}/read`, { method: "POST" });
+    }
+
+    // Nếu thông báo liên quan đến task → quay về dashboard và highlight task
+    if (notif.type === "task" && notif.referenceId) {
+        window.location.href = `/?openTask=${notif.referenceId}`;
+    }
+});
+
             });
 
             notifList.appendChild(div);
@@ -2666,8 +2712,128 @@
           return "other";
         }
 
+        // ========== TỰ ĐỘNG MỞ TASK KHI CÓ QUERY openTask ==========
+document.addEventListener("DOMContentLoaded", async () => {
+    const params = new URLSearchParams(window.location.search);
+    const taskId = params.get("openTask");
+    if (!taskId) return;
+
+    // Chờ 300ms để task được render xong
+    setTimeout(() => {
+        // Chuyển sang tab "Được giao"
+        document.getElementById("btnReceived").click();
+
+        const taskEl = document.querySelector(`[data-task-id="${taskId}"]`);
+
+        if (taskEl) {
+            taskEl.scrollIntoView({ behavior: "smooth", block: "center" });
+
+            // Highlight nhẹ
+            taskEl.style.transition = "background 0.4s";
+            taskEl.style.background = "#FFF3B0";   // vàng nhạt
+
+            setTimeout(() => {
+                taskEl.style.background = "";
+            }, 1500);
+        }
+    }, 300);
+});
+
+
 
       </script>
+
+<script>
+const notifBtn = document.getElementById("notifbutton");
+const popup = document.getElementById("homeNotifPopup");
+const closeBtn = document.getElementById("homeCloseNotifBtn");
+const notifList = document.getElementById("homeNotifList");
+
+// Mở popup khi nhấp nút chuông
+notifBtn.addEventListener("click", () => {
+    popup.style.display = "block";
+    loadHomeNotifications();
+    updateNotifBadge(); // cập nhật số chưa đọc khi mở popup
+});
+
+
+// Đóng popup
+closeBtn.addEventListener("click", () => {
+    popup.style.display = "none";
+});
+
+// ===============================
+// 📌 Gọi API lấy thông báo
+// ===============================
+async function loadHomeNotifications() {
+    try {
+        const response = await fetch("/groups/notifications");
+        const notifs = await response.json();
+
+        notifList.innerHTML = notifs.map(n => `
+            <div class="notif-item"
+                 data-id="${n.id}"
+                 data-task-id="${n.referenceId || ''}"
+                 style="padding:10px 12px;border-bottom:1px solid #ddd;
+                        cursor:pointer;background:${n.isRead ? 'white' : '#eaffea'}">
+
+                <b>${n.message}</b>
+                <div style="font-size:0.8rem;color:gray;">
+                    ${new Date(n.createdAt).toLocaleString()}
+                </div>
+            </div>
+        `).join("");
+    } catch (err) {
+        notifList.innerHTML = "<p style='color:red;'>Lỗi tải thông báo.</p>";
+        console.error(err);
+    }
+}
+
+// ===============================
+// 📌 Click vào thông báo → chuyển đến đúng task
+// ===============================
+notifList.addEventListener("click", async (e) => {
+    const item = e.target.closest(".notif-item");
+    if (!item) return;
+
+    const notifId = item.dataset.id;
+    const taskId = item.dataset.taskId;
+
+    // Đánh dấu đã đọc
+    await fetch("/groups/notifications/read", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: notifId })
+    });
+
+    // Chuyển đến trang với ?openTask=xxx
+    if (taskId) {
+        window.location.href = `/?openTask=${taskId}`;
+    }
+});
+
+async function updateNotifBadge() {
+    try {
+        const res = await fetch("/groups/notifications");
+        const notifs = await res.json();
+
+        const unread = notifs.filter(n => !n.isRead).length;
+        const badge = document.getElementById("notifBadge");
+
+        if (unread > 0) {
+            badge.style.display = "inline-block";
+            badge.textContent = unread > 99 ? "99+" : unread;
+        } else {
+            badge.style.display = "none";
+        }
+    } catch (err) {
+        console.error("Không thể cập nhật badge:", err);
+    }
+}
+
+
+</script>
+
 
 </body>
 

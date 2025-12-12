@@ -2570,10 +2570,8 @@
     </script>
 
   </div>
-<<<<<<< HEAD
 
 <%- include("chatbot") %>
-=======
 <script>
 const notifBtn = document.getElementById("notifbutton");
 const popup = document.getElementById("notificationPopup");
@@ -2582,7 +2580,7 @@ const closePopupBtn = document.getElementById("closePopupBtn");
 // Mở popup khi nhấp vào nút
 notifBtn.addEventListener("click", () => {
     popup.style.display = "flex";
-    loadNotifications();   // ⭐ tải dữ liệu từ server
+    loadNotifications();   // tải dữ liệu từ server
 });
 
 // Đóng popup
@@ -2596,7 +2594,7 @@ popup.addEventListener("click", (e) => {
 });
 
 // ===============================
-// 📌 LẤY DỮ LIỆU TỪ API
+//  LẤY DỮ LIỆU TỪ API
 // ===============================
 async function loadNotifications() {
     const container = document.querySelector("#notificationPopup .notif-content");
@@ -2628,7 +2626,6 @@ async function loadNotifications() {
     }
 }
 </script>
->>>>>>> 92550f35a6f978f13bbeeb1fd63ce1eb766de1e2
 
 </body>
 

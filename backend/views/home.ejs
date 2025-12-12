@@ -9,6 +9,36 @@
 </head>
 
 <body onload="loadTasks()">
+  <!-- Popup thông báo -->
+<div id="homeNotifPopup"
+     style="
+        display:none;
+        position:fixed;
+        top:80px;
+        right:20px;
+        width:380px;
+        background:white;
+        border-radius:12px;
+        box-shadow:0 6px 20px rgba(0,0,0,0.25);
+        z-index:9999;
+        overflow:hidden;
+     ">
+
+    <div style="background:white; padding:20px; max-height:500px; overflow-y:auto;">
+        <h3 style="margin-top:0;">Thông báo</h3>
+
+        <div id="homeNotifList" class="notif-content">
+            <!-- JS sẽ load thông báo vào đây -->
+        </div>
+
+        <button id="homeCloseNotifBtn"
+                style="margin-top:12px;padding:8px 12px;background:#333;color:white;border:none;border-radius:6px;float:right;">
+            Đóng
+        </button>
+    </div>
+</div>
+
+
   <div id="toast-container"></div>
   <div class="dashboard-frame">
     <!-- HEADER -->
@@ -41,12 +71,18 @@
             <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"></line>
           </svg>
         </button>
-        <button class="icon-btn" id="btnNotif" title="Thông báo" aria-label="Thông báo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path>
-            <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
-          </svg>
-        </button>
+       <button class="icon-btn" id="notifbutton" title="Thông báo" aria-label="Thông báo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"></path>
+        <path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"></path>
+    </svg>
+
+    
+</button>
+
+
+
+
         <!-- account -->
         <div class="user-account" id="openProfile" title="Account" style="position: relative">
           <div style="position: relative">
@@ -996,10 +1032,20 @@
                 });
               }
 
-              // Nếu thông báo liên quan đến task → chuyển đến trang task
-              if (notif.type === "task" && notif.referenceId) {
-                window.location.href = `/tasks/${notif.referenceId}`;
-              }
+              // Khi click vào thông báo
+div.addEventListener("click", async () => {
+
+    // Đánh dấu đã đọc
+    if (!notif.isRead) {
+        await fetch(`/groups/notifications/${notif.id}/read`, { method: "POST" });
+    }
+
+    // Nếu thông báo liên quan đến task → quay về dashboard và highlight task
+    if (notif.type === "task" && notif.referenceId) {
+        window.location.href = `/?openTask=${notif.referenceId}`;
+    }
+});
+
             });
 
             notifList.appendChild(div);
@@ -2410,6 +2456,7 @@
           return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
+<<<<<<< HEAD
       </script>
 
       <script>
@@ -2670,6 +2717,386 @@
       </script>
       
 <%- include("chatbot") %>
+=======
+      </script>
+
+      <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+          const socket = io(); // tự động kết nối đến backend
+
+          const chatId = result;
+
+          const userId = "<%= user.id %>";
+          const username = "<%= user.name %>";
+          const avatarPath = "<%= user.avatarPath || '/uploads/default-avatar.png' %>";
+
+          const outputChat = document.querySelector(".outputChat");
+          const input = document.getElementById("messageInput");
+          const sendBtn = document.querySelector(".sendMessage");
+
+          // ========== THAM GIA PHÒNG CHAT ==========
+          socket.emit("joinChat", chatId);
+
+          // ========== LOAD TIN NHẮN CŨ ==========
+          async function loadMessages() {
+            try {
+              console.log("Fetching messages from:", `/chat/${chatId}/messages`);
+              const res = await fetch(`/chat/${chatId}/messages`);
+              console.log("Response status:", res.status);
+              if (!res.ok) throw new Error("Không thể tải tin nhắn");
+              const messages = await res.json();
+              outputChat.innerHTML = "";
+              messages.forEach(renderMessage);
+              outputChat.scrollTop = outputChat.scrollHeight;
+            } catch (err) {
+              console.error("Lỗi khi loadMessages:", err);
+              outputChat.innerHTML = `<div style="color:red;padding:10px;">Lỗi tải tin nhắn.</div>`;
+            }
+          }
+
+          // ========== HIỂN THỊ TIN NHẮN ==========  
+          function renderMessage(msg) {
+            const mine = msg.senderId === "<%= user.id %>";
+            const time = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+            // build message content (handle file vs text)
+            let contentHtml = "";
+            if (msg.messageType === "file") {
+              // prefer msg.fileUrl then msg.filePath
+              const url = msg.fileUrl || msg.filePath || msg.filePath || msg.fileUrl;
+              const name = msg.content || (msg.fileName || url?.split('/').pop() || 'Tệp đính kèm');
+              const ext = (name || '').split('.').pop()?.toLowerCase() || '';
+              const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+              const videoTypes = ['mp4', 'webm', 'ogg'];
+
+              if (imageTypes.includes(ext)) {
+                contentHtml = `<a href="${url}" target="_blank"><img src="${url}" class="chat-file-image" style="max-width:300px;display:block;border-radius:8px"></a>`;
+              } else if (videoTypes.includes(ext)) {
+                contentHtml = `<video controls src="${url}" class="chat-file-video" style="max-width:320px;display:block;border-radius:8px"></video>`;
+              } else {
+                contentHtml = `<a href="${url}" download style="text-decoration:underline;color:inherit;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3 3 0 014.24 4.24l-9.2 9.2a1 1 0 01-1.41-1.41l8.49-8.49"/>
+    </svg>
+                ${name}</a>`;
+              }
+            } else {
+              contentHtml = msg.content || '';
+            }
+
+            const div = document.createElement("div");
+            div.classList.add("chat-row", mine ? "mine" : "other");
+
+            div.innerHTML = `
+    ${!mine ? `
+      <img class="avatar" src="${msg.avatarPath || '/uploads/default-avatar.png'}" alt="">
+      <div class="chat-content">
+        <div class="name">${msg.username || 'Người dùng'}</div>
+        <div class="bubble bubble-other">${contentHtml}</div>
+        <div class="time-other">${time}</div>
+      </div>
+    ` : `
+      <div class="chat-content">
+        <div class="bubble bubble-mine">${contentHtml}</div>
+        <div class="time-mine">${time}</div>
+      </div>
+      <img class="avatar" src="${msg.avatarPath || '/uploads/default-avatar.png'}" alt="">
+    `}
+  `;
+
+            document.querySelector(".outputChat").appendChild(div);
+          }
+
+          // ========== GỬI TIN NHẮN ==========
+          sendBtn.addEventListener("click", sendMessage);
+          input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+          });
+
+          function sendMessage() {
+            const content = input.value.trim();
+            if (!content) return;
+
+            socket.emit("sendMessage", {
+              chatId,
+              senderId: userId,
+              content,
+              messageType: "text"
+            });
+
+            input.value = "";
+          }
+
+          // ========== NHẬN TIN NHẮN MỚI ==========
+          socket.on("newMessage", (msg) => {
+            const { type, fileName, filePath } = msg;
+
+            // Nếu là file
+            if (type === "file" && filePath) {
+              const fileType = getFileType(fileName); // Hàm xác định loại file
+
+              let html = "";
+
+              switch (fileType) {
+                case "image":
+                  html = `
+          <div class="message">
+            <img src="${filePath}" class="chat-image" alt="${fileName}">
+          </div>
+        `;
+                  break;
+
+                case "video":
+                  html = `
+          <div class="message">
+            <video controls class="chat-video">
+              <source src="${filePath}" type="video/mp4">
+              Trình duyệt không hỗ trợ video.
+            </video>
+          </div>
+        `;
+                  break;
+
+                case "document":
+                  html = `
+          <div class="message file-message">
+            📄 <a href="${filePath}" download>${fileName}</a>
+          </div>
+        `;
+                  break;
+
+                case "archive":
+                  html = `
+          <div class="message file-message">
+            🗂 <a href="${filePath}" download>${fileName}</a>
+          </div>
+        `;
+                  break;
+
+                case "code":
+                  html = `
+          <div class="message file-message">
+            💻 <a href="${filePath}" download>${fileName}</a>
+          </div>
+        `;
+                  break;
+
+                default:
+                  html = `
+          <div class="message file-message">
+            📎 <a href="${filePath}" download>${fileName}</a>
+          </div>
+        `;
+              }
+
+              chatBox.innerHTML += html;
+            } else {
+              // Nếu không phải file, render bình thường
+              renderMessage(msg);
+            }
+
+            // Cuộn chat xuống cuối
+            outputChat.scrollTop = outputChat.scrollHeight;
+          });
+
+
+          // ========== NGẮT KẾT NỐI ==========
+          window.addEventListener("beforeunload", () => {
+            socket.emit("leaveChat", chatId);
+            socket.disconnect();
+          });
+
+          // Tải tin nhắn ban đầu
+          loadMessages();
+
+          // Gửi file: xử lý upload rồi emit sendMessage (placed inside DOMContentLoaded so `socket` is available)
+          const fileInputEl = document.getElementById("fileInput");
+          if (fileInputEl) {
+            fileInputEl.addEventListener("change", async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+
+              const form = new FormData();
+              form.append("file", file);
+
+              try {
+                const res = await fetch("/chat/upload", {
+                  method: "POST",
+                  body: form,
+                  credentials: "same-origin",
+                });
+                const data = await res.json();
+                if (!res.ok || !data?.success) {
+                  console.error("Upload failed", data);
+                  showToast(data?.error || "Không thể upload tệp.", "error");
+                  fileInputEl.value = "";
+                  return;
+                }
+
+                const filePath = data.filePath;
+
+                socket.emit("sendMessage", {
+                  chatId,
+                  senderId: userId,
+                  content: file.name,
+                  messageType: "file",
+                  filePath,
+                  fileUrl: filePath,
+                });
+
+                fileInputEl.value = "";
+              } catch (err) {
+                console.error("Upload error", err);
+                showToast("Lỗi khi upload tệp.", "error");
+                fileInputEl.value = "";
+              }
+            });
+          }
+
+        });
+
+
+        function getFileType(filename) {
+          const ext = filename.split('.').pop().toLowerCase();
+
+          const imageTypes = ["jpg", "jpeg", "png", "gif", "webp"];
+          const videoTypes = ["mp4", "webm", "mkv"];
+          const docTypes = ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"];
+          const zipTypes = ["zip", "rar", "7z"];
+          const codeTypes = ["txt", "py", "js", "css", "html", "json"];
+
+          if (imageTypes.includes(ext)) return "image";
+          if (videoTypes.includes(ext)) return "video";
+          if (docTypes.includes(ext)) return "document";
+          if (zipTypes.includes(ext)) return "archive";
+          if (codeTypes.includes(ext)) return "code";
+
+          return "other";
+        }
+
+        // ========== TỰ ĐỘNG MỞ TASK KHI CÓ QUERY openTask ==========
+document.addEventListener("DOMContentLoaded", async () => {
+    const params = new URLSearchParams(window.location.search);
+    const taskId = params.get("openTask");
+    if (!taskId) return;
+
+    // Chờ 300ms để task được render xong
+    setTimeout(() => {
+        // Chuyển sang tab "Được giao"
+        document.getElementById("btnReceived").click();
+
+        const taskEl = document.querySelector(`[data-task-id="${taskId}"]`);
+
+        if (taskEl) {
+            taskEl.scrollIntoView({ behavior: "smooth", block: "center" });
+
+            // Highlight nhẹ
+            taskEl.style.transition = "background 0.4s";
+            taskEl.style.background = "#FFF3B0";   // vàng nhạt
+
+            setTimeout(() => {
+                taskEl.style.background = "";
+            }, 1500);
+        }
+    }, 300);
+});
+
+
+
+      </script>
+
+<script>
+const notifBtn = document.getElementById("notifbutton");
+const popup = document.getElementById("homeNotifPopup");
+const closeBtn = document.getElementById("homeCloseNotifBtn");
+const notifList = document.getElementById("homeNotifList");
+
+// Mở popup khi nhấp nút chuông
+notifBtn.addEventListener("click", () => {
+    popup.style.display = "block";
+    loadHomeNotifications();
+    updateNotifBadge(); // cập nhật số chưa đọc khi mở popup
+});
+
+
+// Đóng popup
+closeBtn.addEventListener("click", () => {
+    popup.style.display = "none";
+});
+
+// ===============================
+// 📌 Gọi API lấy thông báo
+// ===============================
+async function loadHomeNotifications() {
+    try {
+        const response = await fetch("/groups/notifications");
+        const notifs = await response.json();
+
+        notifList.innerHTML = notifs.map(n => `
+            <div class="notif-item"
+                 data-id="${n.id}"
+                 data-task-id="${n.referenceId || ''}"
+                 style="padding:10px 12px;border-bottom:1px solid #ddd;
+                        cursor:pointer;background:${n.isRead ? 'white' : '#eaffea'}">
+
+                <b>${n.message}</b>
+                <div style="font-size:0.8rem;color:gray;">
+                    ${new Date(n.createdAt).toLocaleString()}
+                </div>
+            </div>
+        `).join("");
+    } catch (err) {
+        notifList.innerHTML = "<p style='color:red;'>Lỗi tải thông báo.</p>";
+        console.error(err);
+    }
+}
+
+// ===============================
+// 📌 Click vào thông báo → chuyển đến đúng task
+// ===============================
+notifList.addEventListener("click", async (e) => {
+    const item = e.target.closest(".notif-item");
+    if (!item) return;
+
+    const notifId = item.dataset.id;
+    const taskId = item.dataset.taskId;
+
+    // Đánh dấu đã đọc
+    await fetch("/groups/notifications/read", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: notifId })
+    });
+
+    // Chuyển đến trang với ?openTask=xxx
+    if (taskId) {
+        window.location.href = `/?openTask=${taskId}`;
+    }
+});
+
+async function updateNotifBadge() {
+    try {
+        const res = await fetch("/groups/notifications");
+        const notifs = await res.json();
+
+        const unread = notifs.filter(n => !n.isRead).length;
+        const badge = document.getElementById("notifBadge");
+
+        if (unread > 0) {
+            badge.style.display = "inline-block";
+            badge.textContent = unread > 99 ? "99+" : unread;
+        } else {
+            badge.style.display = "none";
+        }
+    } catch (err) {
+        console.error("Không thể cập nhật badge:", err);
+    }
+}
+
+
+</script>
+
+>>>>>>> 92550f35a6f978f13bbeeb1fd63ce1eb766de1e2
 
 </body>
 

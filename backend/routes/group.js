@@ -820,4 +820,30 @@ router.post("/notifications/:id/read", ensureAuth, async (req, res) => {
   res.json({ success: true });
 });
 
+// API lấy thông báo cho user hiện tại
+router.get("/notifications", ensureAuth, async (req, res) => {
+  const userId = req.session.user.id;
+
+  const sql = `
+    SELECT 
+      BIN_TO_UUID(id) AS id,
+      message,
+      type,
+      isRead,
+      createdAt
+    FROM notification
+    WHERE userId = UUID_TO_BIN(?)
+    ORDER BY createdAt DESC
+  `;
+
+  try {
+    const [rows] = await db.promise().query(sql, [userId]);
+    res.json(rows);
+  } catch (err) {
+    console.error("GET /groups/notifications error:", err);
+    res.status(500).json({ error: "Lỗi khi tải thông báo." });
+  }
+});
+
+
 export default router;

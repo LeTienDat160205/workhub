@@ -2,10 +2,7 @@ CREATE DATABASE team_task_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unico
 USE team_task_management;
 
 select * from user
-<<<<<<< HEAD
 select * from task
-=======
->>>>>>> 92550f35a6f978f13bbeeb1fd63ce1eb766de1e2
 select * from task_assignee
 drop database team_task_management
 SELECT * FROM notification ;

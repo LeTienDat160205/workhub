@@ -226,17 +226,19 @@ router.get("/:taskId/submissions", ensureAuth, async (req, res) => {
 
     const sql = `
       SELECT 
-        BIN_TO_UUID(id) AS fileId,
-        BIN_TO_UUID(userId) AS userId,
-        fileName,
-        fileType,
-        fileSize,
-        filePath,
-        createdAt
-      FROM file
-      WHERE taskId = UUID_TO_BIN(?)
-        AND fileCategory = 'submission'
-      ORDER BY createdAt DESC
+        BIN_TO_UUID(f.id) AS fileId,
+        BIN_TO_UUID(f.userId) AS userId,
+        u.name AS userName,
+        f.fileName,
+        f.fileType,
+        f.fileSize,
+        f.filePath,
+        f.createdAt
+      FROM file f
+      JOIN user u ON f.userId = u.id
+      WHERE f.taskId = UUID_TO_BIN(?)
+        AND f.fileCategory = 'submission'
+      ORDER BY f.createdAt DESC
     `;
 
     const [rows] = await db.promise().query(sql, [taskId]);

@@ -6,6 +6,8 @@
   <title>WorkHub Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="/frontend/style.css">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 
 <body onload="loadTasks()">
@@ -404,25 +406,12 @@
 
             tasks.forEach(task => {
               const taskId = task.id || task._id || (task._doc && (task._doc._id || task._doc.id)) || '';
-              // Tự động lấy CHAT ID của task
-              // (async () => {
-              //   try {
-              //     const res = await fetch(`/groups/task/${taskId}/chat`);
-              //     const data = await res.json();
-
-              //     if (data.chatId) {
-              //       loadTaskMessages(data.chatId);
-              //       setupTaskSendMessage(data.chatId);
-              //     }
-              //   } catch (err) {
-              //     console.error("Lỗi khi lấy chatId:", err);
-              //   }
-              // })();
 
               const div = document.createElement("div");
 
               // tag the DOM node so we can find it when removing after delete
               div.setAttribute('data-task-id', taskId);
+
               div.classList.add("task-assigned");
               div.style = `
       border:1px solid #e6e9ee;
@@ -583,8 +572,12 @@
                 const isCreator = String(creatorId) === String(CURRENT_USER_ID || '');
                 if (isCreator) {
                   const delBtn = document.createElement('button');
-                  delBtn.textContent = 'Xóa công việc';
-                  delBtn.style = 'margin-top:8px;padding:8px 10px;background:#ef4444;color:white;border:none;border-radius:8px;cursor:pointer;';
+                  delBtn.className = "task_delete_btn";
+                  delBtn.innerHTML = `
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="#ef4444" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9 3L10 2H14L15 3H20V5H4V3H9ZM5 6H19L18.2 21.3C18.1 22.3 17.3 23 16.3 23H7.7C6.7 23 5.9 22.3 5.8 21.3L5 6ZM9 10V19H11V10H9ZM13 10V19H15V10H13Z"/>
+  </svg>
+`;
                   delBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     // open modal confirm; actual deletion happens in modal handler
@@ -2004,7 +1997,8 @@
               </div>
 
               <!-- Creator attachments list (rendered by openTaskDetail) -->
-              <div id="creatorAttachments" style="display:flex;flex-direction:column;gap:6px;width:100%;margin-top:6px">
+              <div style="display:flex;flex-direction:column;gap:6px;width:100%;margin-top:6px">
+                <div id="creatorAttachments"></div>
               </div>
               <div style="display:flex;justify-content:center;margin-top:6px">
                 <button class="btn" id="acceptTaskBtn" type="button"
@@ -2055,6 +2049,7 @@
       <!-- ========================== Chat công việc ==========================-->
       <!-- Socket.io client -->
       <script src="/socket.io/socket.io.js"></script>
+
       <script>
         // ===================== OPEN TASK DETAIL =====================
 
@@ -2106,14 +2101,15 @@
           setTextOrValue(groupEl, task.groupName || '');
 
           // Avatar
-          if (task.ownerAvatar) {
-            avatarEl.innerHTML = "";
+          const { name: creatorName, avatar: creatorAvatar } = getCreatorInfo(task);
+          avatarEl.innerHTML = "";
+          if (creatorAvatar) {
             const img = document.createElement("img");
-            img.src = task.ownerAvatar;
+            img.src = creatorAvatar;
             img.style = "width:100%;height:100%;border-radius:50%;object-fit:cover";
             avatarEl.appendChild(img);
           } else {
-            avatarEl.textContent = userName.charAt(0).toUpperCase();
+            avatarEl.textContent = (creatorName || "?").charAt(0).toUpperCase();
           }
 
           // Nội dung task
@@ -2122,9 +2118,25 @@
           setTextOrValue(startEl, task.createdAt ? new Date(task.createdAt).toLocaleDateString('vi-VN') : '');
           setTextOrValue(deadlineEl, task.deadline ? new Date(task.deadline).toLocaleDateString('vi-VN') : '');
 
-          // ======================================
+          // bộ icon 
+          const iconMap = {
+            pdf: "picture_as_pdf",
+            doc: "description",
+            docx: "description",
+            xls: "table",
+            xlsx: "table",
+            png: "image",
+            jpg: "image",
+            jpeg: "image",
+            svg: "image",
+            zip: "folder_zip",
+            rar: "folder_zip",
+            py: "terminal",
+            js: "javascript",
+            default: "insert_drive_file"
+          };
+
           // 1️⃣ LẤY FILE ĐÍNH KÈM — ATTACHMENTS
-          // ======================================
           (async () => {
             creatorAttachmentsEl.innerHTML = `<span style="font-size:0.85rem;color:var(--text-muted)">Đang tải file...</span>`;
 
@@ -2143,10 +2155,31 @@
                 const item = document.createElement("div");
                 item.className = "file_item";
 
+                const created = new Date(f.createdAt);
+                const timeStr = created.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                const dateStr = created.toLocaleDateString("vi-VN");
+
+                // Format size
+                const fileSizeKB = (f.fileSize / 1024).toFixed(1);
+
+                // Icon theo file type
+                const ext = f.fileName.split(".").pop().toLowerCase();
+                const icon = iconMap[ext] || iconMap.default;
+
                 item.innerHTML = `
-          <a href="${f.filePath}" class="file_link" target="_blank">📎 ${f.fileName}</a>
-          <div class="file_time">${new Date(f.createdAt).toLocaleString()}</div>
-        `;
+  <div class="file_left">
+    <div class="file_icon">
+      <span class="material-symbols-rounded">${icon}</span>
+    </div>
+
+    <div class="file_info">
+      <a href="${f.filePath}" target="_blank" class="file_name">${f.fileName}</a>
+      <div class="file_meta">${dateStr} - ${timeStr}</div>
+    </div>
+  </div>
+
+  <div class="file_right">${fileSizeKB} KB</div>
+`;
 
                 creatorAttachmentsEl.appendChild(item);
               });
@@ -2157,9 +2190,7 @@
             }
           })();
 
-          // ======================================
           // 2️⃣ LẤY FILE NỘP — SUBMISSIONS
-          // ======================================
           (async () => {
             submitProductFiles.innerHTML = `<span style="font-size:0.85rem;color:var(--text-muted)">Đang tải file...</span>`;
 
@@ -2176,13 +2207,30 @@
 
               files.forEach(f => {
                 const item = document.createElement("div");
-                item.className = "file_item";
+                item.className = "submit_item";
+
+                const ext = f.fileName.split(".").pop().toLowerCase();
+                const icon = iconMap[ext] || iconMap.default;
+
+                const dateStr = new Date(f.createdAt).toLocaleDateString("vi-VN");
+                const timeStr = new Date(f.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
                 item.innerHTML = `
-          <a href="${f.filePath}" class="file_link" target="_blank">📄 ${f.fileName}</a>
-          <div class="file_time">${new Date(f.createdAt).toLocaleString()}</div>
-        `;
+    <div class="submit_left">
+      <div class="submit_icon">
+        <span class="material-symbols-rounded">${icon}</span>
+      </div>
 
+      <div class="submit_info">
+        <a href="${f.filePath}" class="submit_name" target="_blank">${f.fileName}</a>
+        <div class="submit_user">Người nộp: ${f.userName || "Không rõ"}</div>
+      </div>
+    </div>
+
+    <div class="submit_time">
+      ${dateStr} - ${timeStr}
+    </div>
+  `;
                 submitProductFiles.appendChild(item);
               });
 
@@ -2192,14 +2240,18 @@
             }
           })();
 
-          // ======================================
-          // 3️⃣ NÚT NHẬN CÔNG VIỆC
-          // ======================================
           // Xóa khu vực gửi tệp sản phẩm
           submitProductFiles.innerHTML = '';
 
+          // 3️⃣ NÚT NHẬN CÔNG VIỆC
           // Chấp nhận (Nhận): tải xuống tệp đính kèm và đặt trạng thái cá nhân thành in_progress
           acceptBtn.onclick = async () => {
+            // Kiểm tra xem người dùng hiện tại có phải người được giao không
+            if (!assigneeIds.includes(CURRENT_USER_ID)) {
+              showToast("Bạn không phải người được giao công việc này", "error");
+              return;
+            }
+
             try {
               // Lấy file đính kèm để tải về
               const res = await fetch(`/tasks/${taskId}/files`, { credentials: "include" });
@@ -2226,13 +2278,11 @@
               showToast("Bạn đã nhận công việc");
             } catch (err) {
               console.error(err);
-              alert("Lỗi nhận công việc");
+              showToast("Lỗi nhận công việc", "error");
             }
           };
 
-          // ======================================
           // 4️⃣ UPLOAD FILE SẢN PHẨM
-          // ======================================
           let selectedProductFiles = [];
 
           submitBtn.onclick = () => submitInput.click();
@@ -2265,14 +2315,12 @@
             });
           };
 
-          // ======================================
           // 5️⃣ NỘP FILE
-          // ======================================
           const confirmBtn = document.getElementById("confirmTaskBtn");
-
           confirmBtn.onclick = async () => {
             if (!selectedProductFiles.length) {
-              return alert("Bạn chưa chọn file sản phẩm");
+              showToast("Bạn chưa chọn file sản phẩm", "error");
+              return;
             }
 
             try {
@@ -2323,13 +2371,12 @@
 
             } catch (err) {
               console.error(err);
-              alert("Lỗi khi nộp file");
+              showToast("Lỗi khi nộp file", "error");
             }
           };
 
-          // ======================================
-          // SHOW MODAL
-          // ======================================
+          //==============SHOW MODAL============
+
           modal.style.display = "flex";
           modal.setAttribute("aria-hidden", "false");
 

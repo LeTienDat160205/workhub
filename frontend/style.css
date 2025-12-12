@@ -2113,3 +2113,147 @@ select.form-input {
   border: none;
 }
 
+
+/* file_item */
+.file_item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border: 1px solid #e5e7eb;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  gap: 12px;
+  transition: 0.15s;
+  cursor: pointer;
+  width: 100%;
+}
+.file_item:hover {
+  background: #f9fafb;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.file_left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  flex: 1;
+  min-width: 50px;
+}
+.file_icon {
+  font-size: 1.3rem;
+}
+.file_info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 50px;
+}
+.file_name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  min-width: 100px;  
+}
+.file_meta {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  max-width: 100%;
+  min-width: 100px;
+}
+.file_size {
+  font-size: 0.85rem;
+  color: #6b7280;
+  white-space: nowrap;
+}
+.file_right {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* file_submit */
+.submit_item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+  padding: 10px 14px;
+  border-radius: 8px;
+  gap: 12px;
+  width: 100%;
+  transition: 0.15s;
+}
+
+.submit_item:hover {
+  background: #f9fafb;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.submit_left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.submit_icon {
+  font-size: 1.3rem;
+  color: #4b5563;
+  flex-shrink: 0;
+}
+
+.submit_info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.submit_name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; 
+}
+
+.submit_user {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.submit_time {
+  font-size: 0.8rem;
+  color: #6b7280;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* icon thùng rác */
+.task_delete_btn {
+  margin-top: 8px;
+  padding: 8px;
+  background: white;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task_delete_btn:hover {
+  background: #fee2e2; /* đỏ nhạt */
+}

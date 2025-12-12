@@ -10,7 +10,7 @@
 
 <body onload="loadTasks()">
   <!-- Popup thông báo -->
-  <div id="homeNotifPopup" style="
+  <div id="notificationPopup" style="
         display:none;
         position:fixed;
         top:80px;
@@ -23,17 +23,21 @@
         overflow:hidden;
      ">
 
-    <div style="background:white; padding:20px; max-height:500px; overflow-y:auto;">
-      <h3 style="margin-top:0;">Thông báo</h3>
+    <div style="background:white; width:320px; border-radius:12px;
+                box-shadow:0 6px 20px rgba(0,0,0,0.25); padding:20px;">
 
-      <div id="homeNotifList" class="notif-content">
-        <!-- JS sẽ load thông báo vào đây -->
+      <h3>Thông báo</h3>
+
+      <div class="notif-content" style="max-height:300px;overflow-y:auto;margin-top:10px;">
+        <!-- Dữ liệu sẽ được JS load vào đây -->
       </div>
 
-      <button id="homeCloseNotifBtn"
-        style="margin-top:12px;padding:8px 12px;background:#333;color:white;border:none;border-radius:6px;float:right;">
+      <button id="closePopupBtn"
+        style="margin-top:16px;padding:8px 12px;background:#333;color:white;border:none;border-radius:6px;">
         Đóng
       </button>
+
+
     </div>
   </div>
 
@@ -1805,10 +1809,7 @@
               }
             }
           }
-          btnNotif.onclick = () => {
-            showPanel("notif");
-            loadNotifs();
-          };
+
           btnCalendar.onclick = () => showPanel("calendar");
           closeNotifPanel &&
             (closeNotifPanel.onclick = () => closePanel("notif"));
@@ -2738,10 +2739,10 @@
           }, 300);
         });
       </script>
-      <%- include("chatbot") %>
-        <script>
+
+      <!-- <script>
           const notifBtn = document.getElementById("notifbutton");
-          const popup = document.getElementById("homeNotifPopup");
+          const popup = document.getElementById("notificationPopup");
           const closeBtn = document.getElementById("homeCloseNotifBtn");
           const notifList = document.getElementById("homeNotifList");
 
@@ -2828,7 +2829,64 @@
           }
 
 
+        </script> -->
+      <%- include("chatbot") %>
+
+        <script>
+          const notifBtn = document.getElementById("notifbutton");
+          const popup = document.getElementById("notificationPopup");
+          const closePopupBtn = document.getElementById("closePopupBtn");
+
+          // Mở popup khi nhấp vào nút
+          notifBtn.addEventListener("click", () => {
+            popup.style.display = "flex";
+            loadNotifications();   // tải dữ liệu từ server
+          });
+
+          // Đóng popup
+          closePopupBtn.addEventListener("click", () => {
+            popup.style.display = "none";
+          });
+
+          // Đóng khi bấm ra ngoài popup
+          popup.addEventListener("click", (e) => {
+            if (e.target === popup) popup.style.display = "none";
+          });
+
+          // ===============================
+          //  LẤY DỮ LIỆU TỪ API
+          // ===============================
+          async function loadNotifications() {
+            const container = document.querySelector("#notificationPopup .notif-content");
+
+            try {
+              const res = await fetch("/groups/notifications");
+              const notifs = await res.json();
+
+              if (!Array.isArray(notifs) || notifs.length === 0) {
+                container.innerHTML = `<p style="text-align:center;color:gray;">Không có thông báo.</p>`;
+                return;
+              }
+
+              container.innerHTML = notifs.map(n => `
+            <div class="notif-item" 
+                 style="padding:10px 12px;border-bottom:1px solid #ddd;
+                        background:${n.isRead ? 'white' : '#eaffea'}">
+                
+                <b>${n.message}</b>
+                <div style="font-size:0.8rem;color:gray;">
+                    ${new Date(n.createdAt).toLocaleString()}
+                </div>
+            </div>
+        `).join("");
+
+            } catch (err) {
+              container.innerHTML = `<p style="color:red;">Lỗi tải thông báo</p>`;
+              console.error("Notif error:", err);
+            }
+          }
         </script>
+
 
 </body>
 

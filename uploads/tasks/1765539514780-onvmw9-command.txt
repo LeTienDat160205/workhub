@@ -1,0 +1,38 @@
+*** Lưu ý lấy files về để thống nhất trc khi up lên lại, cấm tiệt giữ code ở máy r cứ thế đẩy lên ***
+
+- Lấy file về
+
+git pull origin main
+
+- Đẩy files lên git
+
+git add .
+git commit -m "code cái j ghi vô đây"
+git push origin main
+
+- Tao package .json
+
+npm init -y
+
+- Tao node_modules
+
+npm install
+
+- Cai dat thu vien
+
+npm install express mysql2 dotenv body-parser cors bcrypt ejs uuid express-session jsonwebtoken 
+npm install express-validator cloudinary multer multer-storage-cloudinary path
+npm install @google/generative-ai
+npm install @google/generative-ai@latest
+
+npm install socket.io
+npm install socket.io-client nodemailer
+
+
+- Lenh chay server
+
+node backend/server.js
+
+
+
+

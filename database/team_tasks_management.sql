@@ -2,7 +2,8 @@ CREATE DATABASE team_task_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unico
 USE team_task_management;
 
 select * from user
-select * from message
+select * from task
+select * from task_assignee
 drop database team_task_management
 
 -- Bảng user
@@ -169,3 +170,19 @@ CREATE TABLE notification (
     FOREIGN KEY (userId) REFERENCES user(id),
     FOREIGN KEY (senderId) REFERENCES user(id)
 );
+
+select * from notification
+ALTER TABLE file ADD COLUMN fileCategory ENUM('attachment', 'submission') DEFAULT 'attachment';
+
+ALTER TABLE chat 
+MODIFY COLUMN chatType ENUM('private', 'group', 'task') NOT NULL;
+
+ALTER TABLE chat 
+ADD COLUMN taskId BINARY(16) NULL;
+
+ALTER TABLE chat
+ADD CONSTRAINT fk_chat_task
+FOREIGN KEY (taskId) REFERENCES task(id)
+ON DELETE CASCADE;
+
+

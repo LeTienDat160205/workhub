@@ -198,6 +198,30 @@ router.post(
         ]);
       }
 
+      // ========================================
+      // TẠO PHÒNG CHAT DÀNH CHO TASK
+      // ========================================
+      const chatId = uuidv7();
+
+      const sqlCreateChat = `
+  INSERT INTO chat (id, chatType, name, taskId, createdBy)
+  VALUES (UUID_TO_BIN(?), 'task', ?, UUID_TO_BIN(?), UUID_TO_BIN(?))
+`;
+
+      await db
+        .promise()
+        .query(sqlCreateChat, [chatId, taskName, taskId, createdBy]);
+
+      // ========================================
+      // UPDATE task.chatId
+      // ========================================
+      await db
+        .promise()
+        .query(
+          `UPDATE task SET chatId = UUID_TO_BIN(?) WHERE id = UUID_TO_BIN(?)`,
+          [chatId, taskId]
+        );
+
       // Cập nhật số task của group
       await db.promise().query(
         `UPDATE \`group\`
@@ -235,7 +259,13 @@ router.post(
                 fileSize,
                 relPath,
               ]);
-            uploadedFiles.push({ id: fileId, fileName, filePath: relPath, fileType, fileSize });
+            uploadedFiles.push({
+              id: fileId,
+              fileName,
+              filePath: relPath,
+              fileType,
+              fileSize,
+            });
           } catch (err) {
             console.error("Failed to insert file metadata", err);
           }
@@ -246,7 +276,8 @@ router.post(
         success: true,
         message: "Tạo công việc thành công.",
         taskId,
-        files: uploadedFiles
+        chatId,
+        files: uploadedFiles,
       });
     } catch (err) {
       console.error("POST /groups error:", err);
@@ -299,11 +330,11 @@ ORDER BY t.createdAt DESC;
   }
 });
 
-    // ==================== LẤY ASSIGNEES CHO 1 TASK (dùng bởi client: /groups/:taskId/assignees)
-    router.get('/:taskId/assignees', ensureAuth, async (req, res) => {
-      try {
-        const { taskId } = req.params;
-        const sql = `
+// ==================== LẤY ASSIGNEES CHO 1 TASK (dùng bởi client: /groups/:taskId/assignees)
+router.get("/:taskId/assignees", ensureAuth, async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const sql = `
           SELECT
             BIN_TO_UUID(ta.userId) AS userId,
             ta.status AS assigneeStatus,
@@ -314,13 +345,13 @@ ORDER BY t.createdAt DESC;
           WHERE ta.taskId = UUID_TO_BIN(?)
           ORDER BY ta.id ASC
         `;
-        const [rows] = await db.promise().query(sql, [taskId]);
-        res.json(rows || []);
-      } catch (err) {
-        console.error('GET /groups/:taskId/assignees error:', err);
-        res.status(500).json({ error: 'Lỗi khi tải assignees' });
-      }
-    });
+    const [rows] = await db.promise().query(sql, [taskId]);
+    res.json(rows || []);
+  } catch (err) {
+    console.error("GET /groups/:taskId/assignees error:", err);
+    res.status(500).json({ error: "Lỗi khi tải assignees" });
+  }
+});
 
 /* ============================================================
          LẤY DANH SÁCH CÔNG VIỆC ĐƯỢC GIAO CHO MÌNH
@@ -499,7 +530,6 @@ router.get("/:taskId/assignees", ensureAuth, async (req, res) => {
 });
 
 //
-
 
 // ========================== XÓA NHÓM ==========================
 router.delete("/:id/delete", ensureAuth, async (req, res) => {

@@ -23,6 +23,8 @@ import notificationRoutes from "./routes/notification.js";
 import { initChatSocket } from "./chatLogic/chatLogic.js";
 import { createSocket } from "./config/socket.js";
 
+import chatbotRoutes  from "./routes/chatbot.js";
+
 // Setup
 const app = express();
 //const server = http.createServer(app); 
@@ -58,9 +60,9 @@ app.use("/notification", notificationRoutes);
 // app.use("/tasks", taskRoutes);
 app.use(chatUploadRoutes);
 app.use("/uploads", express.static("uploads"));
-// Mount task API routes under /tasks (do not shadow with static)
 app.use("/tasks", taskRoutes);
 
+app.use("/api", chatbotRoutes );
 
 // Khởi tạo socket.io
 import { createServer } from "http";

@@ -2247,10 +2247,6 @@
           // Chấp nhận (Nhận): tải xuống tệp đính kèm và đặt trạng thái cá nhân thành in_progress
           acceptBtn.onclick = async () => {
             // Kiểm tra xem người dùng hiện tại có phải người được giao không
-            if (!assigneeIds.includes(CURRENT_USER_ID)) {
-              showToast("Bạn không phải người được giao công việc này", "error");
-              return;
-            }
 
             try {
               // Lấy file đính kèm để tải về

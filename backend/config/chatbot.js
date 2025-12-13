@@ -93,5 +93,5 @@ Trả lời theo giọng như trợ lý thật, không máy móc.
   }
 
   // Fallback nếu thử 3 lần vẫn lỗi
-  return "🤖 Server Gemini đang quá tải hoặc không phản hồi. Bạn thử lại sau 1 phút nhé!";
+  return "Server Gemini đang quá tải hoặc không phản hồi. Bạn thử lại sau 1 phút nhé!";
 }

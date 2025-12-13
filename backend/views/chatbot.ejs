@@ -139,14 +139,14 @@
   </div>
 
   <div id="chatbot-messages">
-    <div class="msg msg-bot">Xin chào 👋 Mình là trợ lý WorkHub! Bạn cần hỗ trợ gì?</div>
+    <div class="msg msg-bot">Xin chào. Mình là trợ lý WorkHub! Bạn cần hỗ trợ gì?</div>
   </div>
 
   <div class="chatbot-faq">
-    <button class="faq-btn">Công việc chưa hoàn thành</button>
-    <button class="faq-btn">Thống kê nhóm</button>
     <button class="faq-btn">Hướng dẫn tạo nhóm</button>
-    <button class="faq-btn">Gợi ý ưu tiên công việc</button>
+    <button class="faq-btn">Hướng dẫn thêm thành viên</button>
+    <button class="faq-btn">Hướng dẫn tạo công việc</button>
+    <button class="faq-btn">Có công việc nào sắp đến hạn không</button>
   </div>
 
   <div id="chatbot-input-area">
@@ -181,7 +181,7 @@
     input.value = "";
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetch("/api/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text })

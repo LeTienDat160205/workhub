@@ -23,7 +23,7 @@
         overflow:hidden;
      ">
 
-    <div style="background:white; width:320px; border-radius:12px;
+    <div style="background:white; width:100%; border-radius:12px;
                 box-shadow:0 6px 20px rgba(0,0,0,0.25); padding:20px;">
 
       <h3>Thông báo</h3>
@@ -2611,7 +2611,7 @@
                  style="padding:10px 12px;border-bottom:1px solid #ddd;
                         background:${n.isRead ? 'white' : '#eaffea'}">
                 
-                <b>${n.message}</b>
+                ${n.message}
                 <div style="font-size:0.8rem;color:gray;">
                     ${new Date(n.createdAt).toLocaleString()}
                 </div>

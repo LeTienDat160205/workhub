@@ -986,7 +986,7 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+  z-index: 1600;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(2px);
@@ -1178,7 +1178,7 @@ select.form-input {
   inset: 0;
   background: var(--bg);
   color: var(--text);
-  z-index: 9999;
+  z-index: 999;
   overflow: hidden;
   display: none;
 }

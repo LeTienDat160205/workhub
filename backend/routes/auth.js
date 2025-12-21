@@ -14,7 +14,11 @@ dotenv.config();
 const router = express.Router();
 
 // ============================== ROUTES ==============================
-
+// Kiểm tra đảm bảo đã đăng nhập
+function ensureAuth(req, res, next) {
+  if (!req.session || !req.session.user) return res.redirect("/login");
+  next();
+}
 // Trang đăng nhập
 router.get("/login", (req, res) => {
   res.render("login", { error: null });
@@ -191,46 +195,69 @@ router.post("/forgot", async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
-    return res.render("forgot", { error: "Vui lòng nhập email!", success: null });
+    return res.render("forgot", {
+      error: "Vui lòng nhập email!",
+      success: null,
+    });
   }
 
-  db.query("SELECT * FROM user WHERE email = ?", [email], async (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.render("forgot", { error: "Lỗi hệ thống!", success: null });
-    }
-
-    if (results.length === 0) {
-      return res.render("forgot", { error: "Email không tồn tại!", success: null });
-    }
-
-    // Tạo mật khẩu ngẫu nhiên
-    const newPassword = Math.random().toString(36).slice(-8);
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Cập nhật mật khẩu trong database
-    db.query("UPDATE user SET password = ? WHERE email = ?", [hashedPassword, email], async (updateErr) => {
-      if (updateErr) {
-        console.error(updateErr);
-        return res.render("forgot", { error: "Không thể cập nhật mật khẩu!", success: null });
+  db.query(
+    "SELECT * FROM user WHERE email = ?",
+    [email],
+    async (err, results) => {
+      if (err) {
+        console.error(err);
+        return res.render("forgot", { error: "Lỗi hệ thống!", success: null });
       }
 
-      try {
-        await transporter.sendMail({
-          from: `"WorkHub Support" <${process.env.EMAIL_USER}>`,
-          to: email,
-          subject: "Mật khẩu mới của bạn - WorkHub",
-          text: `Xin chào,\n\nMật khẩu mới của bạn là: ${newPassword}\n\nVui lòng đăng nhập và đổi lại mật khẩu sau khi đăng nhập.\n\nTrân trọng,\nĐội ngũ WorkHub.`,
+      if (results.length === 0) {
+        return res.render("forgot", {
+          error: "Email không tồn tại!",
+          success: null,
         });
-
-        console.log(`📩 Đã gửi mật khẩu mới tới ${email}`);
-        return res.render("forgot", { error: null, success: "Mật khẩu mới đã được gửi tới email của bạn!" });
-      } catch (mailErr) {
-        console.error("Lỗi gửi email:", mailErr);
-        return res.render("forgot", { error: "Không thể gửi email, vui lòng thử lại!", success: null });
       }
-    });
-  });
+
+      // Tạo mật khẩu ngẫu nhiên
+      const newPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Cập nhật mật khẩu trong database
+      db.query(
+        "UPDATE user SET password = ? WHERE email = ?",
+        [hashedPassword, email],
+        async (updateErr) => {
+          if (updateErr) {
+            console.error(updateErr);
+            return res.render("forgot", {
+              error: "Không thể cập nhật mật khẩu!",
+              success: null,
+            });
+          }
+
+          try {
+            await transporter.sendMail({
+              from: `"WorkHub Support" <${process.env.EMAIL_USER}>`,
+              to: email,
+              subject: "Mật khẩu mới của bạn - WorkHub",
+              text: `Xin chào,\n\nMật khẩu mới của bạn là: ${newPassword}\n\nVui lòng đăng nhập và đổi lại mật khẩu sau khi đăng nhập.\n\nTrân trọng,\nĐội ngũ WorkHub.`,
+            });
+
+            console.log(`📩 Đã gửi mật khẩu mới tới ${email}`);
+            return res.render("forgot", {
+              error: null,
+              success: "Mật khẩu mới đã được gửi tới email của bạn!",
+            });
+          } catch (mailErr) {
+            console.error("Lỗi gửi email:", mailErr);
+            return res.render("forgot", {
+              error: "Không thể gửi email, vui lòng thử lại!",
+              success: null,
+            });
+          }
+        }
+      );
+    }
+  );
 });
 
 // ================================ Đăng xuất ================================
@@ -248,5 +275,51 @@ router.get("/logout", (req, res) => {
     res.redirect("/auth/login");
   }
 });
+
+// ================================ Xóa tài khoản ================================
+router.delete("/delete", ensureAuth, async (req, res) => {
+  const userId = req.session.user.id;
+
+ try {
+    // Xóa khỏi group_user
+    await db.promise().query(
+      "DELETE FROM group_user WHERE userId = UUID_TO_BIN(?)",
+      [userId]
+    );
+
+    // (Nếu có) xóa assignee
+    await db.promise().query(
+      "DELETE FROM task_assignee WHERE userId = UUID_TO_BIN(?)",
+      [userId]
+    );
+
+    // (Nếu có) xóa notification
+    await db.promise().query(
+      "DELETE FROM notification WHERE userId = UUID_TO_BIN(?)",
+      [userId]
+    );
+
+    // Cuối cùng mới xóa user
+    await db.promise().query(
+      "DELETE FROM user WHERE id = UUID_TO_BIN(?)",
+      [userId]
+    );
+
+    // Hủy session (logout)
+    req.session.destroy(() => {});
+
+    return res.json({
+      success: true,
+      message: "Tài khoản đã được xóa thành công",
+    });
+  } catch (err) {
+    console.error("Delete account error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Không thể xóa tài khoản",
+    });
+  }
+});
+
 
 export default router;

@@ -1583,7 +1583,100 @@
                       <button class="wh-btn wh-danger">
                         Vô Hiệu Hóa Tài Khoản
                       </button>
-                      <button class="wh-btn wh-outline">Xóa Tài Khoản</button>
+                      <button class="wh-btn wh-outline" id="deleteAccountBtn">Xóa Tài Khoản</button>
+                      <!-- POPUP XÁC NHẬN XÓA TÀI KHOẢN-->
+                      <div class="popup-overlay" id="popupDeleteAccount" aria-hidden="true">
+                        <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="logout-title">
+                          <div class="popup-header">
+                            <div id="deleteAccount-title" class="popup-title" style="color: red;">Xóa tài khoản</div>
+                            <button class="close-btn" id="closeDeleteAccountBtn" aria-label="Đóng">&times;</button>
+                          </div>
+                          <div style="margin-top:12px">
+                            <p>Bạn chắc chắn muốn xóa tài khoản không?</p>
+                            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+                              <button class="btn" id="deleteAccountConfirmNo" type="button"
+                                style="background:#9e9e9e">Hủy</button>
+                              <button class="btn" id="deleteAccountConfirmYes" type="button"
+                                style="background:var(--secondary); background-color: red">Xóa tài khoản</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+
+                          //Xóa tài khoản với hộp thoại xác nhận
+                          const deleteAccountBtn = document.getElementById("deleteAccountBtn");
+                          const deleteAccountConfirm = document.getElementById("popupDeleteAccount");
+                          const deleteAccountConfirmYes = document.getElementById("deleteAccountConfirmYes");
+                          const deleteAccountConfirmNo = document.getElementById("deleteAccountConfirmNo");
+
+                          deleteAccountBtn && deleteAccountBtn.addEventListener("click", (e) => {
+                            e.preventDefault();
+                            if (deleteAccountConfirm) {
+                              deleteAccountConfirm.classList.add("active");
+                              deleteAccountConfirm.setAttribute("aria-hidden", "false");
+                            } else {
+                              // chuyển hướng
+                              window.location.href = "/auth/delete";
+                            }
+                            // ẩn user menu
+                            if (userMenu) userMenu.style.display = "none";
+                          });
+
+                          // confirm
+                          deleteAccountConfirmYes.addEventListener("click", async () => {
+                            try {
+                              const res = await fetch("/auth/delete", {
+                                method: "DELETE",
+                                credentials: "include"
+                              });
+
+                              const data = await res.json();
+
+                              if (data.success) {
+                                alert("Tài khoản đã được xóa");
+                                window.location.href = "/";
+                              } else {
+                                alert(data.message || "Xóa thất bại");
+                              }
+                            } catch (err) {
+                              alert("Lỗi kết nối server");
+                            }
+                          });
+                          deleteAccountConfirmNo && deleteAccountConfirmNo.addEventListener("click", () => {
+                            if (deleteAccountConfirm) {
+                              deleteAccountConfirm.classList.remove("active");
+                              deleteAccountConfirm.setAttribute("aria-hidden", "true");
+                            }
+                          });
+                          const closeDeleteAccountBtn = document.getElementById("closeDeleteAccountBtn");
+                          closeDeleteAccountBtn && closeDeleteAccountBtn.addEventListener("click", () => {
+                            if (deleteAccountConfirm) {
+                              deleteAccountConfirm.classList.remove("active");
+                              deleteAccountConfirm.setAttribute("aria-hidden", "true");
+                            }
+                          });
+
+                          // Nhấn X hoặc click ra ngoài để thoát
+                          if (deleteAccountConfirm) {
+                            deleteAccountConfirm.addEventListener("click", (e) => {
+                              if (e.target === deleteAccountConfirm) {
+                                deleteAccountConfirm.classList.remove("active");
+                                deleteAccountConfirm.setAttribute("aria-hidden", "true");
+                              }
+                            });
+                            document.addEventListener("keydown", (e) => {
+                              if (e.key === "Escape" && deleteAccountConfirm.classList.contains("active")) {
+                                deleteAccountConfirm.classList.remove("active");
+                                deleteAccountConfirm.setAttribute("aria-hidden", "true");
+                              }
+                            });
+                          }
+                        });
+                      </script>
+
                     </div>
                   </div>
                 </div>

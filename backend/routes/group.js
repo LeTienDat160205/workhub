@@ -484,18 +484,35 @@ router.get("/:id", ensureAuth, async (req, res) => {
 router.get("/:id/members", ensureAuth, async (req, res) => {
   try {
     const { id } = req.params; // id nhóm
+    // const sql = `
+    //   SELECT 
+    //     BIN_TO_UUID(u.id) AS userId,
+    //     u.name,
+    //     u.email,
+    //     u.avatarPath,
+    //     gu.roleInGroup,
+    //     gu.joinAt
+    //   FROM group_user gu
+    //   INNER JOIN user u ON gu.userId = u.id
+    //   WHERE gu.groupId = UUID_TO_BIN(?)
+    //   ORDER BY gu.roleInGroup = 'leader' DESC, u.name ASC
+    // `;
     const sql = `
       SELECT 
         BIN_TO_UUID(u.id) AS userId,
         u.name,
         u.email,
         u.avatarPath,
-        gu.roleInGroup,
+        CASE
+          WHEN g.leaderId = u.id THEN 'leader'
+          ELSE 'member'
+        END AS roleInGroup,
         gu.joinAt
       FROM group_user gu
       INNER JOIN user u ON gu.userId = u.id
+      INNER JOIN \`group\` g ON gu.groupId = g.id
       WHERE gu.groupId = UUID_TO_BIN(?)
-      ORDER BY gu.roleInGroup = 'leader' DESC, u.name ASC
+      ORDER BY (g.leaderId = u.id) DESC, u.name ASC
     `;
     const [rows] = await db.promise().query(sql, [id]);
     res.json(rows);
@@ -701,6 +718,90 @@ router.delete("/:id/remove-member", ensureAuth, async (req, res) => {
     res.status(500).json({ error: "Lỗi khi xoá thành viên." });
   }
 });
+
+// ====================== CHUYỂN QUYỀN TRƯỞNG NHÓM ======================
+router.delete("/:groupId/change-leader", ensureAuth, async (req, res) => {
+  const { groupId } = req.params;
+  const { userId: newLeaderId } = req.body;
+  const currentUserId = req.session.user.id;
+
+  if (!newLeaderId) {
+    return res.status(400).json({
+      success: false,
+      error: "Thiếu userId của trưởng nhóm mới",
+    });
+  }
+
+  try {
+    // Kiểm tra group tồn tại & lấy leader hiện tại
+    const [groups] = await db.promise().query(
+      `
+      SELECT BIN_TO_UUID(id) AS id,
+             BIN_TO_UUID(leaderId) AS leaderId
+      FROM \`group\`
+      WHERE id = UUID_TO_BIN(?)
+      `,
+      [groupId]
+    );
+
+    if (!groups.length) {
+      return res.status(404).json({
+        success: false,
+        error: "Nhóm không tồn tại",
+      });
+    }
+
+    const group = groups[0];
+
+    // Chỉ leader hiện tại mới được chuyển quyền
+    if (group.leaderId !== currentUserId) {
+      return res.status(403).json({
+        success: false,
+        error: "Chỉ trưởng nhóm mới được chuyển quyền",
+      });
+    }
+
+    // Kiểm tra thành viên mới có trong nhóm không
+    const [members] = await db.promise().query(
+      `
+      SELECT 1
+      FROM group_user
+      WHERE groupId = UUID_TO_BIN(?)
+        AND userId = UUID_TO_BIN(?)
+      `,
+      [groupId, newLeaderId]
+    );
+
+    if (!members.length) {
+      return res.status(404).json({
+        success: false,
+        error: "Người được chọn không thuộc nhóm",
+      });
+    }
+
+    // Cập nhật leaderId
+    await db.promise().query(
+      `
+      UPDATE \`group\`
+      SET leaderId = UUID_TO_BIN(?)
+      WHERE id = UUID_TO_BIN(?)
+      `,
+      [newLeaderId, groupId]
+    );
+
+    return res.json({
+      success: true,
+      message: "Chuyển quyền trưởng nhóm thành công",
+    });
+  } catch (err) {
+    console.error("Change leader error:", err);
+    return res.status(500).json({
+      success: false,
+      error: "Lỗi server khi chuyển quyền trưởng nhóm",
+    });
+  }
+});
+
 
 // =========================== LẤY THÔNG TIN THÀNH VIÊN ===========================
 router.get("/users/:id/info", ensureAuth, async (req, res) => {
